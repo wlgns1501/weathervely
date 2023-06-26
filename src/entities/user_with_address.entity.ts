@@ -19,11 +19,11 @@ export class UserWithAddress extends BaseEntity {
   sensory_temp: number;
 
   @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Address, (address) => address.id)
-  @JoinColumn({ name: 'addressId' })
+  @JoinColumn({ name: 'address_id' })
   address: Address;
 
   @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user)

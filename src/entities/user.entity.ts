@@ -18,6 +18,9 @@ export class User extends BaseEntity {
   @Column({ name: 'nickname', comment: '닉네임', length: 5, unique: true })
   nickname: string;
 
+  @Column({ name: 'gender', comment: '성별' })
+  gender: string;
+
   @Column({ name: 'token', comment: 'token' })
   token: string;
 

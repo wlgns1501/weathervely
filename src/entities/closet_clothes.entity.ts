@@ -14,10 +14,10 @@ export class ClosetClothes extends BaseEntity {
   id: number;
 
   @ManyToOne(() => Closet, (closet) => closet.id)
-  @JoinColumn({ name: 'closetId' })
+  @JoinColumn({ name: 'closet_id' })
   closet: Closet;
 
   @ManyToOne(() => Clothes, (clothes) => clothes.id)
-  @JoinColumn({ name: 'clothesId' })
+  @JoinColumn({ name: 'clothes_id' })
   clothes: Clothes;
 }

@@ -18,6 +18,9 @@ export class Address extends BaseEntity {
   @Column({ name: 'city', comment: '도시명' })
   city: string;
 
+  @Column({ name: 'gu', comment: 'gu' })
+  gu: string;
+
   @Column({ name: 'postal_code', comment: '우편번호' })
   postal_code: string;
 
