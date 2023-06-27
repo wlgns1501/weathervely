@@ -5,12 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Closet } from './closet.entity';
-import { Option } from './option.entity';
+import { Options } from './options.entity';
 import { Clothes } from './clothes.entity';
 
-@Entity({ name: 'clothes_option' })
-export class ClothesOption extends BaseEntity {
+@Entity({ name: 'clothes_options' })
+export class ClothesOptions extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
 
@@ -18,7 +17,7 @@ export class ClothesOption extends BaseEntity {
   @JoinColumn({ name: 'clothes_id' })
   clothes: Clothes;
 
-  @ManyToOne(() => Option, (option) => option.id)
-  @JoinColumn({ name: 'option_id' })
-  option: Option;
+  @ManyToOne(() => Options, (options) => options.id)
+  @JoinColumn({ name: 'options_id' })
+  options: Options;
 }
