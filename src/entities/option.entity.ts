@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Clothes } from './clothes.entity';
+import { ClothesOption } from './clothes_option.entity';
 
 @Entity({ name: 'option' })
 export class Option extends BaseEntity {
@@ -15,6 +16,6 @@ export class Option extends BaseEntity {
   @Column({ name: 'name', comment: 'name' })
   name: string;
 
-  @OneToMany(() => Clothes, (clothes) => clothes.option)
-  clothes: Clothes[];
+  @OneToMany(() => ClothesOption, (clothesOption) => clothesOption.option)
+  clothesOptions: ClothesOption[];
 }

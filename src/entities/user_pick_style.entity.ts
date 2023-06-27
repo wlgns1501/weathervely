@@ -29,8 +29,4 @@ export class UserPickStyle extends BaseEntity {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @ManyToOne(() => Closet, (closet) => closet.id)
-  @JoinColumn({ name: 'user_set_style' })
-  user_set_style: Closet[];
 }

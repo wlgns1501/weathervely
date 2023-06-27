@@ -10,6 +10,7 @@ import {
 import { MediumCategory } from './medium_category.entity';
 import { Option } from './option.entity';
 import { ClosetClothes } from './closet_clothes.entity';
+import { ClothesOption } from './clothes_option.entity';
 
 @Entity({ name: 'clothes' })
 export class Clothes extends BaseEntity {
@@ -26,9 +27,8 @@ export class Clothes extends BaseEntity {
   @JoinColumn({ name: 'medium_category_id' })
   medium_category: MediumCategory;
 
-  @ManyToOne(() => Option, (option) => option.id)
-  @JoinColumn({ name: 'option_id' })
-  option: Option[];
+  @OneToMany(() => ClothesOption, (clothesOption) => clothesOption.id)
+  clothesOptions: ClothesOption[];
 
   @OneToMany(() => ClosetClothes, (closetClothes) => closetClothes.clothes)
   closet_clothes: ClosetClothes[];

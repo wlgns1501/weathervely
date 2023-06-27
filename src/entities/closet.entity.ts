@@ -6,8 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ClosetClothes } from './closet_clothes.entity';
-import { UserPickStyle } from './user_pick_style.entity';
 import { UserPickWeather } from './user_pick_weather.entity';
+import { UserSetStyle } from './user_set_style.entity';
+import { ClosetType } from './closet_type.entity';
 
 @Entity({ name: 'closet' })
 export class Closet extends BaseEntity {
@@ -22,9 +23,6 @@ export class Closet extends BaseEntity {
 
   @Column({ name: 'max_temp', comment: '최고 온도' })
   max_temp: string;
-
-  @Column('json', { name: 'type', comment: '타입' })
-  type: string[];
 
   @Column({ name: 'site_name', comment: '출처' })
   site_name: string;
@@ -42,12 +40,6 @@ export class Closet extends BaseEntity {
   closet_clothes: ClosetClothes[];
 
   @OneToMany(
-    () => UserPickStyle,
-    (userPickStyle) => userPickStyle.user_set_style,
-  )
-  user_pick_style: UserPickStyle[];
-
-  @OneToMany(
     () => UserPickWeather,
     (userPickWeather) => userPickWeather.maximum_temperature_closet,
   )
@@ -58,4 +50,10 @@ export class Closet extends BaseEntity {
     (userPickWeather) => userPickWeather.minimum_temperature_closet,
   )
   user_pick_maximum_weather: UserPickWeather[];
+
+  @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.closet)
+  userSetStyles: UserSetStyle[];
+
+  @OneToMany(() => ClosetType, (closetType) => closetType.closet)
+  closetTypes: ClosetType[];
 }

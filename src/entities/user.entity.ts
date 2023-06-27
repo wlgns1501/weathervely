@@ -9,6 +9,7 @@ import {
 import { UserPickWeather } from './user_pick_weather.entity';
 import { UserPickStyle } from './user_pick_style.entity';
 import { UserWithAddress } from './user_with_address.entity';
+import { UserSetStyle } from './user_set_style.entity';
 
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
@@ -35,4 +36,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.user)
   user_pick_style: UserPickStyle[];
+
+  @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.user)
+  user_set_style: UserSetStyle[];
 }
