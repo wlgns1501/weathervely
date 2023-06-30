@@ -1,5 +1,5 @@
-// toXY = 위경도 -> XY 좌표
-// fromXY = XY 좌표 -> 위경도
+// TO_GRID = 위경도 -> XY 좌표
+// FROM_GRID = XY 좌표 -> 위경도
 export function dfsXyConvert(code: string, v1: number, v2: number): any {
   const { PI, tan, log, cos, pow, floor, sin, sqrt, atan, abs, atan2 } = Math;
   //
@@ -33,7 +33,7 @@ export function dfsXyConvert(code: string, v1: number, v2: number): any {
   const rs: any = {};
   let ra, theta;
 
-  if (code === 'toXY') {
+  if (code === 'TO_GRID') {
     rs.lat = v1;
     rs.lon = v2;
     ra = tan(PI * 0.25 + v1 * DEGRAD * 0.5);
@@ -73,12 +73,17 @@ export function dfsXyConvert(code: string, v1: number, v2: number): any {
 export function getWeatherState(ptyCode: number, skyCode: number): string {
   switch (ptyCode) {
     case 1:
-    case 4:
-      return 'rainy';
+      return 'rain';
     case 2:
-      return 'snowAndRainy';
+      return 'snow/rain';
     case 3:
       return 'snow';
+    case 5:
+      return 'rainDrop';
+    case 6:
+      return 'snowDrift';
+    case 7:
+      return 'rainDrop/snowDrift';
   }
   switch (skyCode) {
     case 1:

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ForecastService } from './forecast.service';
 
 @Controller('forecast')
@@ -12,8 +12,11 @@ export class ForecastController {
   }
 
   @Get('getUltraSrtFcst')
-  async getUltraSrtFcst() {
-    const data = await this.forecastService.getUltraSrtFcst();
+  async getUltraSrtFcst(@Query('x') x: string, @Query('y') y: string) {
+    const data = await this.forecastService.getUltraSrtFcst(
+      parseFloat(x),
+      parseFloat(y),
+    );
     return data.items.item;
   }
 
