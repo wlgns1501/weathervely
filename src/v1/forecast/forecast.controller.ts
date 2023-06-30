@@ -21,7 +21,7 @@ export class ForecastController {
     @Query('location') location: string,
     @Query('x') x: string,
     @Query('y') y: string,
-  ) {
+  ): Promise<any> {
     // 같은구에 조회가 들어올때
     const cacheData: any | null = await this.cacheManager.get(
       `UltraSrtFcst_${location}`,
@@ -29,7 +29,7 @@ export class ForecastController {
     if (cacheData) {
       return cacheData;
     } else {
-      const data = await this.forecastService.getUltraSrtFcst(
+      const data = await this.forecastService.getUltraSrtFcst<any>(
         parseFloat(x),
         parseFloat(y),
       );

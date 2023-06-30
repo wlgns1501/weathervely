@@ -29,7 +29,7 @@ export class ForecastService {
   LGT - 낙뢰 
   */
   // test : 서울 성북구 위도 경도 - 37.58638333 , 127.0203333
-  async getUltraSrtFcst(x, y) {
+  async getUltraSrtFcst<T>(x: number, y: number): Promise<T> {
     const xyObj = dfsXyConvert('TO_GRID', x, y);
     const response = await this.axiosInstance.get(
       `/VilageFcstInfoService_2.0/getUltraSrtFcst`,

@@ -99,6 +99,8 @@ export function createPublicApiAxiosInstance(): AxiosInstance {
   const instance = axios.create(publicApiAxiosConfig);
   instance.interceptors.request.use(onPublicApiRequest);
   instance.interceptors.response.use(onResponse, onErrorResponse);
+  const { adapter } = instance.defaults;
+  // if (adapter.name === 'throttleAdapter') return instance;
 
   return instance;
 }
