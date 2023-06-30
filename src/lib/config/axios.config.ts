@@ -73,7 +73,7 @@ const onErrorResponse = (error: AxiosError | Error): Promise<AxiosError> => {
 
 // 외부 API 호출 - 공공데이터 OpenAPI 기상청
 const publicApiAxiosConfig: AxiosRequestConfig = {
-  baseURL: process.env.OPEN_API_BASE_URL,
+  baseURL: process.env.PUBLIC_OPEN_API_BASE_URL,
   timeout: 100000,
 };
 
@@ -86,7 +86,7 @@ const onPublicApiRequest = (
   if (method === 'get') {
     config.params = {
       ...config.params,
-      serviceKey: process.env.OPEN_API_SERVICE_KEY,
+      serviceKey: process.env.PUBLIC_OPEN_API_SERVICE_KEY,
       pageNo: 1,
       numOfRows: 1000,
       dataType: 'JSON',
