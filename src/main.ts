@@ -5,10 +5,15 @@ import {
   SwaggerCustomOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
+import { CustomExceptionFilter } from './lib/utils/exceptionFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // global filter
+  app.useGlobalFilters(new CustomExceptionFilter());
+
+  // swagger setting
   const config = new DocumentBuilder()
     .setTitle('WeatherBly')
     .setDescription('WeatherBly API Description')
