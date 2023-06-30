@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ForecastController } from './forecast.controller';
-import { ApiService } from '../api/api.service';
+import { ForecastService } from './forecast.service';
 
 @Module({
-  providers: [ApiService],
   controllers: [ForecastController],
+  providers: [ForecastService],
 })
 export class ForecastModule {}

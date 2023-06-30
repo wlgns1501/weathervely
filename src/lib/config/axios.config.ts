@@ -3,6 +3,7 @@ import axios, {
   AxiosResponse,
   AxiosError,
   InternalAxiosRequestConfig,
+  AxiosInstance,
 } from 'axios';
 
 // 외부 Api 로그 핸들링
@@ -94,6 +95,13 @@ const onPublicApiRequest = (
   return config;
 };
 
-export const publicApiAxiosInstance = axios.create(publicApiAxiosConfig);
-publicApiAxiosInstance.interceptors.request.use(onPublicApiRequest);
-publicApiAxiosInstance.interceptors.response.use(onResponse, onErrorResponse);
+export function createPublicApiAxiosInstance(): AxiosInstance {
+  const instance = axios.create(publicApiAxiosConfig);
+  instance.interceptors.request.use(onPublicApiRequest);
+  instance.interceptors.response.use(onResponse, onErrorResponse);
+
+  return instance;
+}
+// export const publicApiAxiosInstance = axios.create(publicApiAxiosConfig);
+// instance.interceptors.request.use(onPublicApiRequest);
+// instance.interceptors.response.use(onResponse, onErrorResponse);
