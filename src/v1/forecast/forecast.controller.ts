@@ -26,6 +26,8 @@ export class ForecastController {
     const cacheData: any | null = await this.cacheManager.get(
       `UltraSrtFcst_${location}`,
     );
+
+    console.log(cacheData);
     if (cacheData) {
       return cacheData;
     } else {
@@ -35,15 +37,15 @@ export class ForecastController {
       );
 
       if (location) {
-        const milliSeconds = calculateMS(45);
+        const milliSeconds = calculateMS(45); // api호출 시간 기준시 45분까지 남은 시간 milliSeconds로 변환
         await this.cacheManager.set(
           `UltraSrtFcst_${location}`,
-          data.items.item,
+          data,
           milliSeconds,
         );
       }
 
-      return data.items.item;
+      return data;
     }
   }
 

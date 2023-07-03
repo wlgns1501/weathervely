@@ -35,22 +35,25 @@ export class ForecastService {
       `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
       {
         params: {
-          ...getBaseDateTime(),
+          ...getBaseDateTime({ minutes: 30, provide: 45 }), // bastTime 기준시간 매시 30분 , api 데이터 업데이트 시간 매시 45분
           nx: xyObj.x,
           ny: xyObj.y,
         },
       },
     );
 
-    const temp = response.data.response.body.items.item
+    const nowHours = getBaseDateTime({ provide: 0 }).base_time;
+
+    const data = response.data.response.body.items.item
       .filter(
         (it) =>
-          it.category === 'SKY' ||
-          it.category === 'T1H' ||
-          it.category === 'RN1' ||
-          it.category === 'REH' ||
-          it.category === 'PTY' ||
-          it.category === 'WSD',
+          it.fcstTime === nowHours &&
+          (it.category === 'SKY' ||
+            it.category === 'T1H' ||
+            it.category === 'RN1' ||
+            it.category === 'REH' ||
+            it.category === 'PTY' ||
+            it.category === 'WSD'),
       )
       .map((it) => {
         return {
@@ -59,8 +62,8 @@ export class ForecastService {
           dateTime: it.fcstTime,
         };
       });
-    console.log(temp);
-    return response.data.response?.body;
+    console.log(data);
+    return data;
   }
 
   // 중기예보 : 온보딩 - 최저 , 최고기온 || 10일간 예보 화면
