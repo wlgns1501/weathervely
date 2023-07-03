@@ -6,8 +6,10 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 import { CustomExceptionFilter } from './lib/utils/exceptionFilter';
+import { initializeTransactionalContext } from 'typeorm-transactional';
 
 async function bootstrap() {
+  initializeTransactionalContext();
   const app = await NestFactory.create(AppModule);
 
   // global filter
