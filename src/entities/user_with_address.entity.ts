@@ -6,11 +6,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Address } from './address.entity';
 
 @Entity({ name: 'user_with_address' })
+@Unique(['user', 'address'])
 export class UserWithAddress extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
