@@ -7,20 +7,6 @@ import {
   getBaseDateTime,
 } from '../../lib/utils/publicForecast';
 
-/* 초단기예보 : 메인
-  T1H - 기온 - 현재기온 : 섭씨온도
-  RN1 - 1시간 강수량 - 현재 비오는지 and 강수량 : mm
-  REH - 습도 - 현재 습도 : %
-  PTY - 강수형태 - 코드값 : 없음(0) , 비(1) , 비/눈(2) , 눈(3) , 빗방울(5) , 빗방울눈날림(6) , 눈날림(7)
-  WSD - 풍속 - 바람세기 : m/s
-  UUU - 동서바람성분
-  VVV - 남북바람성분
-  VEC - 풍향
-  // 초단기예보 전용
-  SKY - 하늘상태 - 코드값 : 맑음(1) , 구름많음(3) , 흐림(4)
-  LGT - 낙뢰 
-  */
-
 @Injectable()
 export class ForecastService {
   private readonly axiosInstance: AxiosInstance;
@@ -145,7 +131,7 @@ export class ForecastService {
   }
 
   // 메인 -> 주간 예보 : 글피부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회( getOpenForecastMidInfo() )
-  async getOpenForecastMidInfo() {
+  async getMidTa() {
     const yesterday = getBaseDateTime({ provide: 1440 });
     const response = await this.axiosInstance.get(
       `/MidFcstInfoService/getMidTa`,

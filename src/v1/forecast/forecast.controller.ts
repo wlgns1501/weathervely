@@ -71,9 +71,9 @@ export class ForecastController {
     return data;
   }
 
-  @Get('getOpenForecastMidInfo')
-  async getOpenForecastMidInfo() {
-    const data = await this.forecastService.getOpenForecastMidInfo();
+  @Get('getMidTa')
+  async getMidTa() {
+    const data = await this.forecastService.getMidTa();
     return data;
   }
 }

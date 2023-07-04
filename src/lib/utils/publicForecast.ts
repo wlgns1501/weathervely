@@ -2,9 +2,6 @@
 // FROM_GRID = XY 좌표 -> 위경도
 export function dfsXyConvert(code: string, v1: number, v2: number): any {
   const { PI, tan, log, cos, pow, floor, sin, sqrt, atan, abs, atan2 } = Math;
-  //
-  // LCC DFS 좌표변환을 위한 기초 자료
-  //
   const RE = 6371.00877; // 지구 반경(km)
   const GRID = 5.0; // 격자 간격(km)
   const SLAT1 = 30.0; // 투영 위도1(degree)
