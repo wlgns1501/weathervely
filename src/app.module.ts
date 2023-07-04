@@ -24,10 +24,9 @@ import { ForecastModule } from './v1/forecast/forecast.module';
       },
     }),
     AuthModule,
-    ForecastModule
+    ForecastModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-
 export class AppModule {}
