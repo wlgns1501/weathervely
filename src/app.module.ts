@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './v1/auth/auth.module';
 import { TypeOrmConfigService } from 'ormconfig';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
+import { ForecastModule } from './v1/forecast/forecast.module';
 
 @Module({
   imports: [
@@ -23,8 +24,10 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
       },
     }),
     AuthModule,
+    ForecastModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
 export class AppModule {}

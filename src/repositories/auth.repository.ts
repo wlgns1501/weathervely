@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SetGenderDto } from 'src/auth/dtos/setGender.dto';
+import { SetGenderDto } from 'src/v1/auth/dtos/setGender.dto';
 import { User } from 'src/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 

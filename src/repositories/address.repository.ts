@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SetAddressDto } from 'src/auth/dtos/setAddress.dto';
+import { SetAddressDto } from 'src/v1/auth/dtos/setAddress.dto';
 import { Address } from 'src/entities/address.entity';
 import { DataSource, Repository } from 'typeorm';
 
