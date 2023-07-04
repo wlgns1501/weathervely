@@ -30,7 +30,7 @@ export class ForecastService {
           dateCd: 'DAY', // 날짜 코드
           startDt: beforeYesterday, // 시작일
           endDt: yesterday, // 종료일
-          stnIds: 108, // 지점 번호 - 서울
+          stnIds: 108, // 지점 번호 - 서울 ( TODO: 매핑 필요 )
         },
       },
     );
@@ -145,20 +145,20 @@ export class ForecastService {
     return data;
   }
 
-  // 메인 -> 주간 예보 : 오늘로부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회(getMidTa)
+  // 메인 -> 주간 예보 : 글피부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회(getMidTa)
   // 중기예보 : 온보딩 - 최저 , 최고기온 || 10일간 예보 화면
   async getOpenForecastMidInfo() {
+    const yesterday = getBaseDateTime({ provide: 1440 });
     const response = await this.axiosInstance.get(
       `/MidFcstInfoService/getMidTa`,
       {
         params: {
-          regId: '11B10101',
-          tmFc: '202307031800',
+          regId: '11B10101', // 지점번호 - ( TODO: 매핑 필요 )
+          tmFc: `${yesterday.base_date}1800`, // 어제 18시 발표 데이터
         },
       },
     );
 
-    console.log(response.data.response);
     const data = response.data.response.body?.items?.item ?? [];
 
     return data;
