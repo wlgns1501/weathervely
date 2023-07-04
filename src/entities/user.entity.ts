@@ -10,18 +10,41 @@ import { UserPickWeather } from './user_pick_weather.entity';
 import { UserPickStyle } from './user_pick_style.entity';
 import { UserWithAddress } from './user_with_address.entity';
 import { UserSetStyle } from './user_set_style.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
+  @ApiProperty({ description: 'userId' })
   id: number;
 
-  @Column({ name: 'nickname', comment: '닉네임', length: 5, unique: true })
+  @Column({ name: 'nickname', comment: '닉네임', length: 10, unique: true })
+  @ApiProperty({
+    description: 'nickName',
+    nullable: false,
+    required: true,
+    example: 'abcde',
+    maxLength: 10,
+  })
   nickname: string;
 
-  @Column({ name: 'gender', comment: '성별' })
+  @Column({
+    name: 'gender',
+    comment: '성별',
+    default: 'female',
+    nullable: true,
+  })
+  @ApiProperty({
+    description: '성별',
+    nullable: true,
+    required: false,
+    default: 'female',
+    example: 'female',
+  })
   gender: string;
 
+  @Exclude()
   @Column({ name: 'token', comment: 'token' })
   token: string;
 
