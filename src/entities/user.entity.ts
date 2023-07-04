@@ -11,6 +11,7 @@ import { UserPickStyle } from './user_pick_style.entity';
 import { UserWithAddress } from './user_with_address.entity';
 import { UserSetStyle } from './user_set_style.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'user' })
 export class User extends BaseEntity {
@@ -43,6 +44,7 @@ export class User extends BaseEntity {
   })
   gender: string;
 
+  @Exclude()
   @Column({ name: 'token', comment: 'token' })
   token: string;
 

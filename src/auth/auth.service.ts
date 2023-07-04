@@ -10,6 +10,7 @@ import { SetAddressDto } from './dtos/setAddress.dto';
 import { AddressRepository } from 'src/repositories/address.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
 import { Address } from 'src/entities/address.entity';
+import { SetGenderDto } from './dtos/setGender.dto';
 
 @Injectable()
 export class AuthService {
@@ -83,6 +84,15 @@ export class AuthService {
           );
       }
     }
+    return { success: true };
+  }
+
+  @Transactional()
+  async setGender(setGenderDto: SetGenderDto, user: User) {
+    const userId = user.id;
+
+    await this.authRepository.setGender(setGenderDto, userId);
+
     return { success: true };
   }
 }

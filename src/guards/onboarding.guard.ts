@@ -16,11 +16,8 @@ export type JwtPayload = {
 };
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(
-    private authRepository: AuthRepository,
-    private userAddressRepository: UserAddressRepository,
-  ) {}
+export class OnboardingGuard implements CanActivate {
+  constructor(private authRepository: AuthRepository) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
@@ -44,27 +41,6 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.authRepository.getUserByNickname(nickname);
 
-      const address = await this.userAddressRepository.getUserAddress(user);
-
-      if (!address) {
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.NEED_SET_ADDRESS,
-            detail: '주소를 설정하지 않았습니다.',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      if (user.gender === undefined)
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.NEED_SET_GENDER,
-            detail: '성별을 설정하지 않았습니다.',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-
       req['user'] = user;
 
       return true;
@@ -77,12 +53,3 @@ export class AuthGuard implements CanActivate {
     }
   }
 }
-
-/**
- * 1. 온보딩
- * 2. 토큰 발행
- * 3. 각 기기 마다 토큰이 있어
- * 4.
- *
- *
- */

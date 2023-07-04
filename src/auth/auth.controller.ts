@@ -16,6 +16,9 @@ import { Response } from 'express';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { SetAddressPipe } from './dtos/setAddress.pipe';
 import { SetAddressDto } from './dtos/setAddress.dto';
+import { OnboardingGuard } from 'src/guards/onboarding.guard';
+import { SetGenderDto } from './dtos/setGender.dto';
+import { SetGenderPipe } from './dtos/setGender.pipe';
 
 const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 8;
 
@@ -56,12 +59,23 @@ export class AuthController {
 
   @Post('/address')
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(AuthGuard)
+  @UseGuards(OnboardingGuard)
   @ApiOperation({ summary: 'address 설정' })
   setAddress(
     @Body(new SetAddressPipe()) setAddressDto: SetAddressDto,
     @Req() req: any,
   ) {
     return this.service.setAddress(setAddressDto, req.user);
+  }
+
+  @Post('/gender')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(OnboardingGuard)
+  @ApiOperation({ summary: 'gender 설정' })
+  setGender(
+    @Body(new SetGenderPipe()) setGenderDto: SetGenderDto,
+    @Req() req: any,
+  ) {
+    return this.service.setGender(setGenderDto, req.user);
   }
 }
