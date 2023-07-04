@@ -2,9 +2,6 @@
 // FROM_GRID = XY 좌표 -> 위경도
 export function dfsXyConvert(code: string, v1: number, v2: number): any {
   const { PI, tan, log, cos, pow, floor, sin, sqrt, atan, abs, atan2 } = Math;
-  //
-  // LCC DFS 좌표변환을 위한 기초 자료
-  //
   const RE = 6371.00877; // 지구 반경(km)
   const GRID = 5.0; // 격자 간격(km)
   const SLAT1 = 30.0; // 투영 위도1(degree)
@@ -107,4 +104,20 @@ export function getBaseDateTime(
       date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate()),
     base_time: pad(date.getHours()) + pad(minutes),
   };
+}
+
+export function getRoundedHour(): string {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const roundedMinutes = Math.round(minutes / 45) * 45;
+  const roundedTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    roundedMinutes,
+  );
+  const formattedTime =
+    roundedTime.getHours().toString().padStart(2, '0') + '00';
+  return formattedTime;
 }
