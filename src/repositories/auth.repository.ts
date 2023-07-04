@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateNickNameDto } from 'src/auth/dtos/signUp.dto';
 import { User } from 'src/entities/user.entity';
-import { DataSource, EntityManager, Repository, Transaction } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class AuthRepository extends Repository<User> {
@@ -10,15 +8,13 @@ export class AuthRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  //   constructor(
-  //     @InjectRepository(User) private authRepository: Repository<User>,
-  //   ) {
-  //     super(
-  //       authRepository.target,
-  //       authRepository.manager,
-  //       authRepository.queryRunner,
-  //     );
-  //   }
+  async getUserByNickname(nickName: string) {
+    return await this.findOne({
+      where: {
+        nickname: nickName,
+      },
+    });
+  }
 
   async createNickName(nickname: string, accessToken: string) {
     return await this.create({ nickname, token: accessToken }).save();

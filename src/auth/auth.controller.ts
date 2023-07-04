@@ -1,18 +1,67 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateNickNamePipe } from './dtos/signUp.pipe';
-import { CreateNickNameDto } from './dtos/signUp.dto';
+import { SetNickNamePipe } from './dtos/setNickname.pipe';
+import { SetNickNameDto } from './dtos/setNickName.dto';
+import { Response } from 'express';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { SetAddressPipe } from './dtos/setAddress.pipe';
+import { SetAddressDto } from './dtos/setAddress.dto';
+
+const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 8;
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private service: AuthService) {}
 
+  private setAccessToken(
+    response: Response,
+    accessToken: string,
+    expiresIn: number,
+  ) {
+    response.cookie('access_token', accessToken, {
+      expires: new Date(Date.now() + expiresIn),
+    });
+
+    return response;
+  }
+
   @Post('/nickName')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: '회원가입' })
-  signUp(@Body(new CreateNickNamePipe()) createNickNameDto: CreateNickNameDto) {
-    return this.service.signUp(createNickNameDto);
+  @ApiOperation({ summary: 'nickname 설정' })
+  async setNickName(
+    @Body(new SetNickNamePipe()) setNickNameDto: SetNickNameDto,
+    @Res() response: Response,
+  ) {
+    const { accessToken } = await this.service.setNickName(setNickNameDto);
+
+    const settledResponse = this.setAccessToken(
+      response,
+      accessToken,
+      ACCESS_TOKEN_EXPIRESIN,
+    );
+
+    settledResponse.send({ success: true });
+  }
+
+  @Post('/address')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'address 설정' })
+  setAddress(
+    @Body(new SetAddressPipe()) setAddressDto: SetAddressDto,
+    @Req() req: any,
+  ) {
+    return this.service.setAddress(setAddressDto, req.user);
   }
 }

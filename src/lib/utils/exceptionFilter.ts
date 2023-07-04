@@ -24,6 +24,8 @@ export class CustomExceptionFilter implements ExceptionFilter {
     let body: ApiError;
     let status: HttpStatus;
 
+    console.log(exception);
+
     if (exception instanceof BusinessException) {
       body = {
         id: exception.id,
