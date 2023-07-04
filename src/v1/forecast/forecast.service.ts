@@ -7,6 +7,20 @@ import {
   getBaseDateTime,
 } from '../../lib/utils/publicForecast';
 
+/* 초단기예보 : 메인
+  T1H - 기온 - 현재기온 : 섭씨온도
+  RN1 - 1시간 강수량 - 현재 비오는지 and 강수량 : mm
+  REH - 습도 - 현재 습도 : %
+  PTY - 강수형태 - 코드값 : 없음(0) , 비(1) , 비/눈(2) , 눈(3) , 빗방울(5) , 빗방울눈날림(6) , 눈날림(7)
+  WSD - 풍속 - 바람세기 : m/s
+  UUU - 동서바람성분
+  VVV - 남북바람성분
+  VEC - 풍향
+  // 초단기예보 전용
+  SKY - 하늘상태 - 코드값 : 맑음(1) , 구름많음(3) , 흐림(4)
+  LGT - 낙뢰 
+  */
+
 @Injectable()
 export class ForecastService {
   private readonly axiosInstance: AxiosInstance;
@@ -15,7 +29,7 @@ export class ForecastService {
     this.axiosInstance = createPublicApiAxiosInstance();
   }
 
-  // 온보딩 : 위치 기준 -  어제 , 그저께 최저온도 , 최고온도
+  // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )
   async getWthrDataList() {
     // address_id 받아야됨
 
@@ -46,7 +60,46 @@ export class ForecastService {
     return data;
   }
 
-  // 메인 : 오늘 최저온도 , 최고온도 response => 단기예보 -> 단기예보
+  // 메인 : 현재온도 , 바람 , 날씨 -> 단기예보 -> 초단기예보 ( getUltraSrtFcst() )
+  async getUltraSrtFcst<T>(x: number, y: number): Promise<T> {
+    const xyObj = dfsXyConvert('TO_GRID', x, y);
+    const response = await this.axiosInstance.get(
+      `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+      {
+        params: {
+          ...getBaseDateTime({ minutes: 30, provide: 45 }), // bastTime 기준시간 매시 30분 , api 데이터 업데이트 시간 매시 45분
+          nx: xyObj.x,
+          ny: xyObj.y,
+        },
+      },
+    );
+
+    const nowHours = getBaseDateTime({ provide: 0 }).base_time;
+
+    const data =
+      response.data.response.body?.items?.item
+        .filter(
+          (it) =>
+            it.fcstTime === nowHours &&
+            (it.category === 'SKY' ||
+              it.category === 'T1H' ||
+              it.category === 'RN1' ||
+              it.category === 'REH' ||
+              it.category === 'PTY' ||
+              it.category === 'WSD'),
+        )
+        .map((it) => {
+          return {
+            category: it.category,
+            value: it.fcstValue,
+            dateTime: it.fcstTime,
+          };
+        }) ?? [];
+
+    return data;
+  }
+
+  // 메인 : 오늘 최저온도 , 최고온도 response => 단기예보 -> 단기예보 ( getVilageFcst() )
   async getVilageFcst() {
     const yesterday = getBaseDateTime({ provide: 1440 });
     const today = getBaseDateTime({ provide: 0 });
@@ -91,62 +144,7 @@ export class ForecastService {
     return data;
   }
 
-  /* 초단기예보 : 메인
-  T1H - 기온 - 현재기온 : 섭씨온도
-  RN1 - 1시간 강수량 - 현재 비오는지 and 강수량 : mm
-  REH - 습도 - 현재 습도 : %
-  PTY - 강수형태 - 코드값 : 없음(0) , 비(1) , 비/눈(2) , 눈(3) , 빗방울(5) , 빗방울눈날림(6) , 눈날림(7)
-  WSD - 풍속 - 바람세기 : m/s
-  UUU - 동서바람성분
-  VVV - 남북바람성분
-  VEC - 풍향
-  // 초단기예보 전용
-  SKY - 하늘상태 - 코드값 : 맑음(1) , 구름많음(3) , 흐림(4)
-  LGT - 낙뢰 
-  */
-  // test : 서울 성북구 위도 경도 - 37.58638333 , 127.0203333
-
-  // 메인 : 현재온도 , 바람 , 날씨 -> 단기예보 -> 초단기예보
-  async getUltraSrtFcst<T>(x: number, y: number): Promise<T> {
-    const xyObj = dfsXyConvert('TO_GRID', x, y);
-    const response = await this.axiosInstance.get(
-      `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-      {
-        params: {
-          ...getBaseDateTime({ minutes: 30, provide: 45 }), // bastTime 기준시간 매시 30분 , api 데이터 업데이트 시간 매시 45분
-          nx: xyObj.x,
-          ny: xyObj.y,
-        },
-      },
-    );
-
-    const nowHours = getBaseDateTime({ provide: 0 }).base_time;
-
-    const data =
-      response.data.response.body?.items?.item
-        .filter(
-          (it) =>
-            it.fcstTime === nowHours &&
-            (it.category === 'SKY' ||
-              it.category === 'T1H' ||
-              it.category === 'RN1' ||
-              it.category === 'REH' ||
-              it.category === 'PTY' ||
-              it.category === 'WSD'),
-        )
-        .map((it) => {
-          return {
-            category: it.category,
-            value: it.fcstValue,
-            dateTime: it.fcstTime,
-          };
-        }) ?? [];
-
-    return data;
-  }
-
-  // 메인 -> 주간 예보 : 글피부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회(getMidTa)
-  // 중기예보 : 온보딩 - 최저 , 최고기온 || 10일간 예보 화면
+  // 메인 -> 주간 예보 : 글피부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회( getOpenForecastMidInfo() )
   async getOpenForecastMidInfo() {
     const yesterday = getBaseDateTime({ provide: 1440 });
     const response = await this.axiosInstance.get(
@@ -160,6 +158,17 @@ export class ForecastService {
     );
 
     const data = response.data.response.body?.items?.item ?? [];
+    // const data =
+    //   response.data.response.body?.items?.item?.map((it) => {
+    //     const { regId, ...rest } = it;
+    //     const result = {};
+    //     Object.keys(rest).forEach((key) => {
+    //       if (!key.includes('High') && !key.includes('Low')) {
+    //         result[key] = rest[key];
+    //       }
+    //     });
+    //     return result;
+    //   }) ?? [];
 
     return data;
   }
