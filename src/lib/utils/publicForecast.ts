@@ -105,3 +105,19 @@ export function getBaseDateTime(
     base_time: pad(date.getHours()) + pad(minutes),
   };
 }
+
+export function getRoundedHour(): string {
+  const now = new Date();
+  const minutes = now.getMinutes();
+  const roundedMinutes = Math.round(minutes / 45) * 45;
+  const roundedTime = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    roundedMinutes,
+  );
+  const formattedTime =
+    roundedTime.getHours().toString().padStart(2, '0') + '00';
+  return formattedTime;
+}

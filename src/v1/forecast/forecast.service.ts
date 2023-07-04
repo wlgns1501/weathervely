@@ -5,6 +5,7 @@ import {
   dfsXyConvert,
   getWeatherState,
   getBaseDateTime,
+  getRoundedHour,
 } from '../../lib/utils/publicForecast';
 
 @Injectable()
@@ -60,8 +61,8 @@ export class ForecastService {
       },
     );
 
-    const nowHours = getBaseDateTime({ provide: 0 }).base_time;
-
+    const nowHours = getRoundedHour();
+    console.log(nowHours);
     const data =
       response.data.response.body?.items?.item
         .filter(
