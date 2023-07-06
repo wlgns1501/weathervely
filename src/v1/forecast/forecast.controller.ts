@@ -1,13 +1,23 @@
-import { Inject, Controller, Get, Query } from '@nestjs/common';
+import {
+  Inject,
+  Controller,
+  Get,
+  Query,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common';
 import { ForecastService } from './forecast.service';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { calculateMS } from '../../lib/utils/calculate';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )
 // 메인 : 현재온도 , 바람 , 날씨 -> 단기예보 -> 초단기예보 ( getUltraSrtFcst() )
 // 메인 : 오늘 최저온도 , 최고온도 response => 단기예보 -> 단기예보 ( getVilageFcst() )
 // 메인 -> 주간 예보 : 글피부터 최대 10일간의 최저온도 최고온도 제공 => 중기예보 -> 중기기온조회( getOpenForecastMidInfo() )
+
+@ApiTags('Forcast')
 @Controller('forecast')
 export class ForecastController {
   constructor(
@@ -17,12 +27,16 @@ export class ForecastController {
 
   // 온보딩 - 체감온도 설정시
   @Get('getWthrDataList')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '기상청 데이터 리스트' })
   async getWthrDataList() {
     const data = await this.forecastService.getWthrDataList();
     return data;
   }
 
   @Get('getUltraSrtFcst')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '몰라' })
   async getUltraSrtFcst(
     @Query('location') location: string,
     @Query('x') x: string,
@@ -66,12 +80,16 @@ export class ForecastController {
   }
 
   @Get('getVilageFcst')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '지역 기온 데이터' })
   async getVilageFcst() {
     const data = await this.forecastService.getVilageFcst();
     return data;
   }
 
   @Get('getMidTa')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '중간 데이터' })
   async getMidTa() {
     const data = await this.forecastService.getMidTa();
     return data;
