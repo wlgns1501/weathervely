@@ -10,7 +10,7 @@ export class ClosetRepository extends Repository<Closet> {
     super(Closet, dataSource.createEntityManager());
   }
 
-  async getRecommendCloset(type: string, temperature: number) {
+  async getRecommendCloset(temperature: number) {
     const queryBuilder = await this.createQueryBuilder('closet')
       .select('closet.id', 'id')
       .addSelect('closet.name', 'name')
@@ -23,11 +23,11 @@ export class ClosetRepository extends Repository<Closet> {
       .where(':temperature BETWEEN closet.min_temp AND closet.max_temp', {
         temperature,
       })
-      .andWhere('t.name = :type', { type: type })
+      //   .andWhere('t.name = :type', { type: type })
       .andWhere('closet.status = :status', { status: 'Active' })
-      .groupBy('closet.id')
-      .orderBy('RAND()')
-      .limit(1);
-    return queryBuilder.getRawOne();
+      .groupBy('closet.id');
+    //   .orderBy('RAND()')
+    //   .limit(1);
+    return queryBuilder.getRawMany();
   }
 }
