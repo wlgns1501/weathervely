@@ -12,7 +12,7 @@ import {
 import { ClosetService } from './closet.service';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
 
 @ApiTags('Closet')
@@ -28,6 +28,11 @@ export class ClosetController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '추천 옷차림 가져오기' })
+  @ApiQuery({
+    name: 'temperature',
+    required: false,
+    description: 'temperature입니다.',
+  })
   async getRecommendCloset(
     @Query('temperature') temperature?: number,
     @Req() req?: any,
@@ -37,7 +42,7 @@ export class ClosetController {
       // 2. type, temperature로 룩 테이블 조회 - minTemp , maxTemp , closet table , user_pick_style table , closet_type table
       return this.closetService.getRecommendCloset(temperature, req.user);
     }
-
+    console.log(req.address.address.city);
     // address_id로 address 테이블 조회 후 city 가져오기
     // city를 stnIds로 매핑
     // 기상청 api call -> response 데이터로 minTmp , maxTmp 가져오기 ( 어제 , 그저께 )

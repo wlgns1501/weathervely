@@ -36,11 +36,6 @@ export class ClosetService {
         return it[0];
       });
 
-    // let result: any | null = null;
-    // while (!result) {
-    //   result = await this.closetRepository.getRecommendCloset('', temperature);
-    // }
-
     const closets = await this.closetRepository.getRecommendCloset(temperature);
     // console.log('sorted', sorted); // ['casual','formal','unisex']
     // console.log('closets', closets);
@@ -52,6 +47,8 @@ export class ClosetService {
         return arr_closets[random_num];
       }
     }
+
+    // 예외 1. 온도를 포함하는 옷이 없을때
 
     // return result;
   }
