@@ -10,7 +10,7 @@ export class ClosetRepository extends Repository<Closet> {
     super(Closet, dataSource.createEntityManager());
   }
 
-  async getRecommendCloset(temperature: number) {
+  async getCloset(temperature: number) {
     const queryBuilder = await this.createQueryBuilder('closet')
       .select('closet.id', 'id')
       .addSelect('closet.name', 'name')

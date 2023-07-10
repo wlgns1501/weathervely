@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   UseGuards,
+  Body,
 } from '@nestjs/common';
 import { ClosetService } from './closet.service';
 import { Cache } from 'cache-manager';
@@ -23,49 +24,33 @@ export class ClosetController {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  // 온보딩 - 어제 및 그저께 추천 옷차림
-  @Get('getRecommendedCloset')
+  @Get('getRecommendCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '추천 옷차림 가져오기' })
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 Get' })
   @ApiQuery({
-    name: 'temperature',
-    required: false,
-    description: 'temperature입니다.',
+    name: 'dateTime',
+    required: true,
+    description: 'dateTime',
   })
   async getRecommendCloset(
-    @Query('temperature') temperature?: number,
-    @Req() req?: any,
+    @Query('dateTime') dateTime: string,
+    @Req() req: any,
   ) {
-    if (temperature) {
-      // 1. type order 조회
-      // 2. type, temperature로 룩 테이블 조회 - minTemp , maxTemp , closet table , user_pick_style table , closet_type table
-      return this.closetService.getRecommendCloset(temperature, req.user);
-    }
-    // address_id로 address 테이블 조회 후 city 가져오기
-    const city = req.address.address.city;
-    console.log(city);
-    // city를 stnIds로 매핑
-    // 기상청 api call -> response 데이터로 minTmp , maxTmp 가져오기 ( 어제 , 그저께 )
-    // 각tmp로 룩 테이블 조회
+    return this.closetService.getRecommendCloset(dateTime, req.address.address);
+  }
 
-    // const data = await this.closetService.getWthrDataList();
-    return [
-      {
-        temperature: 12,
-        closet_id: 1,
-        site_name: '육육걸즈',
-        site_url: 'abc.com',
-        image_url: 'abcc.com',
-      },
-      {
-        temperature: 12,
-        closet_id: 1,
-        site_name: '육육걸즈',
-        site_url: 'abc.com',
-        image_url: 'abcc.com',
-      },
-    ];
+  @Get('getCloset')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 Get' })
+  @ApiQuery({
+    name: 'temperature',
+    required: true,
+    description: 'temperature입니다.',
+  })
+  async getCloset(@Query('temperature') temperature: number, @Req() req?: any) {
+    return this.closetService.getCloset(temperature, req.user);
   }
 
   //   // 온보딩 - 체감온도 설정 찐
