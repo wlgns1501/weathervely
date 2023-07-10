@@ -36,6 +36,9 @@ export class Closet extends BaseEntity {
   @Column({ name: 'status', comment: '상태' })
   status: string;
 
+  @Column({ name: 'is_onboarding', comment: '온보딩 여부' })
+  is_onboarding: boolean;
+
   @OneToMany(() => ClosetClothes, (closetClothes) => closetClothes.closet)
   closet_clothes: ClosetClothes[];
 
