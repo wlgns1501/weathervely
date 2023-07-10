@@ -19,7 +19,7 @@ export class Forecast extends BaseEntity {
   @Column({ name: 'weather_type', comment: '날씨' })
   wether_type: string;
 
-  @Column({ name: 'forcast_date', comment: '측정 날짜' })
+  @Column({ name: 'forecast_date', comment: '측정 날짜' })
   forecast_date: Date;
 
   @ManyToOne(() => Address, (address) => address.id)

@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 import { ForecastModule } from './v1/forecast/forecast.module';
+import { ClosetModule } from './v1/closet/closet.module';
+import { TypeModule } from './v1/type/type.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { ForecastModule } from './v1/forecast/forecast.module';
     }),
     AuthModule,
     ForecastModule,
+    ClosetModule,
+    TypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
