@@ -10,6 +10,7 @@ export class UserPickStyleRepository extends Repository<UserPickStyle> {
     super(UserPickStyle, dataSource.createEntityManager());
   }
 
+  // user_set_style도 만들어야댐
   async getOrderStyle(user: User) {
     const userId = user.id;
     const queryBuilder = await this.createQueryBuilder('user_pick_style').where(
