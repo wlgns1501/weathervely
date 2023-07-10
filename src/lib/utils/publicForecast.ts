@@ -121,3 +121,9 @@ export function getRoundedHour(): string {
     roundedTime.getHours().toString().padStart(2, '0') + '00';
   return formattedTime;
 }
+
+export function formatTime(hours: number): string {
+  const paddedHours = hours.toString().padStart(2, '0');
+  const formattedTime = `${paddedHours}00`;
+  return formattedTime;
+}
