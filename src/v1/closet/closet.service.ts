@@ -49,15 +49,17 @@ export class ClosetService {
       },
     );
 
-    const data =
+    const apiData =
       response.data.response.body?.items?.item.filter(
         (it) =>
           it.fcstTime === formatTime(targetDateTime.getHours()) &&
-          it.category === 'T1H',
+          it.category === 'T1H', // 기온
       ) ?? [];
 
-    console.log(data);
-    return data;
+    const { fcstValue } = apiData[0];
+    console.log(fcstValue);
+    // this.getCloset(fcstValue);
+    return apiData;
   }
 
   async getCloset(temperature: number, user: User) {
