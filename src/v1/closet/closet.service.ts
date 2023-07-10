@@ -28,8 +28,8 @@ export class ClosetService {
     );
 
     const sorted = Object.entries(userPickStyle)
-      .filter(([key, value]) => {
-        return key !== 'id' && value > 0;
+      .filter(([key]) => {
+        return key !== 'id';
       })
       .sort((a, b) => b[1] - a[1])
       .map((it) => {
@@ -48,7 +48,7 @@ export class ClosetService {
       }
     }
 
-    // 예외 1. 온도를 포함하는 옷이 없을때
+    // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요
 
     // return result;
   }

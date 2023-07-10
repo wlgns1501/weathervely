@@ -12,7 +12,6 @@ export class UserPickStyleRepository extends Repository<UserPickStyle> {
 
   async getOrderStyle(user: User) {
     const userId = user.id;
-    console.log(userId);
     const queryBuilder = await this.createQueryBuilder('user_pick_style').where(
       'user_id = :userId',
       { userId },
