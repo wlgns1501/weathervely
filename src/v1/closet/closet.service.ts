@@ -24,12 +24,12 @@ export class ClosetService {
     this.axiosInstance = createPublicApiAxiosInstance();
   }
 
-  async getRecommendCloset(dateTime: string, address: Address) {
+  async getRecommendCloset(dateTime: string, address: Address, user: User) {
     // body - 어제 or 오늘 , 시간대
     // 기상청 api call -> response 데이터로 T1H 가져오기 ( 기온 - 어제 or 오늘 )
     // 각tmp로 룩 테이블 조회
     const { x_code, y_code } = address;
-    const xyObj = dfsXyConvert('TO_GRID', x_code, y_code);
+    const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
     const targetDateTime = new Date(dateTime);
 
     const response = await this.axiosInstance.get(
@@ -43,23 +43,22 @@ export class ClosetService {
             },
             targetDateTime.getTime(),
           ),
-          nx: xyObj.x,
-          ny: xyObj.y,
+          nx: x,
+          ny: y,
         },
       },
     );
 
-    const apiData =
-      response.data.response.body?.items?.item.filter(
-        (it) =>
-          it.fcstTime === formatTime(targetDateTime.getHours()) &&
-          it.category === 'T1H', // 기온
-      ) ?? [];
-
-    const { fcstValue } = apiData[0];
-    console.log(fcstValue);
-    // this.getCloset(fcstValue);
-    return apiData;
+    const apiData = getTemperatureData(
+      response.data.response.body?.items?.item,
+      targetDateTime,
+    );
+    const { fcstValue } = apiData;
+    const closet = await this.getCloset(fcstValue, user);
+    return {
+      ...closet,
+      fcstValue,
+    };
   }
 
   async getCloset(temperature: number, user: User) {
@@ -67,7 +66,7 @@ export class ClosetService {
       user,
     );
 
-    const sorted = Object.entries(userPickStyle)
+    const sortedStyles = Object.entries(userPickStyle)
       .filter(([key]) => {
         return key !== 'id';
       })
@@ -77,16 +76,33 @@ export class ClosetService {
       });
 
     const closets = await this.closetRepository.getCloset(temperature);
-    for (let i = 0; i < sorted?.length; i++) {
-      const arr_closets = closets.filter((it) => it.typeName === sorted[i]);
-      if (arr_closets.length > 0) {
-        const random_num = Math.floor(Math.random() * arr_closets.length);
-        return arr_closets[random_num];
+    for (const style of sortedStyles) {
+      const filteredClosets = filterClosetsByType(closets, style);
+      if (filteredClosets.length > 0) {
+        const randomIndex = getRandomIndex(filteredClosets.length);
+        return filteredClosets[randomIndex];
       }
     }
 
     // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요
-
     // return result;
   }
+}
+
+function getTemperatureData(items: any[], targetDateTime: Date) {
+  const formattedTime = formatTime(targetDateTime.getHours());
+  const apiData =
+    items?.filter((item) => {
+      return item.fcstTime === formattedTime && item.category === 'T1H'; // Temperature
+    }) || [];
+
+  return apiData[0];
+}
+
+function filterClosetsByType(closets: any[], type: string) {
+  return closets.filter((closet) => closet.typeName === type);
+}
+
+function getRandomIndex(max: number) {
+  return Math.floor(Math.random() * max);
 }

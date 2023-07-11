@@ -37,7 +37,11 @@ export class ClosetController {
     @Query('dateTime') dateTime: string,
     @Req() req: any,
   ) {
-    return this.closetService.getRecommendCloset(dateTime, req.address.address);
+    return this.closetService.getRecommendCloset(
+      dateTime,
+      req.address.address,
+      req.user,
+    );
   }
 
   @Get('getCloset')
