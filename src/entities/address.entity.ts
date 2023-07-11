@@ -73,18 +73,30 @@ export class Address extends BaseEntity {
     description: 'x_code',
     nullable: false,
     required: true,
-    example: '0.1111',
+    example: '37.570654',
   })
-  @Column({ name: 'x_code', comment: '위도' })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 8,
+    name: 'x_code',
+    comment: '위도',
+  })
   x_code: number;
 
   @ApiProperty({
     description: 'y_code',
     nullable: false,
     required: true,
-    example: '0.33333',
+    example: '126.979893',
   })
-  @Column({ name: 'y_code', comment: '경도' })
+  @Column({
+    type: 'decimal',
+    precision: 11,
+    scale: 8,
+    name: 'y_code',
+    comment: '경도',
+  })
   y_code: number;
 
   @OneToMany(

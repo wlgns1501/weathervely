@@ -13,7 +13,7 @@ export class Type extends BaseEntity {
   id: number;
 
   @Column({ name: 'name', comment: '타입 이름' })
-  type: string;
+  name: string;
 
   @OneToMany(() => ClosetType, (closetType) => closetType.type)
   closetTypes: ClosetType[];
