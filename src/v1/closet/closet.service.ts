@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { Transactional } from 'typeorm-transactional';
@@ -17,6 +17,9 @@ import {
 } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { calculateMS } from 'src/lib/utils/calculate';
 
 @Injectable()
 export class ClosetService {
@@ -25,6 +28,7 @@ export class ClosetService {
     private readonly closetRepository: ClosetRepository,
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
   }
@@ -60,40 +64,55 @@ export class ClosetService {
       }
   }
 
-  async getRecommendCloset(dateTime: string, address: Address) {
-    // body - 어제 or 오늘 , 시간대
-    // 기상청 api call -> response 데이터로 T1H 가져오기 ( 기온 - 어제 or 오늘 )
-    // 각tmp로 룩 테이블 조회
-    const { x_code, y_code } = address;
-    const xyObj = dfsXyConvert('TO_GRID', x_code, y_code);
-    const targetDateTime = new Date(dateTime);
-
-    const response = await this.axiosInstance.get(
-      `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-      {
-        params: {
-          ...getBaseDateTime(
-            {
-              minutes: 30,
-              provide: 45,
-            },
-            targetDateTime.getTime(),
-          ),
-          nx: xyObj.x,
-          ny: xyObj.y,
-        },
-      },
+  async getRecommendCloset(dateTime: string, address: Address, user: User) {
+    const { city, x_code, y_code } = address;
+    const cacheData: any | null = await this.cacheManager.get(
+      `UltraSrtFcst_${city}_${dateTime}`,
     );
+    let fcstValue: number;
+    if (cacheData) {
+      fcstValue = cacheData;
+    } else {
+      const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+      const targetDateTime = new Date(dateTime);
 
-    const data =
-      response.data.response.body?.items?.item.filter(
-        (it) =>
-          it.fcstTime === formatTime(targetDateTime.getHours()) &&
-          it.category === 'T1H',
-      ) ?? [];
+      const response = await this.axiosInstance.get(
+        `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+        {
+          params: {
+            ...getBaseDateTime(
+              {
+                minutes: 30,
+                provide: 45,
+              },
+              targetDateTime.getTime(),
+            ),
+            nx: x,
+            ny: y,
+          },
+        },
+      );
 
-    console.log(data);
-    return data;
+      const apiData = getTemperatureData(
+        response.data.response.body?.items?.item,
+        targetDateTime,
+      );
+
+      fcstValue = apiData.fcstValue;
+      const milliSeconds = calculateMS(45);
+      await this.cacheManager.set(
+        `UltraSrtFcst_${city}_${dateTime}`,
+        fcstValue,
+        milliSeconds,
+      );
+    }
+
+    // const { fcstValue } = apiData;
+    const closet = await this.getCloset(fcstValue, user);
+    return {
+      ...closet,
+      fcstValue,
+    };
   }
 
   async getCloset(temperature: number, user: User) {
@@ -101,7 +120,7 @@ export class ClosetService {
       user,
     );
 
-    const sorted = Object.entries(userPickStyle)
+    const sortedStyles = Object.entries(userPickStyle)
       .filter(([key]) => {
         return key !== 'id';
       })
@@ -111,16 +130,33 @@ export class ClosetService {
       });
 
     const closets = await this.closetRepository.getCloset(temperature);
-    for (let i = 0; i < sorted?.length; i++) {
-      const arr_closets = closets.filter((it) => it.typeName === sorted[i]);
-      if (arr_closets.length > 0) {
-        const random_num = Math.floor(Math.random() * arr_closets.length);
-        return arr_closets[random_num];
+    for (const style of sortedStyles) {
+      const filteredClosets = filterClosetsByType(closets, style);
+      if (filteredClosets.length > 0) {
+        const randomIndex = getRandomIndex(filteredClosets.length);
+        return filteredClosets[randomIndex];
       }
     }
 
-    // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요
-
+    // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
     // return result;
   }
+}
+
+function getTemperatureData(items: any[], targetDateTime: Date) {
+  const formattedTime = formatTime(targetDateTime.getHours());
+  const apiData =
+    items?.filter((item) => {
+      return item.fcstTime === formattedTime && item.category === 'T1H'; // Temperature
+    }) || [];
+
+  return apiData[0];
+}
+
+function filterClosetsByType(closets: any[], type: string) {
+  return closets.filter((closet) => closet.typeName === type);
+}
+
+function getRandomIndex(max: number) {
+  return Math.floor(Math.random() * max);
 }

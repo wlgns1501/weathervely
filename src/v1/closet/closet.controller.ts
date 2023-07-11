@@ -17,6 +17,8 @@ import { PickClosetDto } from './dtos/pickCloset.dto';
 import { PickClosetPipe } from './dtos/pickCloset.pipe';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
+import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
 
 @ApiTags('Closet')
 @Controller('closet')
@@ -48,23 +50,25 @@ export class ClosetController {
   @Get('getRecommendCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 - 체감온도 설정 Get' })
-  @ApiQuery({
-    name: 'dateTime',
-    required: true,
-    description: 'dateTime',
-  })
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 화면 진입시 - Get' })
   async getRecommendCloset(
-    @Query('dateTime') dateTime: string,
+    @Query(new GetRecommendClosetPipe())
+    getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
   ) {
-    return this.service.getRecommendCloset(dateTime, req.address.address);
+    const { dateTime } = getRecommendClosetDto;
+    const data = await this.service.getRecommendCloset(
+      dateTime,
+      req.address.address,
+      req.user,
+    );
+    return data;
   }
 
   @Get('getCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 Get' })
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 - Get' })
   @ApiQuery({
     name: 'temperature',
     required: true,
