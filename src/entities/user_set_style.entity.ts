@@ -4,11 +4,13 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Closet } from './closet.entity';
 
 @Entity({ name: 'user_set_style' })
+@Unique(['user', 'closet'])
 export class UserSetStyle extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;

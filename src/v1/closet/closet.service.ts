@@ -1,4 +1,11 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
+import { User } from 'src/entities/user.entity';
+import { ClosetRepository } from 'src/repositories/closet.repository';
+import { Transactional } from 'typeorm-transactional';
+import { PickClosetDto } from './dtos/pickCloset.dto';
+import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
+import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
+import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { AxiosInstance } from 'axios';
 import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
 import {
@@ -8,9 +15,7 @@ import {
   getRoundedHour,
   formatTime,
 } from '../../lib/utils/publicForecast';
-import { User } from 'src/entities/user.entity';
 import { Address } from 'src/entities/address.entity';
-import { ClosetRepository } from 'src/repositories/closet.repository';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
@@ -19,13 +24,44 @@ import { calculateMS } from 'src/lib/utils/calculate';
 @Injectable()
 export class ClosetService {
   private readonly axiosInstance: AxiosInstance;
-
   constructor(
     private readonly closetRepository: ClosetRepository,
+    private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
+  }
+
+  async getClosetList() {
+    const closets = await this.closetRepository.getClosetList();
+
+    return closets;
+  }
+
+  @Transactional()
+  async pickCloset(pickClosetDto: PickClosetDto, user: User) {
+    const { closet_ids } = pickClosetDto;
+
+    if (closet_ids.length !== 0)
+      try {
+        for (const closet_id of closet_ids) {
+          const closet = await this.closetRepository.getClosetById(closet_id);
+
+          await this.userSetStyleRepository.setUserStyle(closet, user);
+        }
+      } catch (err) {
+        switch (err.errno) {
+          case MYSQL_ERROR_CODE.DUPLICATED_KEY:
+            throw new HttpException(
+              {
+                message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
+                detail: '이미 선택한 style 입니다.',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+        }
+      }
   }
 
   async getRecommendCloset(dateTime: string, address: Address, user: User) {
@@ -35,10 +71,8 @@ export class ClosetService {
     );
     let fcstValue: number;
     if (cacheData) {
-      console.warn('@@@@@ 쿠키가 있어요 @@@@@');
       fcstValue = cacheData;
     } else {
-      console.warn('@@@@@ 쿠키없음 @@@@@');
       const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
       const targetDateTime = new Date(dateTime);
 

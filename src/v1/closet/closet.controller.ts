@@ -1,20 +1,22 @@
 import {
-  Inject,
+  Body,
   Controller,
   Get,
-  Query,
-  HttpStatus,
   HttpCode,
+  HttpStatus,
+  Inject,
   Post,
+  Query,
   Req,
   UseGuards,
-  Body,
 } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ClosetService } from './closet.service';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { PickClosetDto } from './dtos/pickCloset.dto';
+import { PickClosetPipe } from './dtos/pickCloset.pipe';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/guards/auth.guard';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
 
@@ -22,9 +24,28 @@ import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
 @Controller('closet')
 export class ClosetController {
   constructor(
-    private readonly closetService: ClosetService,
+    private service: ClosetService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  @Get('')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '스타일 리스트' })
+  @UseGuards(AuthGuard)
+  getClosetList() {
+    return this.service.getClosetList();
+  }
+
+  @Post('/pick')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: '스타일 선택' })
+  @UseGuards(AuthGuard)
+  pickCloset(
+    @Body(new PickClosetPipe()) pickClosetDto: PickClosetDto,
+    @Req() req: any,
+  ) {
+    return this.service.pickCloset(pickClosetDto, req.user);
+  }
 
   @Get('getRecommendCloset')
   @HttpCode(HttpStatus.OK)
@@ -36,7 +57,7 @@ export class ClosetController {
     @Req() req: any,
   ) {
     const { dateTime } = getRecommendClosetDto;
-    const data = await this.closetService.getRecommendCloset(
+    const data = await this.service.getRecommendCloset(
       dateTime,
       req.address.address,
       req.user,
@@ -54,7 +75,7 @@ export class ClosetController {
     description: 'temperature입니다.',
   })
   async getCloset(@Query('temperature') temperature: number, @Req() req?: any) {
-    return this.closetService.getCloset(temperature, req.user);
+    return this.service.getCloset(temperature, req.user);
   }
 
   //   // 온보딩 - 체감온도 설정 찐
