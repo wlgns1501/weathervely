@@ -36,11 +36,12 @@ export class ClosetController {
     @Req() req: any,
   ) {
     const { dateTime } = getRecommendClosetDto;
-    return this.closetService.getRecommendCloset(
+    const data = await this.closetService.getRecommendCloset(
       dateTime,
       req.address.address,
       req.user,
     );
+    return data;
   }
 
   @Get('getCloset')
