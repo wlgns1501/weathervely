@@ -15,6 +15,8 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
+import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
 
 @ApiTags('Closet')
 @Controller('closet')
@@ -28,15 +30,12 @@ export class ClosetController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '온보딩 - 체감온도 설정 Get' })
-  @ApiQuery({
-    name: 'dateTime',
-    required: true,
-    description: 'dateTime',
-  })
   async getRecommendCloset(
-    @Query('dateTime') dateTime: string,
+    @Query(new GetRecommendClosetPipe())
+    getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
   ) {
+    const { dateTime } = getRecommendClosetDto;
     return this.closetService.getRecommendCloset(
       dateTime,
       req.address.address,

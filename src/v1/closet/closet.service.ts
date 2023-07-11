@@ -25,9 +25,6 @@ export class ClosetService {
   }
 
   async getRecommendCloset(dateTime: string, address: Address, user: User) {
-    // body - 어제 or 오늘 , 시간대
-    // 기상청 api call -> response 데이터로 T1H 가져오기 ( 기온 - 어제 or 오늘 )
-    // 각tmp로 룩 테이블 조회
     const { x_code, y_code } = address;
     const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
     const targetDateTime = new Date(dateTime);
