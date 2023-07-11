@@ -29,7 +29,7 @@ export class ClosetController {
   @Get('getRecommendCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 - 체감온도 설정 Get' })
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 화면 진입시 - Get' })
   async getRecommendCloset(
     @Query(new GetRecommendClosetPipe())
     getRecommendClosetDto: GetRecommendClosetDto,
@@ -47,7 +47,7 @@ export class ClosetController {
   @Get('getCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 Get' })
+  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 - Get' })
   @ApiQuery({
     name: 'temperature',
     required: true,
