@@ -92,7 +92,7 @@ export class ClosetService {
           },
         },
       );
-
+      console.log(response.data.response);
       const apiData = getTemperatureData(
         response.data.response.body?.items?.item,
         targetDateTime,
@@ -106,9 +106,14 @@ export class ClosetService {
         milliSeconds,
       );
     }
-
+    console.log('fcstValue', fcstValue);
     // const { fcstValue } = apiData;
-    const closet = await this.getCloset(fcstValue, user);
+    // const closet = await this.getCloset(fcstValue, user);
+    const closet = await this.closetRepository.getRecommendClosetByTemperature(
+      fcstValue,
+      user,
+    );
+
     return {
       ...closet,
       fcstValue,

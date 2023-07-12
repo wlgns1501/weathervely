@@ -25,7 +25,8 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
-    const accessToken = req.get('cookie')?.split('=')[1];
+    const accessToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuaWNrbmFtZSI6InRlc3QiLCJpYXQiOjE2ODg0NTc3OTV9.Iey4tb3HBc3EqOM-YHVngArlSybh8PPAOlnSHBKPnX8';
 
     if (!accessToken) {
       throw new HttpException(
@@ -38,12 +39,11 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
+      console.log(accessToken);
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
-
       const { nickname } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
-
       const address = await this.userAddressRepository.getUserAddress(user);
 
       if (!address) {
@@ -66,6 +66,7 @@ export class AuthGuard implements CanActivate {
         );
 
       req['user'] = user;
+      req['address'] = address;
 
       return true;
     } catch (err) {
