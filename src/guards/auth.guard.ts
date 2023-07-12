@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.authRepository.getUserByNickname(nickname);
 
-      const address = await this.userAddressRepository.getUserAddress(user);
+      const { address } = await this.userAddressRepository.getUserAddress(user);
 
       if (!address) {
         throw new HttpException(
@@ -66,6 +66,7 @@ export class AuthGuard implements CanActivate {
         );
 
       req['user'] = user;
+      req['address'] = address;
 
       return true;
     } catch (err) {

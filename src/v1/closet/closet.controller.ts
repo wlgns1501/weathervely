@@ -59,7 +59,7 @@ export class ClosetController {
     const { dateTime } = getRecommendClosetDto;
     const data = await this.service.getRecommendCloset(
       dateTime,
-      req.address.address,
+      req.address,
       req.user,
     );
     return data;
