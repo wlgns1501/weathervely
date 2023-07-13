@@ -48,9 +48,9 @@ export class ClosetRepository extends Repository<Closet> {
       .addSelect('closet.status', 'status')
       .addSelect('t.id', 'typeId')
       .addSelect('t.name', 'typeName')
-      .innerJoin('closet.closet_temperature', 'ctemp')
-      .innerJoin('ctemp.temp', 'tr')
-      .innerJoin('closet.closet_type', 'ct')
+      .innerJoin('closet.closetTemperature', 'ctemp')
+      .innerJoin('ctemp.temperatureRange', 'tr')
+      .innerJoin('closet.closetTypes', 'ct')
       .innerJoin('ct.type', 't')
       .innerJoin(
         `(SELECT t.id AS typeId, t.name AS typeName, f.favoritTypeClosetCount
