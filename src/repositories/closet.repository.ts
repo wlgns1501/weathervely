@@ -32,6 +32,52 @@ export class ClosetRepository extends Repository<Closet> {
     return await this.createQueryBuilder().where({ id: closet_id }).getOne();
   }
 
+  async getRecommendClosetByTemperature(
+    temperature: number,
+    user: User,
+  ): Promise<Closet | undefined> {
+    const query = this.createQueryBuilder('closet')
+      .select('tr.id', 'tempId')
+      .addSelect('tr.min_temp', 'minTemp')
+      .addSelect('tr.max_temp', 'maxTemp')
+      .addSelect('closet.id', 'closetId')
+      .addSelect('closet.name', 'closetName')
+      .addSelect('closet.site_name', 'siteName')
+      .addSelect('closet.site_url', 'siteUrl')
+      .addSelect('closet.image_url', 'imageUrl')
+      .addSelect('closet.status', 'status')
+      .addSelect('t.id', 'typeId')
+      .addSelect('t.name', 'typeName')
+      .innerJoin('closet_temperature', 'ctemp', 'ctemp.closet_id = closet.id')
+      .innerJoin('temperature_range', 'tr', 'tr.id = ctemp.temp_id')
+      .innerJoin('closet_type', 'ct', 'ct.closet_id = closet.id')
+      .innerJoin('type', 't', 't.id = ct.type_id')
+      .innerJoin(
+        `(SELECT t.id AS typeId, t.name AS typeName, f.favoritTypeClosetCount
+          FROM type t
+          LEFT OUTER JOIN (
+            SELECT ct.type_id, COUNT(ct.closet_id) AS favoritTypeClosetCount
+            FROM user_set_style ust
+            JOIN user u ON u.id = ust.user_id
+            JOIN closet c ON c.id = ust.closet_id
+            JOIN closet_type ct ON ct.closet_id = c.id
+            WHERE u.id = :userId
+            GROUP BY ct.type_id
+          ) f ON f.type_id = t.id
+          ORDER BY favoritTypeClosetCount DESC, RAND()
+          LIMIT 1
+        )`,
+        'f',
+        'f.typeId = t.id',
+      )
+      .where(':temperature BETWEEN tr.min_temp AND tr.max_temp')
+      .orderBy('RAND()')
+      .setParameters({ userId: user.id, temperature })
+      .limit(1);
+
+    return await query.getRawOne();
+  }
+
   async getCloset(temperature: number) {
     const queryBuilder = await this.createQueryBuilder('closet')
       .select('closet.id', 'id')
