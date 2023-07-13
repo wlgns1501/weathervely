@@ -18,6 +18,10 @@ module.exports = {
         DB_USERNAME: process.env.DB_USERNAME,
         DB_PASSWORD: process.env.DB_PASSWORD,
         DB_DATABASE: process.env.DB_DATABASE,
+
+        PUBLIC_OPEN_API_BASE_URL: process.env.PUBLIC_OPEN_API_BASE_URL,
+        PUBLIC_OPEN_API_SERVICE_KEY: process.env.PUBLIC_OPEN_API_SERVICE_KEY,
+        JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
       },
     },
   ],

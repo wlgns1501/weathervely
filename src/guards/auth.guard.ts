@@ -44,7 +44,8 @@ export class AuthGuard implements CanActivate {
       const { nickname } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
-      const address = await this.userAddressRepository.getUserAddress(user);
+
+      const { address } = await this.userAddressRepository.getUserAddress(user);
 
       if (!address) {
         throw new HttpException(
