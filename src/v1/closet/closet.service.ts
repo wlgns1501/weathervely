@@ -92,7 +92,7 @@ export class ClosetService {
           },
         },
       );
-      console.log(response.data.response);
+      console.log('@@@response@@@', response.data.response);
       const apiData = getTemperatureData(
         response.data.response.body?.items?.item,
         targetDateTime,
