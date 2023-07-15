@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Type } from 'src/entities/type.entity';
 import { Closet } from 'src/entities/closet.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ObjectLiteral, Repository, getRepository } from 'typeorm';
 import { ClosetType } from 'src/entities/closet_type.entity';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
@@ -35,51 +35,83 @@ export class ClosetRepository extends Repository<Closet> {
   async getRecommendClosetByTemperature(
     temperature: number,
     user: User,
-  ): Promise<Closet | undefined> {
-    const query = this.createQueryBuilder('closet')
-      .select('tr.id', 'tempId')
-      .addSelect('tr.min_temp', 'minTemp')
-      .addSelect('tr.max_temp', 'maxTemp')
-      .addSelect('closet.id', 'closetId')
-      .addSelect('closet.name', 'closetName')
-      .addSelect('closet.site_name', 'siteName')
-      .addSelect('closet.site_url', 'siteUrl')
-      .addSelect('closet.image_url', 'imageUrl')
-      .addSelect('closet.status', 'status')
-      .addSelect('t.id', 'typeId')
-      .addSelect('t.name', 'typeName')
-      .innerJoin('closet.closetTemperature', 'ctemp')
-      .innerJoin('ctemp.temperatureRange', 'tr')
-      .innerJoin('closet.closetTypes', 'ct')
-      .innerJoin('ct.type', 't')
-      // .innerJoin('closet_temperature', 'ctemp', 'ctemp.closet_id = closet.id')
-      // .innerJoin('temperature_range', 'tr', 'tr.id = ctemp.temp_id')
-      // .innerJoin('closet_type', 'ct', 'ct.closet_id = closet.id')
-      // .innerJoin('type', 't', 't.id = ct.type_id')
-      .innerJoin(
-        `(SELECT t.id AS typeId, t.name AS typeName, f.favoritTypeClosetCount
-          FROM type t
-          LEFT OUTER JOIN (
-            SELECT ct.type_id, COUNT(ct.closet_id) AS favoritTypeClosetCount
-            FROM user_set_style ust
-            JOIN user u ON u.id = ust.user_id
-            JOIN closet c ON c.id = ust.closet_id
-            JOIN closet_type ct ON ct.closet_id = c.id
-            WHERE u.id = :userId
-            GROUP BY ct.type_id
-          ) f ON f.type_id = t.id
-          ORDER BY favoritTypeClosetCount DESC, RAND()
-          LIMIT 1
-        )`,
-        'f',
-        'f.typeId = t.id',
+  ): Promise<ObjectLiteral[]> {
+    const userSettedTypeQuery = await this.createQueryBuilder()
+      .select('t.id, count(t.id) as counting, t.name')
+      .from('user', 'u')
+      .leftJoin('user_set_style', 'uss', 'uss.user_id = u.id')
+      .leftJoin('closet', 'c', 'c.id = uss.closet_id')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('t.id, t.name, ct.closet_id as closet_id')
+            .from('type', 't')
+            .leftJoin('closet_type', 'ct', 'ct.type_id = t.id'),
+        't',
+        't.closet_id = c.id',
       )
-      .where(':temperature BETWEEN tr.min_temp AND tr.max_temp')
-      .orderBy('RAND()')
-      .setParameters({ userId: user.id, temperature })
-      .limit(1);
+      .where('u.id = :userId')
+      .groupBy('t.id')
+      .orderBy('counting', 'DESC')
+      .addOrderBy('RAND()')
+      .limit(1)
+      .getQuery();
 
-    return await query.getRawOne();
+    const getClosetsQuery = await this.createQueryBuilder()
+      .select('c.*, ust.name as type_name')
+      .from('(' + userSettedTypeQuery + ')', 'ust')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('c.*, ct.type_id')
+            .from('closet', 'c')
+            .leftJoin('closet_type', 'ct', 'ct.closet_id = c.id'),
+        'c',
+        '(ust.id IS NOT NULL AND c.type_id = ust.id) or (ust.id IS NULL AND 1 = 1)',
+      )
+      .groupBy('c.id')
+      .getQuery();
+
+    const tempRangeIds = await this.createQueryBuilder()
+      .select('tr.id')
+      .from('temperature_range', 'tr')
+      .where(
+        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) - 2',
+      )
+      .andWhere(
+        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) + 2',
+      )
+      .groupBy('tr.id')
+      .orderBy('tr.id')
+      .setParameter('temp', temperature)
+      .getRawMany();
+
+    const tempWithClosetQuery = await this.createQueryBuilder()
+      .select('tr.*')
+      .addSelect('gc.id', 'closet_id')
+      .addSelect('gc.name')
+      .addSelect('gc.image_url')
+      .addSelect('gc.type_name')
+      .from('temperature_range', 'tr')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('gc.*, ct.temp_id')
+            .from('(' + getClosetsQuery + ')', 'gc')
+            .leftJoin('closet_temperature', 'ct', 'ct.closet_id = gc.id'),
+        // .where('ct.temp_id = tr.id')
+        // .orderBy('RAND()')
+        // .limit(1),
+        'gc',
+        'gc.temp_id = tr.id',
+      )
+      .where('tr.id IS NOT NULL')
+      .andWhere('tr.id IN (:tempIds)', {
+        tempIds: tempRangeIds.map((it) => it.tr_id),
+      })
+      .setParameter('userId', 42);
+
+    return await tempWithClosetQuery.getRawMany();
   }
 
   async getCloset(temperature: number) {
