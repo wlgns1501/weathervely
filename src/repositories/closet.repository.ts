@@ -76,10 +76,10 @@ export class ClosetRepository extends Repository<Closet> {
       .select('tr.id')
       .from('temperature_range', 'tr')
       .where(
-        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) - 2',
+        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) - 3',
       )
       .andWhere(
-        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) + 2',
+        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) + 3',
       )
       .groupBy('tr.id')
       .orderBy('tr.id')
@@ -92,6 +92,11 @@ export class ClosetRepository extends Repository<Closet> {
       .addSelect('gc.name')
       .addSelect('gc.image_url')
       .addSelect('gc.type_name')
+      .addSelect('gc.temp_id')
+      .addSelect(
+        `case when :temp between tr.min_temp and tr.max_temp then 'true' else 'false' end`,
+        'isTemperatureRange',
+      )
       .from('temperature_range', 'tr')
       .leftJoin(
         (subQuery) =>
@@ -109,6 +114,7 @@ export class ClosetRepository extends Repository<Closet> {
         tempIds: tempRangeIds.map((it) => it.tr_id),
       })
       .groupBy('tr.id')
+      .setParameter('temp', temperature)
       .setParameter('userId', user.id);
 
     return await tempWithClosetQuery.getRawMany();

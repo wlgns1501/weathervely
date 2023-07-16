@@ -64,6 +64,7 @@ export class ClosetService {
       }
   }
 
+  // array
   async getRecommendCloset(dateTime: string, address: Address, user: User) {
     const { city, x_code, y_code } = address;
     const cacheData: any | null = await this.cacheManager.get(
@@ -99,7 +100,8 @@ export class ClosetService {
       );
 
       fcstValue = apiData.fcstValue;
-      const milliSeconds = calculateMS(45);
+      const milliSeconds = calculateMS(2880);
+      console.log(milliSeconds);
       await this.cacheManager.set(
         `UltraSrtFcst_${city}_${dateTime}`,
         fcstValue,
@@ -107,8 +109,6 @@ export class ClosetService {
       );
     }
     console.log('fcstValue', fcstValue);
-    // const { fcstValue } = apiData;
-    // const closet = await this.getCloset(fcstValue, user);
     const closet = await this.closetRepository.getRecommendClosetByTemperature(
       fcstValue,
       user,
@@ -120,32 +120,40 @@ export class ClosetService {
     };
   }
 
-  async getCloset(temperature: number, user: User) {
-    const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
-      user,
-    );
-
-    const sortedStyles = Object.entries(userPickStyle)
-      .filter(([key]) => {
-        return key !== 'id';
-      })
-      .sort((a, b) => b[1] - a[1])
-      .map((it) => {
-        return it[0];
-      });
-
-    const closets = await this.closetRepository.getCloset(temperature);
-    for (const style of sortedStyles) {
-      const filteredClosets = filterClosetsByType(closets, style);
-      if (filteredClosets.length > 0) {
-        const randomIndex = getRandomIndex(filteredClosets.length);
-        return filteredClosets[randomIndex];
-      }
-    }
-
-    // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
-    // return result;
+  async setRecommendCloset() {
+    return {
+      code: 200,
+      msg: 'ok',
+    };
   }
+
+  //   // 단일
+  //   async getCloset(temperature: number, user: User) {
+  //     const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
+  //       user,
+  //     );
+
+  //     const sortedStyles = Object.entries(userPickStyle)
+  //       .filter(([key]) => {
+  //         return key !== 'id';
+  //       })
+  //       .sort((a, b) => b[1] - a[1])
+  //       .map((it) => {
+  //         return it[0];
+  //       });
+
+  //     const closets = await this.closetRepository.getCloset(temperature);
+  //     for (const style of sortedStyles) {
+  //       const filteredClosets = filterClosetsByType(closets, style);
+  //       if (filteredClosets.length > 0) {
+  //         const randomIndex = getRandomIndex(filteredClosets.length);
+  //         return filteredClosets[randomIndex];
+  //       }
+  //     }
+
+  //     // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
+  //     // return result;
+  //   }
 }
 
 function getTemperatureData(items: any[], targetDateTime: Date) {

@@ -19,6 +19,8 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
+import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
+import { SetRecommendClosetPipe } from './dtos/setRecommendCloset.pipe';
 
 @ApiTags('Closet')
 @Controller('closet')
@@ -65,25 +67,38 @@ export class ClosetController {
     return data;
   }
 
-  @Get('getCloset')
+  // 온보딩 - 체감온도 설정 찐
+  @Post('setTemperature')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '체감온도 설정' })
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 - Get' })
-  @ApiQuery({
-    name: 'temperature',
-    required: true,
-    description: 'temperature입니다.',
-  })
-  async getCloset(@Query('temperature') temperature: number, @Req() req?: any) {
-    return this.service.getCloset(temperature, req.user);
+  async setTemperature(
+    @Body(new SetRecommendClosetPipe())
+    setRecommendClosetDto: SetRecommendClosetDto,
+    @Req() req: any,
+  ) {
+    console.log('setRecommendClosetDto', setRecommendClosetDto);
+    console.log('user', req.user.id);
+    console.log('address', req.address.id);
+
+    return {
+      code: 200,
+      msg: 'ok',
+    };
+    // const data = await this.service.setRecommendCloset();
+    // return data;
   }
 
-  //   // 온보딩 - 체감온도 설정 찐
-  //   @Post('setTemperature')
+  //   @Get('getCloset')
   //   @HttpCode(HttpStatus.OK)
-  //   @ApiOperation({ summary: '체감온도 설정' })
-  //   async setTemperature() {
-  //     const data = await this.closetService.getRecommendCloset();
-  //     return data;
+  //   @UseGuards(AuthGuard)
+  //   @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 - Get' })
+  //   @ApiQuery({
+  //     name: 'temperature',
+  //     required: true,
+  //     description: 'temperature입니다.',
+  //   })
+  //   async getCloset(@Query('temperature') temperature: number, @Req() req?: any) {
+  //     return this.service.getCloset(temperature, req.user);
   //   }
 }

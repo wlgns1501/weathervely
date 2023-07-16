@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ClosetTemperature } from './closet_temperature.entity';
+import { UserPickWeather } from './user_pick_weather.entity';
 
 @Entity({ name: 'temperature_range' })
 export class TemperatureRange extends BaseEntity {
@@ -23,4 +24,10 @@ export class TemperatureRange extends BaseEntity {
     (closetTemperature) => closetTemperature.temperatureRange,
   )
   closetTemperature: ClosetTemperature[];
+
+  @OneToMany(
+    () => UserPickWeather,
+    (userPickWeather) => userPickWeather.temperatureRange,
+  )
+  userPickWeather: UserPickWeather[];
 }

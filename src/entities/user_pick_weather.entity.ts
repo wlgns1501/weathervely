@@ -1,5 +1,6 @@
 import {
   BaseEntity,
+  Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
@@ -9,6 +10,8 @@ import {
 import { User } from './user.entity';
 import { Address } from './address.entity';
 import { Closet } from './closet.entity';
+import { TemperatureRange } from './temperature_range.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'user_pick_weather' })
 export class UserPickWeather extends BaseEntity {
@@ -24,13 +27,31 @@ export class UserPickWeather extends BaseEntity {
   address: Address;
 
   @ManyToOne(() => Closet, (closet) => closet.id)
-  @JoinColumn({ name: 'minimum_temperature_clothing_id' })
-  minimum_temperature_closet: Closet;
+  @JoinColumn({ name: 'closet_id' })
+  closet: Closet;
 
-  @ManyToOne(() => Closet, (closet) => closet.id)
-  @JoinColumn({ name: 'maximum_temperature_clothing_id' })
-  maximum_temperature_closet: Closet;
+  @ManyToOne(() => TemperatureRange, (temperatureRange) => temperatureRange.id)
+  @JoinColumn({ name: 'temp_id' })
+  temperatureRange: TemperatureRange;
 
+  //   @ManyToOne(() => Closet, (closet) => closet.id)
+  //   @JoinColumn({ name: 'maximum_temperature_clothing_id' })
+  //   maximum_temperature_closet: Closet;
+  @ApiProperty({
+    description: 'created_at',
+    nullable: false,
+    required: true,
+    example: '2023-07-16 22:57',
+  })
   @CreateDateColumn({ name: 'created_at', comment: '생성일자' })
   created_at: Date;
+
+  @ApiProperty({
+    description: 'temperature',
+    nullable: false,
+    required: true,
+    example: '23',
+  })
+  @Column({ name: 'temperature', comment: '온도' })
+  temperature: string;
 }
