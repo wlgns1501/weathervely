@@ -96,20 +96,20 @@ export class ClosetRepository extends Repository<Closet> {
       .leftJoin(
         (subQuery) =>
           subQuery
-            .select('gc.*, ct.temp_id')
+            .select(
+              'gc.*, ct.temp_id, row_number() over (partition by ct.temp_id order by rand()) as rn',
+            )
             .from('(' + getClosetsQuery + ')', 'gc')
             .leftJoin('closet_temperature', 'ct', 'ct.closet_id = gc.id'),
-        // .where('ct.temp_id = tr.id')
-        // .orderBy('RAND()')
-        // .limit(1),
         'gc',
-        'gc.temp_id = tr.id',
+        'tr.id = gc.temp_id and gc.rn = 1',
       )
       .where('tr.id IS NOT NULL')
       .andWhere('tr.id IN (:tempIds)', {
         tempIds: tempRangeIds.map((it) => it.tr_id),
       })
-      .setParameter('userId', 42);
+      .groupBy('tr.id')
+      .setParameter('userId', user.id);
 
     return await tempWithClosetQuery.getRawMany();
   }
