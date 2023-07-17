@@ -74,59 +74,89 @@ export class ClosetService {
     address: Address,
     user: User,
   ) {
-    const { dateTime } = getRecommendClosetDto;
-    const { city, x_code, y_code } = address;
-    const cacheData: any | null = await this.cacheManager.get(
-      `UltraSrtFcst_${city}_${dateTime}`,
-    );
-    let fcstValue: number;
-    if (cacheData) {
-      fcstValue = cacheData;
-    } else {
-      const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-      const targetDateTime = new Date(dateTime);
-
-      const response = await this.axiosInstance.get(
-        `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-        {
-          params: {
-            ...getBaseDateTime(
-              {
-                minutes: 30,
-                provide: 45,
-              },
-              targetDateTime.getTime(),
-            ),
-            nx: x,
-            ny: y,
-          },
-        },
-      );
-      console.log('@@@response@@@', response.data.response);
-      const apiData = getTemperatureData(
-        response.data.response.body?.items?.item,
-        targetDateTime,
-      );
-
-      fcstValue = apiData.fcstValue;
-      const milliSeconds = calculateMS(2880);
-      console.log(milliSeconds);
-      await this.cacheManager.set(
+    try {
+      const { dateTime } = getRecommendClosetDto;
+      const { city, x_code, y_code } = address;
+      const cacheData: any | null = await this.cacheManager.get(
         `UltraSrtFcst_${city}_${dateTime}`,
-        fcstValue,
-        milliSeconds,
       );
-    }
-    console.log('fcstValue', fcstValue);
-    const closet = await this.closetRepository.getRecommendClosetByTemperature(
-      fcstValue,
-      user,
-    );
+      let fcstValue: number;
 
-    return {
-      ...closet,
-      fcstValue,
-    };
+      if (cacheData) {
+        fcstValue = cacheData;
+      } else {
+        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+        const targetDateTime = new Date(dateTime);
+        try {
+          const response = await this.axiosInstance.get(
+            `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+            {
+              params: {
+                ...getBaseDateTime(
+                  {
+                    minutes: 30,
+                    provide: 45,
+                  },
+                  targetDateTime.getTime(),
+                ),
+                nx: x,
+                ny: y,
+              },
+            },
+          );
+          if (response.data.response.header.resultCode !== '00') {
+            throw response.data.response.header;
+          }
+          const apiData = getTemperatureData(
+            response.data.response.body?.items?.item,
+            targetDateTime,
+          );
+
+          fcstValue = apiData.fcstValue;
+          const milliSeconds = calculateMS(2880);
+          await this.cacheManager.set(
+            `UltraSrtFcst_${city}_${dateTime}`,
+            fcstValue,
+            milliSeconds,
+          );
+        } catch (e) {
+          // 흠...케이스 분류..?
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: e.resultMsg,
+          };
+        }
+      }
+      const closet =
+        await this.closetRepository.getRecommendClosetByTemperature(
+          fcstValue,
+          user,
+        );
+
+      return {
+        ...closet,
+        fcstValue,
+      };
+    } catch (err) {
+      switch (err.errno) {
+        case 503:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        case MYSQL_ERROR_CODE.SQL_SYNTAX:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
+              detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
   }
 
   @Transactional()
