@@ -13,10 +13,8 @@ import { SetRecommendClosetDto } from './setRecommendCloset.dto';
 export class SetRecommendClosetPipe implements PipeTransform<any> {
   transform(value: SetRecommendClosetDto) {
     const validationSchema = Joi.object({
-      //   user_id: SCHEMA.REQUIRED_NUMBER('user_id'),
-      //   address_id: SCHEMA.REQUIRED_NUMBER('address_id'),
-      closet_id: SCHEMA.REQUIRED_NUMBER('closet_id'),
-      temp_id: SCHEMA.REQUIRED_NUMBER('temp_id'),
+      closet: SCHEMA.REQUIRED_NUMBER('closet'),
+      temperatureRange: SCHEMA.REQUIRED_NUMBER('temperatureRange'),
       created_at: SCHEMA.REQUIRED_STRING('created_at'),
       temperature: SCHEMA.REQUIRED_STRING('temperature'),
     });

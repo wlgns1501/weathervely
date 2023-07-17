@@ -17,9 +17,12 @@ import {
 } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
+import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { calculateMS } from 'src/lib/utils/calculate';
+import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
+import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 
 @Injectable()
 export class ClosetService {
@@ -28,6 +31,7 @@ export class ClosetService {
     private readonly closetRepository: ClosetRepository,
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
+    private readonly userPickWeatherRepository: UserPickWeatherRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
@@ -65,7 +69,12 @@ export class ClosetService {
   }
 
   // array
-  async getRecommendCloset(dateTime: string, address: Address, user: User) {
+  async getRecommendCloset(
+    getRecommendClosetDto: GetRecommendClosetDto,
+    address: Address,
+    user: User,
+  ) {
+    const { dateTime } = getRecommendClosetDto;
     const { city, x_code, y_code } = address;
     const cacheData: any | null = await this.cacheManager.get(
       `UltraSrtFcst_${city}_${dateTime}`,
@@ -120,11 +129,30 @@ export class ClosetService {
     };
   }
 
-  async setRecommendCloset() {
-    return {
-      code: 200,
-      msg: 'ok',
-    };
+  @Transactional()
+  async setRecommendCloset(
+    setRecommendClosetDto: SetRecommendClosetDto,
+    user: User,
+    address: Address,
+  ) {
+    try {
+      await this.userPickWeatherRepository.setRecommendCloset(
+        setRecommendClosetDto,
+        user,
+        address,
+      );
+    } catch (err) {
+      switch (err.errno) {
+        case MYSQL_ERROR_CODE.DUPLICATED_KEY:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
+              detail: '이미 선택한 체감온도 입니다.',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+      }
+    }
   }
 
   //   // 단일

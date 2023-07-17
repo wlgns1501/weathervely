@@ -26,10 +26,22 @@ export class UserPickWeather extends BaseEntity {
   @JoinColumn({ name: 'address_id' })
   address: Address;
 
+  @ApiProperty({
+    description: 'closet_id',
+    nullable: false,
+    required: true,
+    example: '7',
+  })
   @ManyToOne(() => Closet, (closet) => closet.id)
   @JoinColumn({ name: 'closet_id' })
   closet: Closet;
 
+  @ApiProperty({
+    description: 'temp_id',
+    nullable: false,
+    required: true,
+    example: '2',
+  })
   @ManyToOne(() => TemperatureRange, (temperatureRange) => temperatureRange.id)
   @JoinColumn({ name: 'temp_id' })
   temperatureRange: TemperatureRange;
@@ -50,7 +62,7 @@ export class UserPickWeather extends BaseEntity {
     description: 'temperature',
     nullable: false,
     required: true,
-    example: '23',
+    example: '25',
   })
   @Column({ name: 'temperature', comment: '온도' })
   temperature: string;

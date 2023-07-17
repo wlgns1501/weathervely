@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -57,17 +58,16 @@ export class ClosetController {
     @Query(new GetRecommendClosetPipe())
     getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
+    @Res() res: any,
   ) {
-    const { dateTime } = getRecommendClosetDto;
     const data = await this.service.getRecommendCloset(
-      dateTime,
+      getRecommendClosetDto,
       req.address,
       req.user,
     );
-    return data;
+    return res.status(200).json({ msg: 'success', data: data });
   }
 
-  // 온보딩 - 체감온도 설정 찐
   @Post('setTemperature')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '체감온도 설정' })
@@ -76,17 +76,14 @@ export class ClosetController {
     @Body(new SetRecommendClosetPipe())
     setRecommendClosetDto: SetRecommendClosetDto,
     @Req() req: any,
+    @Res() res: any,
   ) {
-    console.log('setRecommendClosetDto', setRecommendClosetDto);
-    console.log('user', req.user.id);
-    console.log('address', req.address.id);
-
-    return {
-      code: 200,
-      msg: 'ok',
-    };
-    // const data = await this.service.setRecommendCloset();
-    // return data;
+    await this.service.setRecommendCloset(
+      setRecommendClosetDto,
+      req.user,
+      req.address,
+    );
+    return res.status(200).json({ msg: 'ok' });
   }
 
   //   @Get('getCloset')
