@@ -62,8 +62,8 @@ export class ClosetController {
   ) {
     const data = await this.service.getRecommendCloset(
       getRecommendClosetDto,
-      req.address,
       req.user,
+      req.address,
     );
     return res.status(200).json({ msg: 'success', data: data });
   }
@@ -84,6 +84,18 @@ export class ClosetController {
       req.address,
     );
     return res.status(200).json({ msg: 'ok' });
+  }
+
+  @Get('getClosetByNowTemperature')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '메인 화면 진입시 - Get' })
+  async getClosetByNowTemperature(@Req() req: any, @Res() res: any) {
+    const data = await this.service.getClosetByNowTemperature(
+      req.user,
+      req.address,
+    );
+    return res.status(200).json({ msg: 'success', data: data });
   }
 
   //   @Get('getCloset')

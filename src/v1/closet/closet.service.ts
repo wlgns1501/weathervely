@@ -14,6 +14,7 @@ import {
   getBaseDateTime,
   getRoundedHour,
   formatTime,
+  getCurrentDateTime,
 } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
@@ -68,14 +69,14 @@ export class ClosetService {
       }
   }
 
-  // array
   async getRecommendCloset(
     getRecommendClosetDto: GetRecommendClosetDto,
-    address: Address,
     user: User,
+    address: Address,
   ) {
     try {
       const { dateTime } = getRecommendClosetDto;
+      console.log('온보딩', dateTime);
       const { city, x_code, y_code } = address;
       const cacheData: any | null = await this.cacheManager.get(
         `UltraSrtFcst_${city}_${dateTime}`,
@@ -83,7 +84,9 @@ export class ClosetService {
       let fcstValue: number;
 
       if (cacheData) {
-        fcstValue = cacheData;
+        console.log('111@@@쿠키로111@@@');
+        fcstValue = cacheData.filter((it) => it.category === 'T1H')[0]
+          .fcstValue;
       } else {
         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
         const targetDateTime = new Date(dateTime);
@@ -109,18 +112,15 @@ export class ClosetService {
             message: response.data.response.header.resultMsg,
           };
         }
+
         const apiData = getTemperatureData(
           response.data.response.body?.items?.item,
           targetDateTime,
         );
-
-        fcstValue = apiData.fcstValue;
+        fcstValue = apiData.filter((it) => it.category === 'T1H')[0].fcstValue;
+        const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
         const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(
-          `UltraSrtFcst_${city}_${dateTime}`,
-          fcstValue,
-          milliSeconds,
-        );
+        await this.cacheManager.set(cacheKey, apiData, milliSeconds);
       }
       const closet =
         await this.closetRepository.getRecommendClosetByTemperature(
@@ -180,6 +180,96 @@ export class ClosetService {
     }
   }
 
+  async getClosetByNowTemperature(user: User, address: Address) {
+    try {
+      const dateTime = getCurrentDateTime();
+      console.log('메인', dateTime);
+      const { city, x_code, y_code } = address;
+      const cacheData: any | null = await this.cacheManager.get(
+        `UltraSrtFcst_${city}_${dateTime}`,
+      );
+      let fcstValue: number;
+      let weather: any;
+
+      if (cacheData) {
+        console.log('222@@@쿠키로222@@@');
+        weather = cacheData;
+        fcstValue = cacheData.filter((it) => it.category === 'T1H')[0]
+          .fcstValue;
+      } else {
+        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+        const targetDateTime = new Date(dateTime);
+        const response = await this.axiosInstance.get(
+          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+          {
+            params: {
+              ...getBaseDateTime(
+                {
+                  minutes: 30,
+                  provide: 45,
+                },
+                targetDateTime.getTime(),
+              ),
+              nx: x,
+              ny: y,
+            },
+          },
+        );
+        if (response.data.response.header.resultCode !== '00') {
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: response.data.response.header.resultMsg,
+          };
+        }
+        const apiData = getTemperatureData(
+          response.data.response.body?.items?.item,
+          targetDateTime,
+        );
+        weather = apiData;
+        fcstValue = apiData.filter((it) => it.category === 'T1H')[0].fcstValue;
+        const milliSeconds = calculateMS(2880);
+        await this.cacheManager.set(
+          `UltraSrtFcst_${city}_${dateTime}`,
+          apiData,
+          milliSeconds,
+        );
+      }
+      const closet =
+        await this.closetRepository.getRecommendClosetByTemperature(
+          fcstValue,
+          user,
+        );
+      console.log(closet);
+      return {
+        closet: {
+          ...closet,
+        },
+        weather: {
+          ...weather,
+        },
+      };
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        case MYSQL_ERROR_CODE.SQL_SYNTAX:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
+              detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
   //   // 단일
   //   async getCloset(temperature: number, user: User) {
   //     const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
@@ -213,10 +303,10 @@ function getTemperatureData(items: any[], targetDateTime: Date) {
   const formattedTime = formatTime(targetDateTime.getHours());
   const apiData =
     items?.filter((item) => {
-      return item.fcstTime === formattedTime && item.category === 'T1H'; // Temperature
+      return item.fcstTime === formattedTime;
     }) || [];
 
-  return apiData[0];
+  return apiData;
 }
 
 function filterClosetsByType(closets: any[], type: string) {
