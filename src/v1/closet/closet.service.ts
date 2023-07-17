@@ -87,45 +87,40 @@ export class ClosetService {
       } else {
         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
         const targetDateTime = new Date(dateTime);
-        try {
-          const response = await this.axiosInstance.get(
-            `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-            {
-              params: {
-                ...getBaseDateTime(
-                  {
-                    minutes: 30,
-                    provide: 45,
-                  },
-                  targetDateTime.getTime(),
-                ),
-                nx: x,
-                ny: y,
-              },
+        const response = await this.axiosInstance.get(
+          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+          {
+            params: {
+              ...getBaseDateTime(
+                {
+                  minutes: 30,
+                  provide: 45,
+                },
+                targetDateTime.getTime(),
+              ),
+              nx: x,
+              ny: y,
             },
-          );
-          if (response.data.response.header.resultCode !== '00') {
-            throw response.data.response.header;
-          }
-          const apiData = getTemperatureData(
-            response.data.response.body?.items?.item,
-            targetDateTime,
-          );
-
-          fcstValue = apiData.fcstValue;
-          const milliSeconds = calculateMS(2880);
-          await this.cacheManager.set(
-            `UltraSrtFcst_${city}_${dateTime}`,
-            fcstValue,
-            milliSeconds,
-          );
-        } catch (e) {
-          // 흠...케이스 분류..?
+          },
+        );
+        if (response.data.response.header.resultCode !== '00') {
           throw {
             errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: e.resultMsg,
+            message: response.data.response.header.resultMsg,
           };
         }
+        const apiData = getTemperatureData(
+          response.data.response.body?.items?.item,
+          targetDateTime,
+        );
+
+        fcstValue = apiData.fcstValue;
+        const milliSeconds = calculateMS(2880);
+        await this.cacheManager.set(
+          `UltraSrtFcst_${city}_${dateTime}`,
+          fcstValue,
+          milliSeconds,
+        );
       }
       const closet =
         await this.closetRepository.getRecommendClosetByTemperature(
@@ -139,7 +134,7 @@ export class ClosetService {
       };
     } catch (err) {
       switch (err.errno) {
-        case 503:
+        case HttpStatus.SERVICE_UNAVAILABLE:
           throw new HttpException(
             {
               message: HTTP_ERROR.SERVICE_UNAVAILABLE,
