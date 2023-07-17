@@ -43,17 +43,14 @@ export class Closet extends BaseEntity {
   @OneToMany(() => ClosetClothes, (closetClothes) => closetClothes.closet)
   closet_clothes: ClosetClothes[];
 
-  @OneToMany(
-    () => UserPickWeather,
-    (userPickWeather) => userPickWeather.maximum_temperature_closet,
-  )
-  user_pick_minimum_weather: UserPickWeather[];
+  @OneToMany(() => UserPickWeather, (userPickWeather) => userPickWeather.closet)
+  user_pick_closet_id: UserPickWeather[];
 
-  @OneToMany(
-    () => UserPickWeather,
-    (userPickWeather) => userPickWeather.minimum_temperature_closet,
-  )
-  user_pick_maximum_weather: UserPickWeather[];
+  //   @OneToMany(
+  //     () => UserPickWeather,
+  //     (userPickWeather) => userPickWeather.minimum_temperature_closet,
+  //   )
+  //   user_pick_maximum_weather: UserPickWeather[];
 
   @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.closet)
   userSetStyles: UserSetStyle[];

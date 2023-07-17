@@ -17,9 +17,12 @@ import {
 } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
+import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { calculateMS } from 'src/lib/utils/calculate';
+import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
+import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 
 @Injectable()
 export class ClosetService {
@@ -28,6 +31,7 @@ export class ClosetService {
     private readonly closetRepository: ClosetRepository,
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
+    private readonly userPickWeatherRepository: UserPickWeatherRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
@@ -64,88 +68,145 @@ export class ClosetService {
       }
   }
 
-  async getRecommendCloset(dateTime: string, address: Address, user: User) {
-    const { city, x_code, y_code } = address;
-    const cacheData: any | null = await this.cacheManager.get(
-      `UltraSrtFcst_${city}_${dateTime}`,
-    );
-    let fcstValue: number;
-    if (cacheData) {
-      fcstValue = cacheData;
-    } else {
-      const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-      const targetDateTime = new Date(dateTime);
-
-      const response = await this.axiosInstance.get(
-        `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-        {
-          params: {
-            ...getBaseDateTime(
-              {
-                minutes: 30,
-                provide: 45,
-              },
-              targetDateTime.getTime(),
-            ),
-            nx: x,
-            ny: y,
-          },
-        },
-      );
-      console.log('@@@response@@@', response.data.response);
-      const apiData = getTemperatureData(
-        response.data.response.body?.items?.item,
-        targetDateTime,
-      );
-
-      fcstValue = apiData.fcstValue;
-      const milliSeconds = calculateMS(45);
-      await this.cacheManager.set(
+  // array
+  async getRecommendCloset(
+    getRecommendClosetDto: GetRecommendClosetDto,
+    address: Address,
+    user: User,
+  ) {
+    try {
+      const { dateTime } = getRecommendClosetDto;
+      const { city, x_code, y_code } = address;
+      const cacheData: any | null = await this.cacheManager.get(
         `UltraSrtFcst_${city}_${dateTime}`,
-        fcstValue,
-        milliSeconds,
       );
-    }
-    console.log('fcstValue', fcstValue);
-    // const { fcstValue } = apiData;
-    // const closet = await this.getCloset(fcstValue, user);
-    const closet = await this.closetRepository.getRecommendClosetByTemperature(
-      fcstValue,
-      user,
-    );
+      let fcstValue: number;
 
-    return {
-      ...closet,
-      fcstValue,
-    };
-  }
+      if (cacheData) {
+        fcstValue = cacheData;
+      } else {
+        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+        const targetDateTime = new Date(dateTime);
+        const response = await this.axiosInstance.get(
+          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+          {
+            params: {
+              ...getBaseDateTime(
+                {
+                  minutes: 30,
+                  provide: 45,
+                },
+                targetDateTime.getTime(),
+              ),
+              nx: x,
+              ny: y,
+            },
+          },
+        );
+        if (response.data.response.header.resultCode !== '00') {
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: response.data.response.header.resultMsg,
+          };
+        }
+        const apiData = getTemperatureData(
+          response.data.response.body?.items?.item,
+          targetDateTime,
+        );
 
-  async getCloset(temperature: number, user: User) {
-    const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
-      user,
-    );
+        fcstValue = apiData.fcstValue;
+        const milliSeconds = calculateMS(2880);
+        await this.cacheManager.set(
+          `UltraSrtFcst_${city}_${dateTime}`,
+          fcstValue,
+          milliSeconds,
+        );
+      }
+      const closet =
+        await this.closetRepository.getRecommendClosetByTemperature(
+          fcstValue,
+          user,
+        );
 
-    const sortedStyles = Object.entries(userPickStyle)
-      .filter(([key]) => {
-        return key !== 'id';
-      })
-      .sort((a, b) => b[1] - a[1])
-      .map((it) => {
-        return it[0];
-      });
-
-    const closets = await this.closetRepository.getCloset(temperature);
-    for (const style of sortedStyles) {
-      const filteredClosets = filterClosetsByType(closets, style);
-      if (filteredClosets.length > 0) {
-        const randomIndex = getRandomIndex(filteredClosets.length);
-        return filteredClosets[randomIndex];
+      return {
+        ...closet,
+        fcstValue,
+      };
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        case MYSQL_ERROR_CODE.SQL_SYNTAX:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
+              detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
       }
     }
-
-    // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
-    // return result;
   }
+
+  @Transactional()
+  async setRecommendCloset(
+    setRecommendClosetDto: SetRecommendClosetDto,
+    user: User,
+    address: Address,
+  ) {
+    try {
+      await this.userPickWeatherRepository.setRecommendCloset(
+        setRecommendClosetDto,
+        user,
+        address,
+      );
+    } catch (err) {
+      switch (err.errno) {
+        case MYSQL_ERROR_CODE.DUPLICATED_KEY:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
+              detail: '이미 선택한 체감온도 입니다.',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+      }
+    }
+  }
+
+  //   // 단일
+  //   async getCloset(temperature: number, user: User) {
+  //     const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
+  //       user,
+  //     );
+
+  //     const sortedStyles = Object.entries(userPickStyle)
+  //       .filter(([key]) => {
+  //         return key !== 'id';
+  //       })
+  //       .sort((a, b) => b[1] - a[1])
+  //       .map((it) => {
+  //         return it[0];
+  //       });
+
+  //     const closets = await this.closetRepository.getCloset(temperature);
+  //     for (const style of sortedStyles) {
+  //       const filteredClosets = filterClosetsByType(closets, style);
+  //       if (filteredClosets.length > 0) {
+  //         const randomIndex = getRandomIndex(filteredClosets.length);
+  //         return filteredClosets[randomIndex];
+  //       }
+  //     }
+
+  //     // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
+  //     // return result;
+  //   }
 }
 
 function getTemperatureData(items: any[], targetDateTime: Date) {
