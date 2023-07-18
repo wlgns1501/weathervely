@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -80,25 +81,40 @@ export class UserController {
   }
 
   @Post('address/')
-  @ApiOperation({ summary: '주소 추가' })
+  @ApiOperation({ summary: '주소 설정 추가' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  createAddress(
+  createUserWithAddress(
     @Body(new CreateAddressPipe()) createAddressDto: CreateAddressDto,
     @Req() req: any,
   ) {
-    return this.service.createAddress(createAddressDto, req.user);
+    return this.service.createUserWithAddress(createAddressDto, req.user);
   }
 
   @Patch('address/:addressId')
-  @ApiOperation({ summary: '주소 변경' })
+  @ApiOperation({ summary: '설정된 주소 변경' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  updateAddress(
-    @Param() addressId: number,
+  updateUserWithAddress(
+    @Param('addressId') addressId: number,
     @Req() req: any,
     @Body(new UpdateAddressPipe()) updateAddressDto: UpdateAddressDto,
   ) {
-    return this.service.updateAddress(addressId, req.user, updateAddressDto);
+    return this.service.updateUserWithAddress(
+      addressId,
+      req.user,
+      updateAddressDto,
+    );
+  }
+
+  @Post('address/:addressId')
+  @ApiOperation({ summary: '설정된 주소 삭제' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  deleteUserWithAddress(
+    @Param('addressId') addressId: number,
+    @Req() req: any,
+  ) {
+    return this.service.deleteUserWithAddress(addressId, req.user);
   }
 }

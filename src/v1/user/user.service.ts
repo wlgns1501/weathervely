@@ -60,7 +60,7 @@ export class UserService {
     return address;
   }
 
-  private async createUserWithAddress(user: User, address: Address) {
+  private async createUserAddress(user: User, address: Address) {
     try {
       await this.userAddressRepository.createUserWithAddress(user, address);
     } catch (err) {
@@ -130,7 +130,7 @@ export class UserService {
   }
 
   @Transactional()
-  async createAddress(createAddressDto: CreateAddressDto, user: User) {
+  async createUserWithAddress(createAddressDto: CreateAddressDto, user: User) {
     const userId = user.id;
     const settedAddresses = await this.addressRepository.getUserAddresses(
       userId,
@@ -149,25 +149,26 @@ export class UserService {
 
     const address = await this.checkAddressAndCreateAddress(createAddressDto);
 
-    await this.createUserWithAddress(user, address);
+    await this.createUserAddress(user, address);
 
     return { success: true };
   }
 
   @Transactional()
-  async updateAddress(
+  async updateUserWithAddress(
     addressId: number,
     user: User,
     updateAddressDto: UpdateAddressDto,
   ) {
-    const updateAddress = await this.checkAddressAndCreateAddress(
+    const userId = user.id;
+    const { id: updateAddressId } = await this.checkAddressAndCreateAddress(
       updateAddressDto,
     );
 
     try {
       await this.userAddressRepository.updateUserWithAddress(
-        user,
-        updateAddress,
+        userId,
+        updateAddressId,
         addressId,
       );
     } catch (err) {
@@ -182,5 +183,28 @@ export class UserService {
           );
       }
     }
+
+    return { success: true };
+  }
+
+  @Transactional()
+  async deleteUserWithAddress(addressId: number, user: User) {
+    const userId = user.id;
+
+    const { affected } = await this.userAddressRepository.deleteUserAddress(
+      addressId,
+      userId,
+    );
+
+    if (affected === 0)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.BAD_REQUEST,
+          detail: '이미 삭제된 주소 입니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    return { success: true };
   }
 }
