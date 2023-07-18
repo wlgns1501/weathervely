@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { CustomExceptionFilter } from './lib/utils/exceptionFilter';
 import { initializeTransactionalContext } from 'typeorm-transactional';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   initializeTransactionalContext();
@@ -40,6 +41,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, swaggerCustomOptions);
+
+  app.use(cookieParser('dd'));
 
   await app.listen(3000);
 }
