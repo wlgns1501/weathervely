@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { AddressRepository } from 'src/repositories/address.repository';
 import { AuthRepository } from 'src/repositories/auth.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
+import { UserRepository } from 'src/repositories/user.repository';
 
 @Module({
   controllers: [UserController],
@@ -12,6 +13,7 @@ import { UserAddressRepository } from 'src/repositories/user_address.repository'
     AuthRepository,
     AddressRepository,
     UserAddressRepository,
+    UserRepository,
   ],
 })
 export class UserModule {}
