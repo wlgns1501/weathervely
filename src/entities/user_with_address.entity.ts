@@ -23,10 +23,14 @@ export class UserWithAddress extends BaseEntity {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
   user: User;
+  @Column()
+  user_id: number;
 
   @ManyToOne(() => Address, (address) => address.id)
   @JoinColumn({ name: 'address_id' })
   address: Address;
+  @Column()
+  address_id: number;
 
   @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user)
   user_with_address: UserWithAddress[];

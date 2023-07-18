@@ -11,6 +11,7 @@ import { AddressRepository } from 'src/repositories/address.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
 import { Address } from 'src/entities/address.entity';
 import { SetGenderDto } from './dtos/setGender.dto';
+import { LoginDto } from './dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,14 @@ export class AuthService {
 
   private createAccessToken(nickname: string) {
     return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY);
+  }
+
+  async login(loginDto: LoginDto) {
+    const { nickname } = loginDto;
+
+    const access_token = await this.createAccessToken(nickname);
+
+    return { access_token };
   }
 
   @Transactional()

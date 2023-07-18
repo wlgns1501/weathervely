@@ -19,8 +19,10 @@ import { SetAddressDto } from './dtos/setAddress.dto';
 import { OnboardingGuard } from 'src/guards/onboarding.guard';
 import { SetGenderDto } from './dtos/setGender.dto';
 import { SetGenderPipe } from './dtos/setGender.pipe';
+import { LoginDto } from './dtos/login.dto';
+import { LoginPipe } from './dtos/login.pipe';
 
-const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 8;
+export const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 8;
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,6 +39,23 @@ export class AuthController {
     });
 
     return response;
+  }
+
+  @Post('/login')
+  @ApiOperation({ summary: '임시 토큰 발행' })
+  async login(
+    @Body(new LoginPipe()) loginDto: LoginDto,
+    @Res() response: Response,
+  ) {
+    const { access_token } = await this.service.login(loginDto);
+
+    const settledResponse = this.setAccessToken(
+      response,
+      access_token,
+      ACCESS_TOKEN_EXPIRESIN,
+    );
+
+    settledResponse.send({ success: true });
   }
 
   @Post('/nickName')

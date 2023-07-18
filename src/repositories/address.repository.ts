@@ -24,4 +24,12 @@ export class AddressRepository extends Repository<Address> {
   async createAddress(setAddressDto: SetAddressDto) {
     return await this.create({ ...setAddressDto }).save();
   }
+
+  async getUserAddresses(userId: number) {
+    return await this.createQueryBuilder('a')
+      .leftJoin('user_with_address', 'uwa', 'uwa.address_id = a.id')
+      .leftJoin('user', 'u', 'uwa.user_id = u.id')
+      .where('u.id = :userId', { userId })
+      .getMany();
+  }
 }
