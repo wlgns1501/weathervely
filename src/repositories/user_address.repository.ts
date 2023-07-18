@@ -22,4 +22,15 @@ export class UserAddressRepository extends Repository<UserWithAddress> {
   async createUserWithAddress(user: User, address: Address) {
     return await this.create({ user, address }).save();
   }
+
+  async updateUserWithAddress(
+    user: User,
+    updateAddress: Address,
+    addressId: number,
+  ) {
+    return await this.createQueryBuilder()
+      .update()
+      .set({ address: updateAddress })
+      .where({ user });
+  }
 }

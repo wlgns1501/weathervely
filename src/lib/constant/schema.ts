@@ -10,4 +10,12 @@ export const SCHEMA = {
 
   REQUIRED_NUMBER_ARRAY: (label: string) =>
     Joi.array().items(Joi.number().label(label)).min(1).label(label),
+
+  UPDATE_NOTNULL_NUMBER: (label: string) =>
+    Joi.number().optional().label(label),
+  UPDATE_NULLABLE_NUMBER: (label: string) =>
+    Joi.number().optional().allow('').label(label),
+
+  UPDATE_NOTNULL_STRING: (label: string) =>
+    Joi.string().optional().label(label),
 };

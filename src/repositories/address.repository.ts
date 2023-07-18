@@ -26,7 +26,10 @@ export class AddressRepository extends Repository<Address> {
   }
 
   async getUserAddresses(userId: number) {
-    return await this.createQueryBuilder('a')
+    return await this.createQueryBuilder()
+      .select('a.*')
+      // .addSelect('uwa.address_id')
+      .from('address', 'a')
       .leftJoin('user_with_address', 'uwa', 'uwa.address_id = a.id')
       .leftJoin('user', 'u', 'uwa.user_id = u.id')
       .where('u.id = :userId', { userId })

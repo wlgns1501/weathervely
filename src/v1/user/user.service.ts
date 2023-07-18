@@ -10,6 +10,18 @@ import { UserAddressRepository } from 'src/repositories/user_address.repository'
 import { AddressRepository } from 'src/repositories/address.repository';
 import { CreateAddressDto } from './dtos/createAddress.dto';
 import { Address } from 'src/entities/address.entity';
+import { UpdateAddressDto } from './dtos/updateAddress.dto';
+
+export type ADDRESS_TYPE = {
+  address_name: string;
+  country: string;
+  city: string;
+  gu: string;
+  dong: string;
+  postal_code: string;
+  x_code: number;
+  y_code: number;
+};
 
 @Injectable()
 export class UserService {
@@ -21,6 +33,48 @@ export class UserService {
 
   private createAccessToken(nickname: string) {
     return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY);
+  }
+
+  private async checkAddressAndCreateAddress(addressType: ADDRESS_TYPE) {
+    let address: Address | null;
+
+    address = await this.addressRepository.getAddress(addressType);
+
+    if (!address) {
+      try {
+        address = await this.addressRepository.createAddress(addressType);
+      } catch (err) {
+        switch (err.errno) {
+          case MYSQL_ERROR_CODE.DUPLICATED_KEY:
+            throw new HttpException(
+              {
+                message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
+                detail: '중복된 주소 입니다.',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+        }
+      }
+    }
+
+    return address;
+  }
+
+  private async createUserWithAddress(user: User, address: Address) {
+    try {
+      await this.userAddressRepository.createUserWithAddress(user, address);
+    } catch (err) {
+      switch (err.errno) {
+        case MYSQL_ERROR_CODE.DUPLICATED_KEY:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
+              detail: '중복된 주소를 등록 했습니다.',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+      }
+    }
   }
 
   async getUserNickNameGender(user: User) {
@@ -69,7 +123,8 @@ export class UserService {
   }
 
   async getAddresses(user: User) {
-    const { address } = await this.userAddressRepository.getUserAddress(user);
+    const userId = user.id;
+    const address = await this.addressRepository.getUserAddresses(userId);
 
     return address;
   }
@@ -80,8 +135,6 @@ export class UserService {
     const settedAddresses = await this.addressRepository.getUserAddresses(
       userId,
     );
-
-    console.log(settedAddresses);
 
     if (settedAddresses.length >= 3) {
       throw new HttpException(
@@ -94,29 +147,29 @@ export class UserService {
       );
     }
 
-    let address: Address | null;
+    const address = await this.checkAddressAndCreateAddress(createAddressDto);
 
-    address = await this.addressRepository.getAddress(createAddressDto);
+    await this.createUserWithAddress(user, address);
 
-    if (!address) {
-      try {
-        address = await this.addressRepository.createAddress(createAddressDto);
-      } catch (err) {
-        switch (err.errno) {
-          case MYSQL_ERROR_CODE.DUPLICATED_KEY:
-            throw new HttpException(
-              {
-                message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
-                detail: '중복된 주소 입니다.',
-              },
-              HttpStatus.BAD_REQUEST,
-            );
-        }
-      }
-    }
+    return { success: true };
+  }
+
+  @Transactional()
+  async updateAddress(
+    addressId: number,
+    user: User,
+    updateAddressDto: UpdateAddressDto,
+  ) {
+    const updateAddress = await this.checkAddressAndCreateAddress(
+      updateAddressDto,
+    );
 
     try {
-      await this.userAddressRepository.createUserWithAddress(user, address);
+      await this.userAddressRepository.updateUserWithAddress(
+        user,
+        updateAddress,
+        addressId,
+      );
     } catch (err) {
       switch (err.errno) {
         case MYSQL_ERROR_CODE.DUPLICATED_KEY:
@@ -129,6 +182,5 @@ export class UserService {
           );
       }
     }
-    return { success: true };
   }
 }

@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Req,
@@ -19,6 +20,8 @@ import { Response } from 'express';
 import { ACCESS_TOKEN_EXPIRESIN } from '../auth/auth.controller';
 import { CreateAddressPipe } from './dtos/createAddress.pipe';
 import { CreateAddressDto } from './dtos/createAddress.dto';
+import { UpdateAddressPipe } from './dtos/updateAddress.pipe';
+import { UpdateAddressDto } from './dtos/updateAddress.dto';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -85,5 +88,17 @@ export class UserController {
     @Req() req: any,
   ) {
     return this.service.createAddress(createAddressDto, req.user);
+  }
+
+  @Patch('address/:addressId')
+  @ApiOperation({ summary: '주소 변경' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  updateAddress(
+    @Param() addressId: number,
+    @Req() req: any,
+    @Body(new UpdateAddressPipe()) updateAddressDto: UpdateAddressDto,
+  ) {
+    return this.service.updateAddress(addressId, req.user, updateAddressDto);
   }
 }
