@@ -49,7 +49,6 @@ export class AuthController {
     @Res() response: Response,
   ) {
     const { access_token } = await this.service.login(loginDto);
-    console.log(access_token);
 
     const settledResponse = this.setAccessToken(
       response,
