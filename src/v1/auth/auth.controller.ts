@@ -43,11 +43,13 @@ export class AuthController {
 
   @Post('/login')
   @ApiOperation({ summary: '임시 토큰 발행' })
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body(new LoginPipe()) loginDto: LoginDto,
     @Res() response: Response,
   ) {
     const { access_token } = await this.service.login(loginDto);
+    console.log(access_token);
 
     const settledResponse = this.setAccessToken(
       response,
