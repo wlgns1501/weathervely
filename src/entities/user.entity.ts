@@ -44,6 +44,9 @@ export class User extends BaseEntity {
   })
   gender: string;
 
+  @Column({ name: 'phone_id', comment: '기기 고유번호' })
+  phone_id: string;
+
   @Exclude()
   @Column({ name: 'token', comment: 'token' })
   token: string;

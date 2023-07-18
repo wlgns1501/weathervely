@@ -10,6 +10,7 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
 import { ForecastModule } from './v1/forecast/forecast.module';
 import { ClosetModule } from './v1/closet/closet.module';
 import { TypeModule } from './v1/type/type.module';
+import { UserModule } from './v1/user/user.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TypeModule } from './v1/type/type.module';
     ForecastModule,
     ClosetModule,
     TypeModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
