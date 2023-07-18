@@ -26,6 +26,7 @@ export class AuthGuard implements CanActivate {
     const req: Request = context.switchToHttp().getRequest();
 
     const accessToken = req.get('cookie').split('=')[1];
+    console.log(accessToken);
 
     // const accessToken =
     //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuaWNrbmFtZSI6InRlc3QiLCJpYXQiOjE2ODg0NTc3OTV9.Iey4tb3HBc3EqOM-YHVngArlSybh8PPAOlnSHBKPnX8';
@@ -42,6 +43,8 @@ export class AuthGuard implements CanActivate {
 
     try {
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
+      console.log(verifiedToken);
+
       const { nickname } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
