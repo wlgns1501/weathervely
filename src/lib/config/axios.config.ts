@@ -88,7 +88,7 @@ const onPublicApiRequest = (
       ...config.params,
       serviceKey: process.env.PUBLIC_OPEN_API_SERVICE_KEY,
       pageNo: 1,
-      numOfRows: 500,
+      numOfRows: 1000,
       dataType: 'JSON',
     };
   }
