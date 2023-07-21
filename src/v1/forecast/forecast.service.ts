@@ -90,6 +90,7 @@ export class ForecastService {
   async getVilageFcst() {
     const yesterday = getBaseDateTime({ provide: 1440 });
     const today = getBaseDateTime({ provide: 0 });
+    const tomorrow = getBaseDateTime({ provide: -1440 });
 
     const response = await this.axiosInstance.get(
       `/VilageFcstInfoService_2.0/getVilageFcst`,
@@ -103,28 +104,26 @@ export class ForecastService {
       },
     );
 
-    const data =
-      response.data.response.body?.items?.item
-        .filter(
-          (it) =>
-            it.fcstDate === today.base_date &&
-            (it.category === 'TMN' || // 최고기온
-              it.category === 'TMX'), // 최저기온
-          // it.category === 'SKY' || // 하늘상태
-          // it.category === 'TMP', // 1시간 체감온도
-          // it.category === 'PCP' || // 1시간 강수량
-          // it.category === 'REH' || // 습도
-          // it.category === 'PTY' || // 강수형태
-          // it.category === 'WSD', // 풍속
-        )
-        .map((it) => {
-          return {
-            category: it.category,
-            date: it.fcstDate,
-            time: it.fcstTime,
-            tmp: it.fcstValue,
-          };
-        }) ?? [];
+    const data = response.data.response.body?.items?.item.filter(
+      (it) =>
+        it.fcstDate === today.base_date || it.fcstDate === tomorrow.base_date,
+      // (it.category === 'TMN' || // 최고기온
+      // it.category === 'TMX'), // 최저기온
+      // it.category === 'SKY' || // 하늘상태
+      // it.category === 'TMP', // 1시간 체감온도
+      // it.category === 'PCP' || // 1시간 강수량
+      // it.category === 'REH' || // 습도
+      // it.category === 'PTY' || // 강수형태
+      // it.category === 'WSD', // 풍속
+    );
+    // .map((it) => {
+    //   return {
+    //     category: it.category,
+    //     date: it.fcstDate,
+    //     time: it.fcstTime,
+    //     tmp: it.fcstValue,
+    //   };
+    // }) ?? [];
 
     console.log(data);
 

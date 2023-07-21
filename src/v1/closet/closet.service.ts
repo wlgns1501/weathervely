@@ -75,6 +75,7 @@ export class ClosetService {
     address: Address,
   ) {
     try {
+      // use 초단기예보 API
       const { dateTime } = getRecommendClosetDto;
       console.log('온보딩', dateTime);
       const { city, x_code, y_code } = address;
@@ -180,13 +181,17 @@ export class ClosetService {
     }
   }
 
-  async getClosetByNowTemperature(user: User, address: Address) {
+  async getClosetByNowTemperature(
+    getRecommendClosetDto: GetRecommendClosetDto,
+    user: User,
+    address: Address,
+  ) {
     try {
-      const dateTime = getCurrentDateTime();
-      console.log('메인', dateTime);
+      // use 단기예보 API
+      const { dateTime } = getRecommendClosetDto;
       const { city, x_code, y_code } = address;
       const cacheData: any | null = await this.cacheManager.get(
-        `UltraSrtFcst_${city}_${dateTime}`,
+        `VilageFcst_${city}_${dateTime}`,
       );
       let fcstValue: number;
       let weather: any;
@@ -200,7 +205,7 @@ export class ClosetService {
         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
         const targetDateTime = new Date(dateTime);
         const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+          `/VilageFcstInfoService_2.0/getVilageFcst`,
           {
             params: {
               ...getBaseDateTime(

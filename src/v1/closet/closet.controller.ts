@@ -90,8 +90,14 @@ export class ClosetController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '메인 화면 진입시 - Get' })
-  async getClosetByNowTemperature(@Req() req: any, @Res() res: any) {
+  async getClosetByNowTemperature(
+    @Query(new GetRecommendClosetPipe())
+    getRecommendClosetDto: GetRecommendClosetDto,
+    @Req() req: any,
+    @Res() res: any,
+  ) {
     const data = await this.service.getClosetByNowTemperature(
+      getRecommendClosetDto,
       req.user,
       req.address,
     );

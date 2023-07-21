@@ -37,23 +37,9 @@ export class ClosetRepository extends Repository<Closet> {
     user: User,
   ): Promise<ObjectLiteral[]> {
     const userSettedTypeQuery = await this.createQueryBuilder()
-      .select('t.id, count(t.id) as counting, t.name')
-      .from('user', 'u')
-      .leftJoin('user_set_style', 'uss', 'uss.user_id = u.id')
-      .leftJoin('closet', 'c', 'c.id = uss.closet_id')
-      .leftJoin(
-        (subQuery) =>
-          subQuery
-            .select('t.id, t.name, ct.closet_id as closet_id')
-            .from('type', 't')
-            .leftJoin('closet_type', 'ct', 'ct.type_id = t.id'),
-        't',
-        't.closet_id = c.id',
-      )
-      .where('u.id = :userId')
-      .groupBy('t.id')
-      .orderBy('counting', 'DESC')
-      .addOrderBy('RAND()')
+      .select('t.id, t.name')
+      .from('type', 't')
+      .orderBy('RAND()')
       .limit(1)
       .getQuery();
 
@@ -120,24 +106,24 @@ export class ClosetRepository extends Repository<Closet> {
     return await tempWithClosetQuery.getRawMany();
   }
 
-  async getCloset(temperature: number) {
-    const queryBuilder = await this.createQueryBuilder('closet')
-      .select('closet.id', 'id')
-      .addSelect('closet.name', 'name')
-      .addSelect('closet.site_name', 'siteName')
-      .addSelect('closet.site_url', 'siteUrl')
-      .addSelect('closet.image_url', 'imageUrl')
-      .addSelect('type.name', 'typeName')
-      .innerJoin('closet.closetTypes', 'closetType')
-      .innerJoin('closetType.type', 'type')
-      .where(':temperature BETWEEN closet.min_temp AND closet.max_temp', {
-        temperature,
-      })
-      //   .andWhere('t.name = :type', { type: type })
-      .andWhere('closet.status = :status', { status: 'Active' })
-      .groupBy('closet.id');
-    //   .orderBy('RAND()')
-    //   .limit(1);
-    return queryBuilder.getRawMany();
-  }
+  // async getCloset(temperature: number) {
+  //   const queryBuilder = await this.createQueryBuilder('closet')
+  //     .select('closet.id', 'id')
+  //     .addSelect('closet.name', 'name')
+  //     .addSelect('closet.site_name', 'siteName')
+  //     .addSelect('closet.site_url', 'siteUrl')
+  //     .addSelect('closet.image_url', 'imageUrl')
+  //     .addSelect('type.name', 'typeName')
+  //     .innerJoin('closet.closetTypes', 'closetType')
+  //     .innerJoin('closetType.type', 'type')
+  //     .where(':temperature BETWEEN closet.min_temp AND closet.max_temp', {
+  //       temperature,
+  //     })
+  //     //   .andWhere('t.name = :type', { type: type })
+  //     .andWhere('closet.status = :status', { status: 'Active' })
+  //     .groupBy('closet.id');
+  //   //   .orderBy('RAND()')
+  //   //   .limit(1);
+  //   return queryBuilder.getRawMany();
+  // }
 }
