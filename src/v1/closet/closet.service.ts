@@ -79,19 +79,18 @@ export class ClosetService {
   ) {
     try {
       // use 초단기예보 API
-      const { dateTime } = GetClosetByTemperatureDto;
-      const targetDateTime = new Date(dateTime);
-      const targetDate = getTargetDate(targetDateTime);
-      const targetTime = getTargetTime(targetDateTime);
+      const { dateTime } = GetClosetByTemperatureDto; // 2023-07-22 23:00
+      const targetDateTime = new Date(dateTime); // 2023-07-22 23:00
+      const targetDate = getTargetDate(targetDateTime); // 20230722
+      const targetTime = getTargetTime(targetDateTime); // 2300
       const { city, x_code, y_code } = address;
       const cacheData: any | null = await this.cacheManager.get(
         `UltraSrtFcst_${city}_${dateTime}`,
-      );
+      ); // `UltraSrtFcst_${서울}_${2023-07-22 23:00}`
       let fcstValue: number;
 
       if (cacheData) {
-        fcstValue = cacheData.filter((it) => it.category === 'T1H')[0]
-          .fcstValue;
+        fcstValue = cacheData;
       } else {
         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
 
@@ -105,7 +104,7 @@ export class ClosetService {
                   provide: 45,
                 },
                 targetDateTime.getTime(),
-              ),
+              ), // 2023-07-22 23:00 기준 45분전의 30분 ( 22:30 )
               nx: x,
               ny: y,
             },
@@ -117,15 +116,15 @@ export class ClosetService {
             message: response.data.response.header.resultMsg,
           };
         }
-
-        const apiData = getTargetTemperatureData(
+        fcstValue = getTargetTemperature(
           response.data.response.body?.items?.item,
+          targetDate,
           targetTime,
+          'T1H',
         );
-        fcstValue = apiData.filter((it) => it.category === 'T1H')[0].fcstValue;
         const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
         const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(cacheKey, apiData, milliSeconds);
+        await this.cacheManager.set(cacheKey, fcstValue, milliSeconds);
       }
       const closet = await this.closetRepository.getClosetByTemperature(
         fcstValue,
@@ -207,12 +206,12 @@ export class ClosetService {
       if (cacheData) {
         console.log('캐시로가냐?');
         weather = cacheData;
-        fcstValue = weather.filter(
-          (it) =>
-            it.fcstDate === targetDate &&
-            it.fcstTime === targetTime &&
-            it.category === 'TMP',
-        )[0].fcstValue;
+        fcstValue = getTargetTemperature(
+          weather,
+          targetDate,
+          targetTime,
+          'TMP',
+        );
       } else {
         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
 
@@ -227,40 +226,39 @@ export class ClosetService {
             },
           },
         );
-        console.log(response.data.response.body?.items?.item);
         if (response.data.response.header.resultCode !== '00') {
           throw {
             errno: HttpStatus.SERVICE_UNAVAILABLE,
             message: response.data.response.header.resultMsg,
           };
         }
-
-        const apiData = getTargetTemperatureData(
-          response.data.response.body?.items?.item,
+        weather = response.data.response.body?.items?.item;
+        fcstValue = getTargetTemperature(
+          weather,
+          targetDate,
           targetTime,
+          'TMP',
         );
-        // weather = apiData;
-        // fcstValue = apiData.filter((it) => it.category === 'T1H')[0].fcstValue;
-        // const milliSeconds = calculateMS(2880);
-        // await this.cacheManager.set(
-        //   `UltraSrtFcst_${city}_${dateTime}`,
-        //   apiData,
-        //   milliSeconds,
-        // );
+        const milliSeconds = calculateMS(2880);
+        await this.cacheManager.set(
+          `VilageFcst_${city}_${base_date}_${base_time}`,
+          response.data.response.body?.items?.item,
+          milliSeconds,
+        );
       }
-      //   const closet = await this.closetRepository.getClosetByTemperature(
-      //     fcstValue,
-      //     user,
-      //   );
-      //   console.log(closet);
-      //   return {
-      //     closet: {
-      //       ...closet,
-      //     },
-      //     weather: {
-      //       ...weather,
-      //     },
-      //   };
+      const closet = await this.closetRepository.getClosetByTemperature(
+        fcstValue,
+        user,
+      );
+
+      return {
+        closet: {
+          ...closet,
+        },
+        weather: {
+          ...weather,
+        },
+      };
     } catch (err) {
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:
@@ -313,7 +311,7 @@ export class ClosetService {
 }
 
 function getTargetDate(targetDateTime: Date): string {
-  return `${targetDateTime.getFullYear}${padNumber(
+  return `${targetDateTime.getFullYear()}${padNumber(
     targetDateTime.getMonth() + 1,
   )}${padNumber(targetDateTime.getDate())}`;
 }
@@ -322,14 +320,23 @@ function getTargetTime(targetDateTime: Date): string {
   return formatTime(targetDateTime.getHours());
 }
 
-function getTargetTemperatureData(items: any[], targetTime: string) {
-  //   const formattedTime = formatTime(targetDateTime.getHours());
+function getTargetTemperature(
+  items: any[],
+  targetDate: string,
+  targetTime: string,
+  separator: string,
+) {
   const apiData =
     items?.filter((item) => {
-      return item.fcstTime === targetTime;
+      return (
+        item.fcstDate === targetDate &&
+        item.fcstTime === targetTime &&
+        item.category === separator
+      );
     }) || [];
+  console.log(apiData[0].fcstValue);
 
-  return apiData;
+  return apiData[0].fcstValue;
 }
 
 function filterClosetsByType(closets: any[], type: string) {

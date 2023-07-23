@@ -166,7 +166,7 @@ export function getVilageFcstBaseTime(): any {
     baseYear = prevDate.getFullYear();
     baseMonth = prevDate.getMonth() + 1;
     baseDate = prevDate.getDate();
-  } else if (currentMinute <= 10) {
+  } else {
     baseTimeIndex -= 1;
     if (baseTimeIndex < 0) baseTimeIndex = 0;
   }
