@@ -140,3 +140,44 @@ export function getCurrentDateTime(): string {
 
   return `${year}-${month}-${day} ${hours}:00`;
 }
+
+// 메인 - getVilageFcst의 base_time
+export function getVilageFcstBaseTime(): any {
+  const currentDateTime = new Date();
+  const currentHour = currentDateTime.getHours();
+  const currentMinute = currentDateTime.getMinutes();
+  let baseYear = currentDateTime.getFullYear();
+  let baseMonth = currentDateTime.getMonth() + 1;
+  let baseDate = currentDateTime.getDate();
+  const baseTimes = [
+    '0200',
+    '0500',
+    '0800',
+    '1100',
+    '1400',
+    '1700',
+    '2000',
+    '2300',
+  ];
+  let baseTimeIndex = Math.floor(currentHour / 3);
+  if (currentHour < 2 || (currentHour === 2 && currentMinute <= 10)) {
+    baseTimeIndex = baseTimes.length - 1;
+    const prevDate = new Date(currentDateTime.getTime() - 86400000);
+    baseYear = prevDate.getFullYear();
+    baseMonth = prevDate.getMonth() + 1;
+    baseDate = prevDate.getDate();
+  } else if (currentMinute <= 10) {
+    baseTimeIndex -= 1;
+    if (baseTimeIndex < 0) baseTimeIndex = 0;
+  }
+
+  const baseTime = baseTimes[baseTimeIndex];
+  return {
+    base_date: `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`,
+    base_time: baseTime,
+  };
+}
+
+export function padNumber(num: number): string {
+  return num.toString().padStart(2, '0');
+}

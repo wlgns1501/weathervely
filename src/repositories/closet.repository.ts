@@ -32,7 +32,7 @@ export class ClosetRepository extends Repository<Closet> {
     return await this.createQueryBuilder().where({ id: closet_id }).getOne();
   }
 
-  async getRecommendClosetByTemperature(
+  async getClosetByTemperature(
     temperature: number,
     user: User,
   ): Promise<ObjectLiteral[]> {

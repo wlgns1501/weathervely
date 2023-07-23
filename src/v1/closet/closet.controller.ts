@@ -22,6 +22,8 @@ import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
 import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
 import { SetRecommendClosetPipe } from './dtos/setRecommendCloset.pipe';
+import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
+import { GetClosetByTemperaturePipe } from './dtos/getClosetByTemperature.pipe';
 
 @ApiTags('Closet')
 @Controller('closet')
@@ -50,18 +52,18 @@ export class ClosetController {
     return this.service.pickCloset(pickClosetDto, req.user);
   }
 
-  @Get('getRecommendCloset')
+  @Get('getClosetByTemperature')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '온보딩 - 체감온도 설정 화면 진입시 - Get' })
-  async getRecommendCloset(
-    @Query(new GetRecommendClosetPipe())
-    getRecommendClosetDto: GetRecommendClosetDto,
+  async getClosetByTemperature(
+    @Query(new GetClosetByTemperaturePipe())
+    getClosetByTemperatureDto: GetClosetByTemperatureDto,
     @Req() req: any,
     @Res() res: any,
   ) {
-    const data = await this.service.getRecommendCloset(
-      getRecommendClosetDto,
+    const data = await this.service.getClosetByTemperature(
+      getClosetByTemperatureDto,
       req.user,
       req.address,
     );
@@ -86,17 +88,17 @@ export class ClosetController {
     return res.status(200).json({ msg: 'ok' });
   }
 
-  @Get('getClosetByNowTemperature')
+  @Get('getRecommendCloset')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '메인 화면 진입시 - Get' })
-  async getClosetByNowTemperature(
+  async getRecommendCloset(
     @Query(new GetRecommendClosetPipe())
     getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
     @Res() res: any,
   ) {
-    const data = await this.service.getClosetByNowTemperature(
+    const data = await this.service.getRecommendCloset(
       getRecommendClosetDto,
       req.user,
       req.address,
