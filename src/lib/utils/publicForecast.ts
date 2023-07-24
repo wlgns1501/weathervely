@@ -178,6 +178,15 @@ export function getVilageFcstBaseTime(): any {
   };
 }
 
+export function getYesterdayBaseDate(): string {
+  const currentDateTime = new Date();
+  const prevDate = new Date(currentDateTime.getTime() - 86400000);
+  const baseYear = prevDate.getFullYear();
+  const baseMonth = prevDate.getMonth() + 1;
+  const baseDate = prevDate.getDate();
+  return `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`;
+}
+
 export function padNumber(num: number): string {
   return num.toString().padStart(2, '0');
 }

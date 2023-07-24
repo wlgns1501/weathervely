@@ -17,6 +17,7 @@ import {
   getCurrentDateTime,
   getVilageFcstBaseTime,
   padNumber,
+  getYesterdayBaseDate,
 } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
@@ -79,14 +80,14 @@ export class ClosetService {
   ) {
     try {
       // use 초단기예보 API
-      const { dateTime } = GetClosetByTemperatureDto; // 2023-07-22 23:00
-      const targetDateTime = new Date(dateTime); // 2023-07-22 23:00
-      const targetDate = getTargetDate(targetDateTime); // 20230722
-      const targetTime = getTargetTime(targetDateTime); // 2300
+      const { dateTime } = GetClosetByTemperatureDto;
+      const targetDateTime = new Date(dateTime);
+      const targetDate = getTargetDate(targetDateTime);
+      const targetTime = getTargetTime(targetDateTime);
       const { city, x_code, y_code } = address;
       const cacheData: any | null = await this.cacheManager.get(
         `UltraSrtFcst_${city}_${dateTime}`,
-      ); // `UltraSrtFcst_${서울}_${2023-07-22 23:00}`
+      );
       let fcstValue: number;
 
       if (cacheData) {
@@ -104,7 +105,7 @@ export class ClosetService {
                   provide: 45,
                 },
                 targetDateTime.getTime(),
-              ), // 2023-07-22 23:00 기준 45분전의 30분 ( 22:30 )
+              ),
               nx: x,
               ny: y,
             },
@@ -196,9 +197,11 @@ export class ClosetService {
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
       const { city, x_code, y_code } = address;
-      const { base_date, base_time } = getVilageFcstBaseTime();
+      // const { base_date, base_time } = getVilageFcstBaseTime();
+      const base_date = getYesterdayBaseDate();
+
       const cacheData: any | null = await this.cacheManager.get(
-        `VilageFcst_${city}_${base_date}_${base_time}`,
+        `VilageFcst_${city}_${base_date}`,
       );
       let weather: any;
       let fcstValue: number;
@@ -220,7 +223,7 @@ export class ClosetService {
           {
             params: {
               base_date: base_date,
-              base_time: base_time,
+              base_time: '2300',
               nx: x,
               ny: y,
             },
@@ -241,7 +244,7 @@ export class ClosetService {
         );
         const milliSeconds = calculateMS(2880);
         await this.cacheManager.set(
-          `VilageFcst_${city}_${base_date}_${base_time}`,
+          `VilageFcst_${city}_${base_date}`,
           response.data.response.body?.items?.item,
           milliSeconds,
         );
