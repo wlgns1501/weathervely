@@ -28,6 +28,7 @@ import { calculateMS } from 'src/lib/utils/calculate';
 import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
+import { ForecastService } from '../forecast/forecast.service';
 
 @Injectable()
 export class ClosetService {
@@ -37,6 +38,7 @@ export class ClosetService {
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userPickWeatherRepository: UserPickWeatherRepository,
+    private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
@@ -196,72 +198,19 @@ export class ClosetService {
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-      const { city, x_code, y_code } = address;
-      // const { base_date, base_time } = getVilageFcstBaseTime();
-      const base_date = getYesterdayBaseDate();
 
-      const cacheData: any | null = await this.cacheManager.get(
-        `VilageFcst_${city}_${base_date}`,
+      const weather = await this.forecastService.getVilageForecastInfo(address);
+      const fcstValue = getTargetTemperature(
+        weather,
+        targetDate,
+        targetTime,
+        'TMP',
       );
-      let weather: any;
-      let fcstValue: number;
-
-      if (cacheData) {
-        console.log('캐시로가냐?');
-        weather = cacheData;
-        fcstValue = getTargetTemperature(
-          weather,
-          targetDate,
-          targetTime,
-          'TMP',
-        );
-      } else {
-        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-
-        const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getVilageFcst`,
-          {
-            params: {
-              base_date: base_date,
-              base_time: '2300',
-              nx: x,
-              ny: y,
-            },
-          },
-        );
-        if (response.data.response.header.resultCode !== '00') {
-          throw {
-            errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: response.data.response.header.resultMsg,
-          };
-        }
-        weather = response.data.response.body?.items?.item;
-        fcstValue = getTargetTemperature(
-          weather,
-          targetDate,
-          targetTime,
-          'TMP',
-        );
-        const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(
-          `VilageFcst_${city}_${base_date}`,
-          response.data.response.body?.items?.item,
-          milliSeconds,
-        );
-      }
       const closet = await this.closetRepository.getClosetByTemperature(
         fcstValue,
         user,
       );
-
-      return {
-        closet: {
-          ...closet,
-        },
-        weather: {
-          ...weather,
-        },
-      };
+      return closet;
     } catch (err) {
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:

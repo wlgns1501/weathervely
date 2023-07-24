@@ -8,7 +8,7 @@ import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.re
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
 import { CacheModule } from '@nestjs/cache-manager';
-
+import { ForecastService } from '../forecast/forecast.service';
 @Module({
   imports: [CacheModule.register()],
   providers: [
@@ -19,6 +19,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     UserSetStyleRepository,
     UserPickStyleRepository,
     UserPickWeatherRepository,
+    ForecastService,
   ],
   controllers: [ClosetController],
 })

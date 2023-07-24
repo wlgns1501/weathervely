@@ -60,14 +60,12 @@ export class ClosetController {
     @Query(new GetClosetByTemperaturePipe())
     getClosetByTemperatureDto: GetClosetByTemperatureDto,
     @Req() req: any,
-    @Res() res: any,
   ) {
-    const data = await this.service.getClosetByTemperature(
+    return await this.service.getClosetByTemperature(
       getClosetByTemperatureDto,
       req.user,
       req.address,
     );
-    return res.status(200).json({ msg: 'success', data: data });
   }
 
   @Post('setTemperature')
@@ -96,14 +94,12 @@ export class ClosetController {
     @Query(new GetRecommendClosetPipe())
     getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
-    @Res() res: any,
   ) {
-    const data = await this.service.getRecommendCloset(
+    return await this.service.getRecommendCloset(
       getRecommendClosetDto,
       req.user,
       req.address,
     );
-    return res.status(200).json({ msg: 'success', data: data });
   }
 
   //   @Get('getCloset')
