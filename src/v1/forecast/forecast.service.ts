@@ -19,6 +19,7 @@ import { Cache } from 'cache-manager';
 import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { calculateMS } from 'src/lib/utils/calculate';
+import { GetClosetByTemperatureDto } from '../closet/dtos/getClosetByTemperature.dto';
 @Injectable()
 export class ForecastService {
   private readonly axiosInstance: AxiosInstance;
@@ -27,13 +28,78 @@ export class ForecastService {
     this.axiosInstance = createPublicApiAxiosInstance();
   }
 
+  async getUltraSrtForecastInfo(
+    getClosetByTemperatureDto: GetClosetByTemperatureDto,
+    address: Address,
+  ) {
+    try {
+      const { dateTime } = getClosetByTemperatureDto;
+      const targetDateTime = new Date(dateTime);
+      const { city, x_code, y_code } = address;
+      const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
+      const cacheData: any | null = await this.cacheManager.get(
+        `UltraSrtFcst_${city}_${dateTime}`,
+      );
+      let weather: any;
+      if (cacheData) {
+        weather = cacheData;
+      } else {
+        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+        const response = await this.axiosInstance.get(
+          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+          {
+            params: {
+              ...getBaseDateTime(
+                {
+                  minutes: 30,
+                  provide: 45,
+                },
+                targetDateTime.getTime(),
+              ),
+              nx: x,
+              ny: y,
+            },
+          },
+        );
+        if (response.data.response.header.resultCode !== '00') {
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: response.data.response.header.resultMsg,
+          };
+        }
+        weather = response.data.response.body?.items?.item;
+        const milliSeconds = calculateMS(2880);
+        await this.cacheManager.set(cacheKey, weather, milliSeconds);
+      }
+      return weather;
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
   async getVilageForecastInfo(address: Address) {
     try {
       const { city, x_code, y_code } = address;
       const base_date = getYesterdayBaseDate();
-      const cacheData: any | null = await this.cacheManager.get(
-        `VilageFcst_${city}_${base_date}`,
-      );
+      const cacheKey = `VilageFcst_${city}_${base_date}`;
+      const cacheData: any | null = await this.cacheManager.get(cacheKey);
       let weather: any;
       if (cacheData) {
         weather = cacheData;
@@ -57,12 +123,8 @@ export class ForecastService {
           };
         }
         weather = response.data.response.body?.items?.item;
-        const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(
-          `VilageFcst_${city}_${base_date}`,
-          response.data.response.body?.items?.item,
-          milliSeconds,
-        );
+        const milliSeconds = calculateMS();
+        await this.cacheManager.set(cacheKey, weather, milliSeconds);
       }
       return weather;
     } catch (err) {
@@ -74,6 +136,14 @@ export class ForecastService {
               detail: err.message,
             },
             HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
           );
       }
     }

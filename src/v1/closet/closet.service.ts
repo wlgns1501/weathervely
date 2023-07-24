@@ -76,64 +76,30 @@ export class ClosetService {
   }
 
   async getClosetByTemperature(
-    GetClosetByTemperatureDto: GetClosetByTemperatureDto,
+    getClosetByTemperatureDto: GetClosetByTemperatureDto,
     user: User,
     address: Address,
   ) {
     try {
       // use 초단기예보 API
-      const { dateTime } = GetClosetByTemperatureDto;
+      const { dateTime } = getClosetByTemperatureDto;
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-      const { city, x_code, y_code } = address;
-      const cacheData: any | null = await this.cacheManager.get(
-        `UltraSrtFcst_${city}_${dateTime}`,
+      const weather = await this.forecastService.getUltraSrtForecastInfo(
+        getClosetByTemperatureDto,
+        address,
       );
-      let fcstValue: number;
-
-      if (cacheData) {
-        fcstValue = cacheData;
-      } else {
-        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-
-        const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-          {
-            params: {
-              ...getBaseDateTime(
-                {
-                  minutes: 30,
-                  provide: 45,
-                },
-                targetDateTime.getTime(),
-              ),
-              nx: x,
-              ny: y,
-            },
-          },
-        );
-        if (response.data.response.header.resultCode !== '00') {
-          throw {
-            errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: response.data.response.header.resultMsg,
-          };
-        }
-        fcstValue = getTargetTemperature(
-          response.data.response.body?.items?.item,
-          targetDate,
-          targetTime,
-          'T1H',
-        );
-        const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
-        const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(cacheKey, fcstValue, milliSeconds);
-      }
+      const fcstValue = getTargetTemperature(
+        weather,
+        targetDate,
+        targetTime,
+        'T1H',
+      );
       const closet = await this.closetRepository.getClosetByTemperature(
         fcstValue,
         user,
       );
-
       return {
         ...closet,
         fcstValue,

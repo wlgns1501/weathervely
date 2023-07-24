@@ -1,10 +1,10 @@
 // Cache 유효시간 계산
-export function calculateMS(minutes = 2880): number {
+export function calculateMS(minutes = 1440): number {
   const now = new Date();
   const currentTimestamp = now.getTime();
 
   let targetTime: Date;
-  if (minutes > 1440) {
+  if (minutes >= 1440) {
     const targetDay = Math.round(minutes / 1440);
     targetTime = new Date(
       now.getFullYear(),
