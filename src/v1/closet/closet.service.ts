@@ -172,10 +172,7 @@ export class ClosetService {
         targetTime,
         'TMP',
       );
-      const closet = await this.closetRepository.getClosetByTemperature(
-        fcstValue,
-        user,
-      );
+      const closet = await this.closetRepository.getRecommendCloset(fcstValue);
       return closet;
     } catch (err) {
       switch (err.errno) {

@@ -73,24 +73,7 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-      }
+      throw err;
     }
   }
 
@@ -128,24 +111,46 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
+      throw err;
+    }
+  }
+
+  async getTendayForecastInfo(address: Address) {
+    try {
+      const { city, x_code, y_code } = address;
+
+      const base_date = getYesterdayBaseDate();
+      const cacheKey = `VilageFcst_${city}_${base_date}`;
+      const cacheData: any | null = await this.cacheManager.get(cacheKey);
+      let weather: any;
+      if (cacheData) {
+        weather = cacheData;
+      } else {
+        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+        const response = await this.axiosInstance.get(
+          `/VilageFcstInfoService_2.0/getVilageFcst`,
+          {
+            params: {
+              base_date: base_date,
+              base_time: '2300',
+              nx: x,
+              ny: y,
             },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+          },
+        );
+        if (response.data.response.header.resultCode !== '00') {
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: response.data.response.header.resultMsg,
+          };
+        }
+        weather = response.data.response.body?.items?.item;
+        const milliSeconds = calculateMS();
+        await this.cacheManager.set(cacheKey, weather, milliSeconds);
       }
+      return weather;
+    } catch (err) {
+      throw err;
     }
   }
   // // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )

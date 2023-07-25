@@ -37,6 +37,14 @@ export class ForecastController {
     return await this.forecastService.getVilageForecastInfo(req.address);
   }
 
+  @Get('getTendayForecastInfo')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '10일간 예보 - 3일후 ~ 10일후 날씨 데이터' })
+  async getTendayForecastInfo(@Req() req: any) {
+    return await this.forecastService.getTendayForecastInfo(req.address);
+  }
+
   // // 온보딩 - 체감온도 설정시
   // @Get('getWthrDataList')
   // @HttpCode(HttpStatus.OK)

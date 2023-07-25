@@ -106,6 +106,17 @@ export class ClosetRepository extends Repository<Closet> {
     return await tempWithClosetQuery.getRawMany();
   }
 
+  async getRecommendCloset(temperature: number) {
+    const queryBuilder = await this.createQueryBuilder('closet')
+      .select('closet.*')
+      .innerJoin('closet.closetTemperature', 'ct')
+      .innerJoin('ct.temperatureRange', 'tr')
+      .where(':temperature between tr.min_temp and tr.max_temp', {
+        temperature,
+      });
+    return queryBuilder.getRawMany();
+  }
+
   // async getCloset(temperature: number) {
   //   const queryBuilder = await this.createQueryBuilder('closet')
   //     .select('closet.id', 'id')
