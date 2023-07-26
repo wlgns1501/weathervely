@@ -1,17 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { AxiosInstance } from 'axios';
 import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
-import {
-  dfsXyConvert,
-  getWeatherState,
-  getBaseDateTime,
-  getRoundedHour,
-  formatTime,
-  getCurrentDateTime,
-  getVilageFcstBaseTime,
-  padNumber,
-  getYesterdayBaseDate,
-} from '../../lib/utils/publicForecast';
+import { dfsXyConvert, getBaseDateTime } from '../../lib/utils/publicForecast';
 import { User } from 'src/entities/user.entity';
 import { Address } from 'src/entities/address.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -97,7 +87,7 @@ export class ForecastService {
   async getVilageForecastInfo(address: Address) {
     try {
       const { city, x_code, y_code } = address;
-      const base_date = getYesterdayBaseDate();
+      const base_date = getBaseDateTime({ provide: 1440 }).base_date;
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
       let weather: any;
@@ -152,27 +142,27 @@ export class ForecastService {
   async getTendayForecastInfo(address: Address) {
     try {
       const { city, x_code, y_code } = address;
-
-      const base_date = getYesterdayBaseDate();
-      const cacheKey = `VilageFcst_${city}_${base_date}`;
+      const date = new Date();
+      const base_date =
+        date.getHours() < 18
+          ? getBaseDateTime({ provide: 1440 }).base_date
+          : getBaseDateTime({ provide: 0 }).base_date;
+      const cacheKey = `MidTa_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
       let weather: any;
       if (cacheData) {
         weather = cacheData;
       } else {
-        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
         const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getVilageFcst`,
+          `/MidFcstInfoService/getMidTa`,
           {
             params: {
-              base_date: base_date,
-              base_time: '2300',
-              nx: x,
-              ny: y,
+              regId: '11B10101', // 지점번호 - ( TODO: 매핑 필요 )
+              tmFc: `${base_date}1800`, // 어제 18시 발표 데이터
             },
           },
         );
-        if (response.data.response.header.resultCode !== '00') {
+        if (response?.data?.response?.header?.resultCode !== '00') {
           throw {
             errno: HttpStatus.SERVICE_UNAVAILABLE,
             message: response.data.response.header.resultMsg,

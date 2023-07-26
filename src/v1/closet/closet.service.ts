@@ -8,17 +8,7 @@ import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { AxiosInstance } from 'axios';
 import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
-import {
-  dfsXyConvert,
-  getWeatherState,
-  getBaseDateTime,
-  getRoundedHour,
-  formatTime,
-  getCurrentDateTime,
-  getVilageFcstBaseTime,
-  padNumber,
-  getYesterdayBaseDate,
-} from '../../lib/utils/publicForecast';
+import { formatTime, padNumber } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
 import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';

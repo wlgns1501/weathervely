@@ -66,32 +66,6 @@ export function dfsXyConvert(code: string, v1: number, v2: number): any {
   return rs;
 }
 
-// 상태 가져오는 함수
-export function getWeatherState(ptyCode: number, skyCode: number): string {
-  switch (ptyCode) {
-    case 1:
-      return 'rain';
-    case 2:
-      return 'snow/rain';
-    case 3:
-      return 'snow';
-    case 5:
-      return 'rainDrop';
-    case 6:
-      return 'snowDrift';
-    case 7:
-      return 'rainDrop/snowDrift';
-  }
-  switch (skyCode) {
-    case 1:
-      return 'clear';
-    case 3:
-      return 'partlyClear';
-    case 4:
-      return 'cloudy';
-  }
-}
-
 // 베이스 시간 가져오는 함수
 export function getBaseDateTime(
   { minutes = 0, provide = 40 } = {},
@@ -106,87 +80,97 @@ export function getBaseDateTime(
   };
 }
 
-export function getRoundedHour(): string {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  const roundedMinutes = Math.round(minutes / 45) * 45;
-  const roundedTime = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    roundedMinutes,
-  );
-  const formattedTime =
-    roundedTime.getHours().toString().padStart(2, '0') + '00';
-  return formattedTime;
-}
-
 export function formatTime(hours: number): string {
   const paddedHours = hours.toString().padStart(2, '0');
   const formattedTime = `${paddedHours}00`;
   return formattedTime;
 }
 
-// 현재시간 : ex) 2023-07-16 23:00
-export function getCurrentDateTime(): string {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  // const minutes = String(now.getMinutes()).padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hours}:00`;
-}
-
-// 메인 - getVilageFcst의 base_time
-export function getVilageFcstBaseTime(): any {
-  const currentDateTime = new Date();
-  const currentHour = currentDateTime.getHours();
-  const currentMinute = currentDateTime.getMinutes();
-  let baseYear = currentDateTime.getFullYear();
-  let baseMonth = currentDateTime.getMonth() + 1;
-  let baseDate = currentDateTime.getDate();
-  const baseTimes = [
-    '0200',
-    '0500',
-    '0800',
-    '1100',
-    '1400',
-    '1700',
-    '2000',
-    '2300',
-  ];
-  let baseTimeIndex = Math.floor(currentHour / 3);
-  if (currentHour < 2 || (currentHour === 2 && currentMinute <= 10)) {
-    baseTimeIndex = baseTimes.length - 1;
-    const prevDate = new Date(currentDateTime.getTime() - 86400000);
-    baseYear = prevDate.getFullYear();
-    baseMonth = prevDate.getMonth() + 1;
-    baseDate = prevDate.getDate();
-  } else {
-    baseTimeIndex -= 1;
-    if (baseTimeIndex < 0) baseTimeIndex = 0;
-  }
-
-  const baseTime = baseTimes[baseTimeIndex];
-  return {
-    base_date: `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`,
-    base_time: baseTime,
-  };
-}
-
-export function getYesterdayBaseDate(): string {
-  const currentDateTime = new Date();
-  const prevDate = new Date(currentDateTime.getTime() - 86400000);
-  const baseYear = prevDate.getFullYear();
-  const baseMonth = prevDate.getMonth() + 1;
-  const baseDate = prevDate.getDate();
-  return `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`;
-}
-
 export function padNumber(num: number): string {
   return num.toString().padStart(2, '0');
 }
+
+// // 상태 가져오는 함수
+// export function getWeatherState(ptyCode: number, skyCode: number): string {
+//   switch (ptyCode) {
+//     case 1:
+//       return 'rain';
+//     case 2:
+//       return 'snow/rain';
+//     case 3:
+//       return 'snow';
+//     case 5:
+//       return 'rainDrop';
+//     case 6:
+//       return 'snowDrift';
+//     case 7:
+//       return 'rainDrop/snowDrift';
+//   }
+//   switch (skyCode) {
+//     case 1:
+//       return 'clear';
+//     case 3:
+//       return 'partlyClear';
+//     case 4:
+//       return 'cloudy';
+//   }
+// }
+
+// // 현재시간 : ex) 2023-07-16 23:00
+// export function getCurrentDateTime(): string {
+//   const now = new Date();
+
+//   const year = now.getFullYear();
+//   const month = String(now.getMonth() + 1).padStart(2, '0');
+//   const day = String(now.getDate()).padStart(2, '0');
+//   const hours = String(now.getHours()).padStart(2, '0');
+//   // const minutes = String(now.getMinutes()).padStart(2, '0');
+
+//   return `${year}-${month}-${day} ${hours}:00`;
+// }
+
+// // 메인 - getVilageFcst의 base_time
+// export function getVilageFcstBaseTime(): any {
+//   const currentDateTime = new Date();
+//   const currentHour = currentDateTime.getHours();
+//   const currentMinute = currentDateTime.getMinutes();
+//   let baseYear = currentDateTime.getFullYear();
+//   let baseMonth = currentDateTime.getMonth() + 1;
+//   let baseDate = currentDateTime.getDate();
+//   const baseTimes = [
+//     '0200',
+//     '0500',
+//     '0800',
+//     '1100',
+//     '1400',
+//     '1700',
+//     '2000',
+//     '2300',
+//   ];
+//   let baseTimeIndex = Math.floor(currentHour / 3);
+//   if (currentHour < 2 || (currentHour === 2 && currentMinute <= 10)) {
+//     baseTimeIndex = baseTimes.length - 1;
+//     const prevDate = new Date(currentDateTime.getTime() - 86400000);
+//     baseYear = prevDate.getFullYear();
+//     baseMonth = prevDate.getMonth() + 1;
+//     baseDate = prevDate.getDate();
+//   } else {
+//     baseTimeIndex -= 1;
+//     if (baseTimeIndex < 0) baseTimeIndex = 0;
+//   }
+
+//   const baseTime = baseTimes[baseTimeIndex];
+//   return {
+//     base_date: `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`,
+//     base_time: baseTime,
+//   };
+// }
+
+// export function getYesterdayBaseDate(): string {
+//   const currentDateTime = new Date();
+//   const prevDate = new Date(currentDateTime.getTime() - 86400000);
+//   const baseYear = prevDate.getFullYear();
+//   const baseMonth = prevDate.getMonth() + 1;
+//   const baseDate = prevDate.getDate();
+//   return `${baseYear}${padNumber(baseMonth)}${padNumber(baseDate)}`;
+// }
