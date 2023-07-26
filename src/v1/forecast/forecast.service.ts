@@ -229,7 +229,6 @@ export class ForecastService {
         const milliSeconds = calculateMS();
         await this.cacheManager.set(cacheKey, temperatureInfo, milliSeconds);
       }
-      console.log(temperatureInfo);
       return temperatureInfo;
     } catch (err) {
       throw err;
