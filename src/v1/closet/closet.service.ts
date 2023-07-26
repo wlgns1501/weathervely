@@ -86,7 +86,7 @@ export class ClosetService {
         user,
       );
       return {
-        ...closet,
+        closet,
         fcstValue,
       };
     } catch (err) {
