@@ -6,8 +6,6 @@ import { PickClosetDto } from './dtos/pickCloset.dto';
 import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
 import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
-import { AxiosInstance } from 'axios';
-import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
 import { formatTime, padNumber } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
@@ -22,7 +20,6 @@ import { ForecastService } from '../forecast/forecast.service';
 
 @Injectable()
 export class ClosetService {
-  private readonly axiosInstance: AxiosInstance;
   constructor(
     private readonly closetRepository: ClosetRepository,
     private readonly userSetStyleRepository: UserSetStyleRepository,
@@ -30,9 +27,7 @@ export class ClosetService {
     private readonly userPickWeatherRepository: UserPickWeatherRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {
-    this.axiosInstance = createPublicApiAxiosInstance();
-  }
+  ) {}
 
   async getClosetList() {
     const closets = await this.closetRepository.getClosetList();
@@ -76,7 +71,7 @@ export class ClosetService {
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-      const weather = await this.forecastService.getUltraSrtForecastInfo(
+      const weather = await this.forecastService.getUltraSrtFcst(
         getClosetByTemperatureDto,
         address,
       );
@@ -171,7 +166,7 @@ export class ClosetService {
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
 
-      const weather = await this.forecastService.getVilageForecastInfo(address);
+      const weather = await this.forecastService.getVilageFcst(address);
       const fcstValue = getTargetTemperature(
         weather,
         targetDate,
@@ -209,34 +204,6 @@ export class ClosetService {
       }
     }
   }
-
-  //   // 단일
-  //   async getCloset(temperature: number, user: User) {
-  //     const userPickStyle = await this.userPickStyleRepository.getOrderStyle(
-  //       user,
-  //     );
-
-  //     const sortedStyles = Object.entries(userPickStyle)
-  //       .filter(([key]) => {
-  //         return key !== 'id';
-  //       })
-  //       .sort((a, b) => b[1] - a[1])
-  //       .map((it) => {
-  //         return it[0];
-  //       });
-
-  //     const closets = await this.closetRepository.getCloset(temperature);
-  //     for (const style of sortedStyles) {
-  //       const filteredClosets = filterClosetsByType(closets, style);
-  //       if (filteredClosets.length > 0) {
-  //         const randomIndex = getRandomIndex(filteredClosets.length);
-  //         return filteredClosets[randomIndex];
-  //       }
-  //     }
-
-  //     // 예외 1. 온도를 포함하는 옷이 없을때 - 정책 수립 필요 - 데이터적으로 이런 예외가 발생하지않게 하겠다고 답받음
-  //     // return result;
-  //   }
 }
 
 function getTargetDate(targetDateTime: Date): string {

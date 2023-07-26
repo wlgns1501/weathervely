@@ -23,6 +23,95 @@ export class ForecastService {
     address: Address,
   ) {
     try {
+      const weather = await this.getUltraSrtFcst(
+        getClosetByTemperatureDto,
+        address,
+      );
+      return weather;
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
+  async getVilageForecastInfo(address: Address) {
+    try {
+      const weather = await this.getVilageFcst(address);
+      return weather;
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
+  async getTendayForecastInfo(address: Address) {
+    try {
+      const temperatureInfo = await this.getMidTa(address);
+      const weatherInfo = await this.getMidLandFcst(address);
+      return {
+        temperature: temperatureInfo,
+        weather: weatherInfo,
+      };
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
+  // 조회시간 기준 상세날씨
+  async getUltraSrtFcst(
+    getClosetByTemperatureDto: GetClosetByTemperatureDto,
+    address: Address,
+  ) {
+    try {
       const { dateTime } = getClosetByTemperatureDto;
       const targetDateTime = new Date(dateTime);
       const { city, x_code, y_code } = address;
@@ -63,28 +152,12 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-      }
+      throw err;
     }
   }
 
-  async getVilageForecastInfo(address: Address) {
+  // 오늘 ~ 3일후 날씨
+  async getVilageFcst(address: Address) {
     try {
       const { city, x_code, y_code } = address;
       const base_date = getBaseDateTime({ provide: 1440 }).base_date;
@@ -118,30 +191,14 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-      }
+      throw err;
     }
   }
 
-  async getTendayForecastInfo(address: Address) {
+  // 4일후 ~ 10일후 기온 예보
+  private async getMidTa(address: Address) {
     try {
-      const { city, x_code, y_code } = address;
+      const { city } = address;
       const date = new Date();
       const base_date =
         date.getHours() < 18
@@ -149,9 +206,9 @@ export class ForecastService {
           : getBaseDateTime({ provide: 0 }).base_date;
       const cacheKey = `MidTa_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
-      let weather: any;
+      let temperatureInfo: any;
       if (cacheData) {
-        weather = cacheData;
+        temperatureInfo = cacheData;
       } else {
         const response = await this.axiosInstance.get(
           `/MidFcstInfoService/getMidTa`,
@@ -168,30 +225,54 @@ export class ForecastService {
             message: response.data.response.header.resultMsg,
           };
         }
-        weather = response.data.response.body?.items?.item;
+        temperatureInfo = response.data.response.body?.items?.item;
         const milliSeconds = calculateMS();
-        await this.cacheManager.set(cacheKey, weather, milliSeconds);
+        await this.cacheManager.set(cacheKey, temperatureInfo, milliSeconds);
       }
-      return weather;
+      console.log(temperatureInfo);
+      return temperatureInfo;
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
+      throw err;
+    }
+  }
+
+  // 4일후 ~ 10일후 날씨 예보
+  private async getMidLandFcst(address: Address) {
+    try {
+      const { city } = address;
+      const date = new Date();
+      const base_date =
+        date.getHours() < 18
+          ? getBaseDateTime({ provide: 1440 }).base_date
+          : getBaseDateTime({ provide: 0 }).base_date;
+      const cacheKey = `MidLandFcst_${city}_${base_date}`;
+      const cacheData: any | null = await this.cacheManager.get(cacheKey);
+      let weatherInfo: any;
+      if (cacheData) {
+        weatherInfo = cacheData;
+      } else {
+        const response = await this.axiosInstance.get(
+          `/MidFcstInfoService/getMidLandFcst`,
+          {
+            params: {
+              regId: '11B00000', // 지점번호 - ( TODO: 매핑 필요 )
+              tmFc: `${base_date}1800`, // 어제 18시 발표 데이터
             },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+          },
+        );
+        if (response?.data?.response?.header?.resultCode !== '00') {
+          throw {
+            errno: HttpStatus.SERVICE_UNAVAILABLE,
+            message: response.data.response.header.resultMsg,
+          };
+        }
+        weatherInfo = response.data.response.body?.items?.item;
+        const milliSeconds = calculateMS();
+        await this.cacheManager.set(cacheKey, weatherInfo, milliSeconds);
       }
+      return weatherInfo;
+    } catch (err) {
+      throw err;
     }
   }
   // // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )
