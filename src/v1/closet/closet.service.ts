@@ -8,13 +8,7 @@ import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { AxiosInstance } from 'axios';
 import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
-import {
-  dfsXyConvert,
-  getWeatherState,
-  getBaseDateTime,
-  getRoundedHour,
-  formatTime,
-} from '../../lib/utils/publicForecast';
+import { formatTime, padNumber } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
 import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
@@ -23,6 +17,8 @@ import { Cache } from 'cache-manager';
 import { calculateMS } from 'src/lib/utils/calculate';
 import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
+import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
+import { ForecastService } from '../forecast/forecast.service';
 
 @Injectable()
 export class ClosetService {
@@ -32,6 +28,7 @@ export class ClosetService {
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userPickWeatherRepository: UserPickWeatherRepository,
+    private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.axiosInstance = createPublicApiAxiosInstance();
@@ -68,66 +65,31 @@ export class ClosetService {
       }
   }
 
-  // array
-  async getRecommendCloset(
-    getRecommendClosetDto: GetRecommendClosetDto,
-    address: Address,
+  async getClosetByTemperature(
+    getClosetByTemperatureDto: GetClosetByTemperatureDto,
     user: User,
+    address: Address,
   ) {
     try {
-      const { dateTime } = getRecommendClosetDto;
-      const { city, x_code, y_code } = address;
-      const cacheData: any | null = await this.cacheManager.get(
-        `UltraSrtFcst_${city}_${dateTime}`,
+      // use 초단기예보 API
+      const { dateTime } = getClosetByTemperatureDto;
+      const targetDateTime = new Date(dateTime);
+      const targetDate = getTargetDate(targetDateTime);
+      const targetTime = getTargetTime(targetDateTime);
+      const weather = await this.forecastService.getUltraSrtForecastInfo(
+        getClosetByTemperatureDto,
+        address,
       );
-      let fcstValue: number;
-
-      if (cacheData) {
-        fcstValue = cacheData;
-      } else {
-        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-        const targetDateTime = new Date(dateTime);
-        const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-          {
-            params: {
-              ...getBaseDateTime(
-                {
-                  minutes: 30,
-                  provide: 45,
-                },
-                targetDateTime.getTime(),
-              ),
-              nx: x,
-              ny: y,
-            },
-          },
-        );
-        if (response.data.response.header.resultCode !== '00') {
-          throw {
-            errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: response.data.response.header.resultMsg,
-          };
-        }
-        const apiData = getTemperatureData(
-          response.data.response.body?.items?.item,
-          targetDateTime,
-        );
-
-        fcstValue = apiData.fcstValue;
-        const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(
-          `UltraSrtFcst_${city}_${dateTime}`,
-          fcstValue,
-          milliSeconds,
-        );
-      }
-      const closet =
-        await this.closetRepository.getRecommendClosetByTemperature(
-          fcstValue,
-          user,
-        );
-
+      const fcstValue = getTargetTemperature(
+        weather,
+        targetDate,
+        targetTime,
+        'T1H',
+      );
+      const closet = await this.closetRepository.getClosetByTemperature(
+        fcstValue,
+        user,
+      );
       return {
         ...closet,
         fcstValue,
@@ -147,6 +109,14 @@ export class ClosetService {
             {
               message: HTTP_ERROR.SQL_SYNTAX_ERROR,
               detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
             },
             HttpStatus.INTERNAL_SERVER_ERROR,
           );
@@ -175,6 +145,66 @@ export class ClosetService {
               detail: '이미 선택한 체감온도 입니다.',
             },
             HttpStatus.BAD_REQUEST,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
+    }
+  }
+
+  // MAIN
+  async getRecommendCloset(
+    getRecommendClosetDto: GetRecommendClosetDto,
+    user: User,
+    address: Address,
+  ) {
+    try {
+      // use 단기예보 API
+      const { dateTime } = getRecommendClosetDto;
+      const targetDateTime = new Date(dateTime);
+      const targetDate = getTargetDate(targetDateTime);
+      const targetTime = getTargetTime(targetDateTime);
+
+      const weather = await this.forecastService.getVilageForecastInfo(address);
+      const fcstValue = getTargetTemperature(
+        weather,
+        targetDate,
+        targetTime,
+        'TMP',
+      );
+      const closet = await this.closetRepository.getRecommendCloset(fcstValue);
+      return closet;
+    } catch (err) {
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        case MYSQL_ERROR_CODE.SQL_SYNTAX:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
+              detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
           );
       }
     }
@@ -209,14 +239,33 @@ export class ClosetService {
   //   }
 }
 
-function getTemperatureData(items: any[], targetDateTime: Date) {
-  const formattedTime = formatTime(targetDateTime.getHours());
+function getTargetDate(targetDateTime: Date): string {
+  return `${targetDateTime.getFullYear()}${padNumber(
+    targetDateTime.getMonth() + 1,
+  )}${padNumber(targetDateTime.getDate())}`;
+}
+
+function getTargetTime(targetDateTime: Date): string {
+  return formatTime(targetDateTime.getHours());
+}
+
+function getTargetTemperature(
+  items: any[],
+  targetDate: string,
+  targetTime: string,
+  separator: string,
+) {
   const apiData =
     items?.filter((item) => {
-      return item.fcstTime === formattedTime && item.category === 'T1H'; // Temperature
+      return (
+        item.fcstDate === targetDate &&
+        item.fcstTime === targetTime &&
+        item.category === separator
+      );
     }) || [];
+  console.log(apiData[0].fcstValue);
 
-  return apiData[0];
+  return apiData[0].fcstValue;
 }
 
 function filterClosetsByType(closets: any[], type: string) {
