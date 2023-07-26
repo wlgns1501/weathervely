@@ -73,7 +73,24 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      throw err;
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
     }
   }
 
@@ -111,7 +128,24 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      throw err;
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
     }
   }
 
@@ -150,7 +184,24 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      throw err;
+      switch (err.errno) {
+        case HttpStatus.SERVICE_UNAVAILABLE:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: err.message,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+      }
     }
   }
   // // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )

@@ -122,6 +122,14 @@ export class ClosetService {
             },
             HttpStatus.INTERNAL_SERVER_ERROR,
           );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
       }
     }
   }
@@ -147,6 +155,14 @@ export class ClosetService {
               detail: '이미 선택한 체감온도 입니다.',
             },
             HttpStatus.BAD_REQUEST,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
           );
       }
     }
@@ -189,6 +205,14 @@ export class ClosetService {
             {
               message: HTTP_ERROR.SQL_SYNTAX_ERROR,
               detail: 'SERVER ERROR!',
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        default:
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
             },
             HttpStatus.INTERNAL_SERVER_ERROR,
           );
