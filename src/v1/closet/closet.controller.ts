@@ -101,17 +101,4 @@ export class ClosetController {
       req.address,
     );
   }
-
-  //   @Get('getCloset')
-  //   @HttpCode(HttpStatus.OK)
-  //   @UseGuards(AuthGuard)
-  //   @ApiOperation({ summary: '온보딩 - 체감온도 설정 - 스와이프 - Get' })
-  //   @ApiQuery({
-  //     name: 'temperature',
-  //     required: true,
-  //     description: 'temperature입니다.',
-  //   })
-  //   async getCloset(@Query('temperature') temperature: number, @Req() req?: any) {
-  //     return this.service.getCloset(temperature, req.user);
-  //   }
 }
