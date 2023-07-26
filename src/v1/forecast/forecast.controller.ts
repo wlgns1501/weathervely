@@ -15,6 +15,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { calculateMS } from '../../lib/utils/calculate';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { Response } from 'express';
 
 // 온보딩 : 위치 기준 어제 , 그저께 최저온도 , 최고온도 ( getWthrDataList() )
 // 메인 : 현재온도 , 바람 , 날씨 -> 단기예보 -> 초단기예보 ( getUltraSrtFcst() )
@@ -24,25 +25,24 @@ import { AuthGuard } from 'src/guards/auth.guard';
 @ApiTags('Forcast')
 @Controller('forecast')
 export class ForecastController {
-  constructor(
-    private readonly forecastService: ForecastService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  constructor(private readonly forecastService: ForecastService) {}
 
   @Get('getVilageForecastInfo')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '메인 화면 - 당일 ~ 3일후 날씨 데이터' })
-  async getVilageForecastInfo(@Req() req: any) {
-    return await this.forecastService.getVilageForecastInfo(req.address);
+  async getVilageForecastInfo(@Req() req: any, @Res() res: Response) {
+    const data = await this.forecastService.getVilageForecastInfo(req.address);
+    return res.send({ status: 200, data: { list: data } });
   }
 
   @Get('getTendayForecastInfo')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: '10일간 예보 - 3일후 ~ 10일후 날씨 데이터' })
-  async getTendayForecastInfo(@Req() req: any) {
-    return await this.forecastService.getTendayForecastInfo(req.address);
+  async getTendayForecastInfo(@Req() req: any, @Res() res: Response) {
+    const data = await this.forecastService.getTendayForecastInfo(req.address);
+    return res.send({ status: 200, data: { list: data } });
   }
 
   // // 온보딩 - 체감온도 설정시

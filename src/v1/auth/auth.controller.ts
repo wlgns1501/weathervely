@@ -56,7 +56,7 @@ export class AuthController {
       ACCESS_TOKEN_EXPIRESIN,
     );
 
-    settledResponse.send({ success: true });
+    settledResponse.send({ status: 200 });
   }
 
   @Post('/nickName')
@@ -74,7 +74,7 @@ export class AuthController {
       ACCESS_TOKEN_EXPIRESIN,
     );
 
-    settledResponse.send({ success: true });
+    settledResponse.send({ status: 200 });
   }
 
   @Post('/address')
@@ -84,8 +84,10 @@ export class AuthController {
   setAddress(
     @Body(new SetAddressPipe()) setAddressDto: SetAddressDto,
     @Req() req: any,
+    @Res() res: Response,
   ) {
-    return this.service.setAddress(setAddressDto, req.user);
+    const data = this.service.setAddress(setAddressDto, req.user);
+    return res.send({ status: 200, data: { data: data } });
   }
 
   @Post('/gender')
@@ -95,7 +97,9 @@ export class AuthController {
   setGender(
     @Body(new SetGenderPipe()) setGenderDto: SetGenderDto,
     @Req() req: any,
+    @Res() res: Response,
   ) {
-    return this.service.setGender(setGenderDto, req.user);
+    const data = this.service.setGender(setGenderDto, req.user);
+    return res.send({ status: 200, data: { data: data } });
   }
 }

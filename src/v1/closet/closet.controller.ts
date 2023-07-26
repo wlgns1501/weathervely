@@ -24,21 +24,20 @@ import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
 import { SetRecommendClosetPipe } from './dtos/setRecommendCloset.pipe';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { GetClosetByTemperaturePipe } from './dtos/getClosetByTemperature.pipe';
+import { Response } from 'express';
 
 @ApiTags('Closet')
 @Controller('closet')
 export class ClosetController {
-  constructor(
-    private service: ClosetService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  constructor(private service: ClosetService) {}
 
   @Get('')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '스타일 리스트' })
   @UseGuards(AuthGuard)
-  getClosetList() {
-    return this.service.getClosetList();
+  getClosetList(@Res() res: Response) {
+    const data = this.service.getClosetList();
+    return res.send({ status: 200, data: { list: data } });
   }
 
   @Post('/pick')
@@ -48,8 +47,10 @@ export class ClosetController {
   pickCloset(
     @Body(new PickClosetPipe()) pickClosetDto: PickClosetDto,
     @Req() req: any,
+    @Res() res: Response,
   ) {
-    return this.service.pickCloset(pickClosetDto, req.user);
+    this.service.pickCloset(pickClosetDto, req.user);
+    return res.send({ status: 200 });
   }
 
   @Get('getClosetByTemperature')
@@ -60,30 +61,32 @@ export class ClosetController {
     @Query(new GetClosetByTemperaturePipe())
     getClosetByTemperatureDto: GetClosetByTemperatureDto,
     @Req() req: any,
+    @Res() res: Response,
   ) {
-    return await this.service.getClosetByTemperature(
+    const data = await this.service.getClosetByTemperature(
       getClosetByTemperatureDto,
       req.user,
       req.address,
     );
+    return res.send({ status: 200, data: { list: data } });
   }
 
   @Post('setTemperature')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: '체감온도 설정' })
   @UseGuards(AuthGuard)
   async setTemperature(
     @Body(new SetRecommendClosetPipe())
     setRecommendClosetDto: SetRecommendClosetDto,
     @Req() req: any,
-    @Res() res: any,
+    @Res() res: Response,
   ) {
     await this.service.setRecommendCloset(
       setRecommendClosetDto,
       req.user,
       req.address,
     );
-    return res.status(200).json({ msg: 'ok' });
+    return res.send({ status: 200 });
   }
 
   @Get('getRecommendCloset')
@@ -94,11 +97,13 @@ export class ClosetController {
     @Query(new GetRecommendClosetPipe())
     getRecommendClosetDto: GetRecommendClosetDto,
     @Req() req: any,
+    @Res() res: Response,
   ) {
-    return await this.service.getRecommendCloset(
+    const data = await this.service.getRecommendCloset(
       getRecommendClosetDto,
       req.user,
       req.address,
     );
+    return res.send({ status: 200, data: { list: data } });
   }
 }
