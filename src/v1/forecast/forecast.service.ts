@@ -156,11 +156,11 @@ export class ForecastService {
     }
   }
 
-  // 오늘 ~ 3일후 날씨
+  // 어제 ~ 2일후 날씨
   async getVilageFcst(address: Address) {
     try {
       const { city, x_code, y_code } = address;
-      const base_date = getBaseDateTime({ provide: 1440 }).base_date;
+      const base_date = getBaseDateTime({ provide: 2880 }).base_date;
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
       let weather: any;
@@ -195,7 +195,7 @@ export class ForecastService {
     }
   }
 
-  // 4일후 ~ 10일후 기온 예보
+  // 3일후 ~ 10일후 기온 예보
   private async getMidTa(address: Address) {
     try {
       const { city } = address;
@@ -235,7 +235,7 @@ export class ForecastService {
     }
   }
 
-  // 4일후 ~ 10일후 날씨 예보
+  // 3일후 ~ 10일후 날씨 예보
   private async getMidLandFcst(address: Address) {
     try {
       const { city } = address;
