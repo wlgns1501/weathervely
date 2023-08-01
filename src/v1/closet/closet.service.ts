@@ -12,7 +12,7 @@ import { UserPickStyleRepository } from 'src/repositories/user_pick_style.reposi
 import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { calculateMS } from 'src/lib/utils/calculate';
+import { getCalculateSensoryTemperature } from 'src/lib/utils/calculate';
 import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
@@ -75,18 +75,13 @@ export class ClosetService {
         getClosetByTemperatureDto,
         address,
       );
-      const fcstValue = getTargetTemperature(
-        weather,
-        targetDate,
-        targetTime,
-        'T1H',
-      );
+      const fcstValue = getTargetValue(weather, targetDate, targetTime, 'T1H');
       const closet = await this.closetRepository.getClosetByTemperature(
         fcstValue,
         user,
       );
       return {
-        ...closet,
+        closet,
         fcstValue,
       };
     } catch (err) {
@@ -167,13 +162,33 @@ export class ClosetService {
       const targetTime = getTargetTime(targetDateTime);
 
       const weather = await this.forecastService.getVilageFcst(address);
-      const fcstValue = getTargetTemperature(
+      console.log(weather);
+      const temperatureValue = getTargetValue(
         weather,
         targetDate,
         targetTime,
         'TMP',
       );
-      const closet = await this.closetRepository.getRecommendCloset(fcstValue);
+      const windValue = getTargetValue(weather, targetDate, targetTime, 'WSD');
+      const humidityValue = getTargetValue(
+        weather,
+        targetDate,
+        targetTime,
+        'REH',
+      );
+
+      const sonsoryTemperature = getCalculateSensoryTemperature(
+        temperatureValue,
+        windValue,
+        humidityValue,
+      );
+      console.log('windValue', windValue);
+      console.log('humidityValue', humidityValue);
+      console.log('temperatureValue', temperatureValue);
+      console.log('sonsoryTemperature', sonsoryTemperature);
+      const closet = await this.closetRepository.getRecommendCloset(
+        temperatureValue,
+      );
       return closet;
     } catch (err) {
       switch (err.errno) {
@@ -216,7 +231,7 @@ function getTargetTime(targetDateTime: Date): string {
   return formatTime(targetDateTime.getHours());
 }
 
-function getTargetTemperature(
+function getTargetValue(
   items: any[],
   targetDate: string,
   targetTime: string,
@@ -230,7 +245,6 @@ function getTargetTemperature(
         item.category === separator
       );
     }) || [];
-  console.log(apiData[0].fcstValue);
 
   return apiData[0].fcstValue;
 }

@@ -68,7 +68,10 @@ export class ClosetController {
       req.user,
       req.address,
     );
-    return res.send({ status: 200, data: { list: data } });
+    return res.send({
+      status: 200,
+      data: { list: data.closet, fcstValue: data.fcstValue },
+    });
   }
 
   @Post('setTemperature')
