@@ -30,7 +30,7 @@ export class ForecastController {
   @Get('getVilageForecastInfo')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '메인 화면 - 당일 ~ 3일후 날씨 데이터' })
+  @ApiOperation({ summary: '메인 화면 - 어제 ~ 2일후 날씨 데이터' })
   async getVilageForecastInfo(@Req() req: any, @Res() res: Response) {
     const data = await this.forecastService.getVilageForecastInfo(req.address);
     return res.send({ status: 200, data: { list: data } });
