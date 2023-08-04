@@ -161,6 +161,8 @@ export class ForecastService {
     try {
       const { city, x_code, y_code } = address;
       const base_date = getBaseDateTime({ provide: 2880 }).base_date;
+      console.log(base_date);
+
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
       let weather: any;
