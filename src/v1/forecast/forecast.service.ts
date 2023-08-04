@@ -193,6 +193,8 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
+      console.log(err);
+
       throw err;
     }
   }
@@ -233,6 +235,8 @@ export class ForecastService {
       }
       return temperatureInfo;
     } catch (err) {
+      console.log(err);
+
       throw err;
     }
   }
