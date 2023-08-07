@@ -4,7 +4,5 @@ import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
 
 export class SetRecommendClosetDto extends PickType(UserPickWeather, [
   'closet',
-  'temperatureRange',
   'temperature',
-  'created_at',
 ]) {}

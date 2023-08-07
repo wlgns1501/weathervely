@@ -14,8 +14,6 @@ export class SetRecommendClosetPipe implements PipeTransform<any> {
   transform(value: SetRecommendClosetDto) {
     const validationSchema = Joi.object({
       closet: SCHEMA.REQUIRED_NUMBER('closet'),
-      temperatureRange: SCHEMA.REQUIRED_NUMBER('temperatureRange'),
-      created_at: SCHEMA.REQUIRED_STRING('created_at'),
       temperature: SCHEMA.REQUIRED_STRING('temperature'),
     });
 

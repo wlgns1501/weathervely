@@ -1,9 +1,11 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
+import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { Transactional } from 'typeorm-transactional';
 import { PickClosetDto } from './dtos/pickCloset.dto';
 import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
+import { TemperatureRangeRepository } from 'src/repositories/temperature_range.repository';
 import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { formatTime, padNumber } from '../../lib/utils/publicForecast';
@@ -25,6 +27,7 @@ export class ClosetService {
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userPickWeatherRepository: UserPickWeatherRepository,
+    private readonly temperatureRangeRepository: TemperatureRangeRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -121,8 +124,16 @@ export class ClosetService {
     address: Address,
   ) {
     try {
+      const { closet } = setRecommendClosetDto;
+      const temperatureRange =
+        await this.temperatureRangeRepository.getTemperatureId(closet);
+      const newUserPickWeather = new UserPickWeather();
+      newUserPickWeather.closet = closet;
+      newUserPickWeather.temperature = setRecommendClosetDto.temperature;
+      newUserPickWeather.temperatureRange = temperatureRange;
+      newUserPickWeather.created_at = new Date();
       await this.userPickWeatherRepository.setRecommendCloset(
-        setRecommendClosetDto,
+        newUserPickWeather,
         user,
         address,
       );
