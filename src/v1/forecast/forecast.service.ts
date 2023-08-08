@@ -18,37 +18,37 @@ export class ForecastService {
     this.axiosInstance = createPublicApiAxiosInstance();
   }
 
-  async getUltraSrtForecastInfo(
-    getClosetByTemperatureDto: GetClosetByTemperatureDto,
-    address: Address,
-  ) {
-    try {
-      const weather = await this.getUltraSrtFcst(
-        getClosetByTemperatureDto,
-        address,
-      );
-      return weather;
-    } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: err.message,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-      }
-    }
-  }
+  //   async getUltraSrtForecastInfo(
+  //     getClosetByTemperatureDto: GetClosetByTemperatureDto,
+  //     address: Address,
+  //   ) {
+  //     try {
+  //       const weather = await this.getUltraSrtFcst(
+  //         getClosetByTemperatureDto,
+  //         address,
+  //       );
+  //       return weather;
+  //     } catch (err) {
+  //       switch (err.errno) {
+  //         case HttpStatus.SERVICE_UNAVAILABLE:
+  //           throw new HttpException(
+  //             {
+  //               message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+  //               detail: err.message,
+  //             },
+  //             HttpStatus.SERVICE_UNAVAILABLE,
+  //           );
+  //         default:
+  //           throw new HttpException(
+  //             {
+  //               message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+  //               detail: err.message,
+  //             },
+  //             HttpStatus.INTERNAL_SERVER_ERROR,
+  //           );
+  //       }
+  //     }
+  //   }
 
   async getVilageForecastInfo(address: Address) {
     try {
@@ -106,55 +106,55 @@ export class ForecastService {
     }
   }
 
-  // 조회시간 기준 상세날씨
-  async getUltraSrtFcst(
-    getClosetByTemperatureDto: GetClosetByTemperatureDto,
-    address: Address,
-  ) {
-    try {
-      const { dateTime } = getClosetByTemperatureDto;
-      const targetDateTime = new Date(dateTime);
-      const { city, x_code, y_code } = address;
-      const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
-      const cacheData: any | null = await this.cacheManager.get(
-        `UltraSrtFcst_${city}_${dateTime}`,
-      );
-      let weather: any;
-      if (cacheData) {
-        weather = cacheData;
-      } else {
-        const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
-        const response = await this.axiosInstance.get(
-          `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
-          {
-            params: {
-              ...getBaseDateTime(
-                {
-                  minutes: 30,
-                  provide: 45,
-                },
-                targetDateTime.getTime(),
-              ),
-              nx: x,
-              ny: y,
-            },
-          },
-        );
-        if (response.data.response.header.resultCode !== '00') {
-          throw {
-            errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: response.data.response.header.resultMsg,
-          };
-        }
-        weather = response.data.response.body?.items?.item;
-        const milliSeconds = calculateMS(2880);
-        await this.cacheManager.set(cacheKey, weather, milliSeconds);
-      }
-      return weather;
-    } catch (err) {
-      throw err;
-    }
-  }
+  //   // 조회시간 기준 상세날씨
+  //   async getUltraSrtFcst(
+  //     getClosetByTemperatureDto: GetClosetByTemperatureDto,
+  //     address: Address,
+  //   ) {
+  //     try {
+  //       const { dateTime } = getClosetByTemperatureDto;
+  //       const targetDateTime = new Date(dateTime);
+  //       const { city, x_code, y_code } = address;
+  //       const cacheKey = `UltraSrtFcst_${city}_${dateTime}`;
+  //       const cacheData: any | null = await this.cacheManager.get(
+  //         `UltraSrtFcst_${city}_${dateTime}`,
+  //       );
+  //       let weather: any;
+  //       if (cacheData) {
+  //         weather = cacheData;
+  //       } else {
+  //         const { x, y } = dfsXyConvert('TO_GRID', x_code, y_code);
+  //         const response = await this.axiosInstance.get(
+  //           `/VilageFcstInfoService_2.0/getUltraSrtFcst`,
+  //           {
+  //             params: {
+  //               ...getBaseDateTime(
+  //                 {
+  //                   minutes: 30,
+  //                   provide: 45,
+  //                 },
+  //                 targetDateTime.getTime(),
+  //               ),
+  //               nx: x,
+  //               ny: y,
+  //             },
+  //           },
+  //         );
+  //         if (response.data.response.header.resultCode !== '00') {
+  //           throw {
+  //             errno: HttpStatus.SERVICE_UNAVAILABLE,
+  //             message: response.data.response.header.resultMsg,
+  //           };
+  //         }
+  //         weather = response.data.response.body?.items?.item;
+  //         const milliSeconds = calculateMS(2880);
+  //         await this.cacheManager.set(cacheKey, weather, milliSeconds);
+  //       }
+  //       return weather;
+  //     } catch (err) {
+  //       throw err;
+  //     }
+  //   }
 
   // 어제 ~ 2일후 날씨
   async getVilageFcst(address: Address) {

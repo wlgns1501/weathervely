@@ -9,10 +9,11 @@ export class TemperatureRangeRepository extends Repository<TemperatureRange> {
     super(TemperatureRange, dataSource.createEntityManager());
   }
 
-  async getTemperatureId(closet: Closet) {
+  async getTemperatureId(closet_id: Closet | number) {
+    console.log('getTemperatureId', closet_id);
     return await this.createQueryBuilder('tr')
       .leftJoin('closet_temperature', 'ctemp', 'ctemp.temp_id = tr.id')
-      .where('ctemp.closet_id = :closetId', { closetId: closet })
+      .where('ctemp.closet_id = :closetId', { closetId: closet_id })
       .getOne();
   }
 }

@@ -34,11 +34,13 @@ export class ClosetRepository extends Repository<Closet> {
 
   async getClosetByTemperature(
     temperature: number,
+    type_id: number,
     user: User,
   ): Promise<ObjectLiteral[]> {
     const userSettedTypeQuery = await this.createQueryBuilder()
       .select('t.id, t.name')
       .from('type', 't')
+      .where('t.id = coalesce(:type_id, t.id)')
       .orderBy('RAND()')
       .limit(1)
       .getQuery();
@@ -101,7 +103,8 @@ export class ClosetRepository extends Repository<Closet> {
       })
       .groupBy('tr.id')
       .setParameter('temp', temperature)
-      .setParameter('userId', user.id);
+      .setParameter('userId', user.id)
+      .setParameter('type_id', type_id);
 
     return await tempWithClosetQuery.getRawMany();
   }

@@ -12,6 +12,7 @@ export class GetClosetByTemperaturePipe implements PipeTransform<any> {
   transform(value: any) {
     const validationSchema = Joi.object({
       dateTime: Joi.string().required(),
+      closet_id: Joi.string(),
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);

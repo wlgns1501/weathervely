@@ -56,7 +56,7 @@ export class ClosetController {
   @Get('getClosetByTemperature')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  @ApiOperation({ summary: '온보딩 / 설정 - 체감온도 설정 화면' })
+  @ApiOperation({ summary: '체감온도 설정시 LIST' })
   async getClosetByTemperature(
     @Query(new GetClosetByTemperaturePipe())
     getClosetByTemperatureDto: GetClosetByTemperatureDto,
@@ -70,7 +70,7 @@ export class ClosetController {
     );
     return res.send({
       status: 200,
-      data: { list: data.closet, fcstValue: data.fcstValue },
+      data: { list: data.closets, fcstValue: data.fcstValue },
     });
   }
 

@@ -69,22 +69,37 @@ export class ClosetService {
     address: Address,
   ) {
     try {
-      // use 초단기예보 API
-      const { dateTime } = getClosetByTemperatureDto;
+      // use 단기예보 API
+      const { dateTime, closet_id } = getClosetByTemperatureDto;
+      let temp_id: number;
+      let closet: any;
+      if (closet_id) {
+        closet = await this.closetRepository.getClosetById(closet_id);
+        const temperatureRange =
+          await this.temperatureRangeRepository.getTemperatureId(closet.id);
+        temp_id = temperatureRange.id;
+      }
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-      const weather = await this.forecastService.getUltraSrtFcst(
-        getClosetByTemperatureDto,
-        address,
-      );
-      const fcstValue = getTargetValue(weather, targetDate, targetTime, 'T1H');
-      const closet = await this.closetRepository.getClosetByTemperature(
+      const weather = await this.forecastService.getVilageFcst(address);
+      const fcstValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
+      const closets = await this.closetRepository.getClosetByTemperature(
         fcstValue,
+        temp_id,
         user,
       );
+
+      if (temp_id) {
+        closets.forEach((c) => {
+          if (c.id === temp_id) {
+            c = closet;
+          }
+        });
+      }
+      console.log('closet@@@@@@@', closets);
       return {
-        closet,
+        closets,
         fcstValue,
       };
     } catch (err) {
@@ -171,9 +186,7 @@ export class ClosetService {
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-
       const weather = await this.forecastService.getVilageFcst(address);
-      console.log(weather);
       const temperatureValue = getTargetValue(
         weather,
         targetDate,
