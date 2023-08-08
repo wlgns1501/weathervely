@@ -15,7 +15,7 @@ import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.re
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { getCalculateSensoryTemperature } from 'src/lib/utils/calculate';
-import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
+import { SetTemperatureDto } from './dtos/setTemperature.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { ForecastService } from '../forecast/forecast.service';
@@ -118,21 +118,21 @@ export class ClosetService {
   }
 
   @Transactional()
-  async setRecommendCloset(
-    setRecommendClosetDto: SetRecommendClosetDto,
+  async setTemperature(
+    setTemperatureDto: SetTemperatureDto,
     user: User,
     address: Address,
   ) {
     try {
-      const { closet } = setRecommendClosetDto;
+      const { closet } = setTemperatureDto;
       const temperatureRange =
         await this.temperatureRangeRepository.getTemperatureId(closet);
       const newUserPickWeather = new UserPickWeather();
       newUserPickWeather.closet = closet;
-      newUserPickWeather.temperature = setRecommendClosetDto.temperature;
+      newUserPickWeather.temperature = setTemperatureDto.temperature;
       newUserPickWeather.temperatureRange = temperatureRange;
       newUserPickWeather.created_at = new Date();
-      await this.userPickWeatherRepository.setRecommendCloset(
+      await this.userPickWeatherRepository.setTemperature(
         newUserPickWeather,
         user,
         address,

@@ -20,8 +20,8 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetRecommendClosetPipe } from './dtos/getRecommendCloset.pipe';
-import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
-import { SetRecommendClosetPipe } from './dtos/setRecommendCloset.pipe';
+import { SetTemperatureDto } from './dtos/setTemperature.dto';
+import { SetTemperaturePipe } from './dtos/setTemperature.pipe';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { GetClosetByTemperaturePipe } from './dtos/getClosetByTemperature.pipe';
 import { Response } from 'express';
@@ -79,16 +79,12 @@ export class ClosetController {
   @ApiOperation({ summary: '체감온도 설정' })
   @UseGuards(AuthGuard)
   async setTemperature(
-    @Body(new SetRecommendClosetPipe())
-    setRecommendClosetDto: SetRecommendClosetDto,
+    @Body(new SetTemperaturePipe())
+    setTemperatureDto: SetTemperatureDto,
     @Req() req: any,
     @Res() res: Response,
   ) {
-    await this.service.setRecommendCloset(
-      setRecommendClosetDto,
-      req.user,
-      req.address,
-    );
+    await this.service.setTemperature(setTemperatureDto, req.user, req.address);
     return res.send({ status: 200 });
   }
 
