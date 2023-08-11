@@ -35,8 +35,9 @@ export class ClosetController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '스타일 리스트' })
   @UseGuards(AuthGuard)
-  getClosetList(@Res() res: Response) {
-    const data = this.service.getClosetList();
+  async getClosetList(@Res() res: Response) {
+    const data = await this.service.getClosetList();
+
     return res.send({ status: 200, data: { list: data } });
   }
 

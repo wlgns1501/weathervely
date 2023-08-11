@@ -30,9 +30,13 @@ export class ClosetService {
   ) {}
 
   async getClosetList() {
-    const closets = await this.closetRepository.getClosetList();
+    try {
+      const closets = await this.closetRepository.getClosetList();
 
-    return closets;
+      return closets;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   @Transactional()
@@ -85,6 +89,8 @@ export class ClosetService {
         fcstValue,
       };
     } catch (err) {
+      console.log(err);
+
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:
           throw new HttpException(

@@ -42,12 +42,13 @@ export class AuthGuard implements CanActivate {
 
     try {
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
-      console.log(verifiedToken);
 
       const { nickname } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
+
       const { address } = await this.userAddressRepository.getUserAddress(user);
+      console.log(address);
 
       if (!address) {
         throw new HttpException(
