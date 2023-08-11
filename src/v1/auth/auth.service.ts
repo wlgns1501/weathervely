@@ -28,9 +28,25 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { nickname } = loginDto;
 
+    const user = await this.authRepository.getUserByNickname(nickname);
+
+    if (!user)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.NOT_FOUND,
+          detail: '유저가 존재하지 않습니다.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     const access_token = await this.createAccessToken(nickname);
 
     return { access_token };
+  }
+
+  async getUser() {
+    const users = await this.authRepository.getUsers();
+
+    return users;
   }
 
   @Transactional()

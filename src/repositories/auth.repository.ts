@@ -17,6 +17,10 @@ export class AuthRepository extends Repository<User> {
     });
   }
 
+  async getUsers() {
+    return await this.find();
+  }
+
   async createNickName(nickname: string, accessToken: string) {
     return await this.create({ nickname, token: accessToken }).save();
   }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -42,7 +43,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  @ApiOperation({ summary: '임시 토큰 발행' })
+  @ApiOperation({ summary: '<test 용> 임시 토큰 발행' })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body(new LoginPipe()) loginDto: LoginDto,
@@ -57,6 +58,13 @@ export class AuthController {
     );
 
     settledResponse.send({ status: 200 });
+  }
+
+  @Get('/getUser')
+  @ApiOperation({ summary: '<test용> 유저 리스트 불러오기' })
+  @HttpCode(HttpStatus.OK)
+  async getUser() {
+    return await this.service.getUser();
   }
 
   @Post('/nickName')

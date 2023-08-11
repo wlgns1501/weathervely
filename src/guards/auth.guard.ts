@@ -42,11 +42,20 @@ export class AuthGuard implements CanActivate {
 
     try {
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
-      console.log(verifiedToken);
 
       const { nickname } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
+
+      if (!user)
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.NOT_FOUND,
+            detail: '유저가 존재하지 않습니다.',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+
       const { address } = await this.userAddressRepository.getUserAddress(user);
 
       if (!address) {
