@@ -43,6 +43,12 @@ export class AuthService {
     return { access_token };
   }
 
+  async getUser() {
+    const users = await this.authRepository.getUsers();
+
+    return users;
+  }
+
   @Transactional()
   async setNickName(setNickNameDto: SetNickNameDto) {
     const { nickname } = setNickNameDto;
