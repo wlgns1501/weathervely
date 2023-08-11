@@ -160,7 +160,7 @@ export class ForecastService {
   async getVilageFcst(address: Address) {
     try {
       const { city, x_code, y_code } = address;
-      const base_date = getBaseDateTime({ provide: 2880 }).base_date;
+      const base_date = getBaseDateTime({ provide: 1440 }).base_date;
       console.log(base_date);
 
       const cacheKey = `VilageFcst_${city}_${base_date}`;
@@ -175,7 +175,7 @@ export class ForecastService {
           {
             params: {
               base_date: base_date,
-              base_time: '2300',
+              base_time: '0200',
               nx: x,
               ny: y,
             },

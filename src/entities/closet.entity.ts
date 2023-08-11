@@ -19,11 +19,11 @@ export class Closet extends BaseEntity {
   @Column({ name: 'name', comment: '의류 이름' })
   name: string;
 
-  @Column({ name: 'min_temp', comment: '최저 온도' })
-  min_temp: string;
+  //   @Column({ name: 'min_temp', comment: '최저 온도' })
+  //   min_temp: string;
 
-  @Column({ name: 'max_temp', comment: '최고 온도' })
-  max_temp: string;
+  //   @Column({ name: 'max_temp', comment: '최고 온도' })
+  //   max_temp: string;
 
   @Column({ name: 'site_name', comment: '출처' })
   site_name: string;

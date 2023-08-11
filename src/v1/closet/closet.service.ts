@@ -96,12 +96,14 @@ export class ClosetService {
 
       if (temp_id) {
         closets.forEach((c) => {
-          if (c.id === temp_id) {
-            c = closet;
+          if (c.temp_id === temp_id) {
+            c.closet_id = closet.id;
+            c.name = closet.name;
+            c.image_url = closet.image_url;
           }
         });
       }
-      console.log('closet@@@@@@@', closets);
+
       return {
         closets,
         tmpValue,

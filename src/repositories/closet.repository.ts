@@ -36,7 +36,7 @@ export class ClosetRepository extends Repository<Closet> {
     temperature: number,
     type_id: number,
     user: User,
-  ): Promise<ObjectLiteral[]> {
+  ): Promise<any[]> {
     const userSettedTypeQuery = await this.createQueryBuilder()
       .select('t.id, t.name')
       .from('type', 't')
@@ -83,7 +83,7 @@ export class ClosetRepository extends Repository<Closet> {
       .addSelect('gc.temp_id')
       .addSelect(
         `case when :temp between tr.min_temp and tr.max_temp then 'true' else 'false' end`,
-        'isTemperatureRange',
+        'isCurrentTemperature',
       )
       .from('temperature_range', 'tr')
       .leftJoin(
