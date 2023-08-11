@@ -47,8 +47,16 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.authRepository.getUserByNickname(nickname);
 
+      if (!user)
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.NOT_FOUND,
+            detail: '유저가 존재하지 않습니다.',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+
       const { address } = await this.userAddressRepository.getUserAddress(user);
-      console.log(address);
 
       if (!address) {
         throw new HttpException(
