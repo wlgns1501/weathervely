@@ -71,7 +71,7 @@ export class ClosetController {
     );
     return res.send({
       status: 200,
-      data: { list: data.closets, fcstValue: data.fcstValue },
+      data: { list: data.closets, fcstValue: data.tmpValue },
     });
   }
 

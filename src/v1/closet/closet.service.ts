@@ -87,9 +87,9 @@ export class ClosetService {
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
       const weather = await this.forecastService.getVilageFcst(address);
-      const fcstValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
+      const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
       const closets = await this.closetRepository.getClosetByTemperature(
-        fcstValue,
+        Number(tmpValue),
         temp_id,
         user,
       );
@@ -104,7 +104,7 @@ export class ClosetService {
       console.log('closet@@@@@@@', closets);
       return {
         closets,
-        fcstValue,
+        tmpValue,
       };
     } catch (err) {
       console.log(err);
