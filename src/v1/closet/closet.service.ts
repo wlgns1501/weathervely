@@ -1,9 +1,11 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
+import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { Transactional } from 'typeorm-transactional';
 import { PickClosetDto } from './dtos/pickCloset.dto';
 import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
+import { TemperatureRangeRepository } from 'src/repositories/temperature_range.repository';
 import { MYSQL_ERROR_CODE } from 'src/lib/constant/mysqlError';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { formatTime, padNumber } from '../../lib/utils/publicForecast';
@@ -13,7 +15,7 @@ import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.re
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { getCalculateSensoryTemperature } from 'src/lib/utils/calculate';
-import { SetRecommendClosetDto } from './dtos/setRecommendCloset.dto';
+import { SetTemperatureDto } from './dtos/setTemperature.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { ForecastService } from '../forecast/forecast.service';
@@ -25,6 +27,7 @@ export class ClosetService {
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userPickWeatherRepository: UserPickWeatherRepository,
+    private readonly temperatureRangeRepository: TemperatureRangeRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -70,23 +73,40 @@ export class ClosetService {
     address: Address,
   ) {
     try {
-      // use 초단기예보 API
-      const { dateTime } = getClosetByTemperatureDto;
+      // use 단기예보 API
+      const { dateTime, closet_id } = getClosetByTemperatureDto;
+      let temp_id: number;
+      let closet: any;
+      if (closet_id) {
+        closet = await this.closetRepository.getClosetById(closet_id);
+        const temperatureRange =
+          await this.temperatureRangeRepository.getTemperatureId(closet.id);
+        temp_id = temperatureRange.id;
+      }
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-      const weather = await this.forecastService.getUltraSrtFcst(
-        getClosetByTemperatureDto,
-        address,
-      );
-      const fcstValue = getTargetValue(weather, targetDate, targetTime, 'T1H');
-      const closet = await this.closetRepository.getClosetByTemperature(
-        fcstValue,
+      const weather = await this.forecastService.getVilageFcst(address);
+      const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
+      const closets = await this.closetRepository.getClosetByTemperature(
+        Number(tmpValue),
+        temp_id,
         user,
       );
+
+      if (temp_id) {
+        closets.forEach((c) => {
+          if (c.temp_id === temp_id) {
+            c.closet_id = closet.id;
+            c.name = closet.name;
+            c.image_url = closet.image_url;
+          }
+        });
+      }
+
       return {
-        closet,
-        fcstValue,
+        closets,
+        tmpValue,
       };
     } catch (err) {
       console.log(err);
@@ -121,14 +141,22 @@ export class ClosetService {
   }
 
   @Transactional()
-  async setRecommendCloset(
-    setRecommendClosetDto: SetRecommendClosetDto,
+  async setTemperature(
+    setTemperatureDto: SetTemperatureDto,
     user: User,
     address: Address,
   ) {
     try {
-      await this.userPickWeatherRepository.setRecommendCloset(
-        setRecommendClosetDto,
+      const { closet } = setTemperatureDto;
+      const temperatureRange =
+        await this.temperatureRangeRepository.getTemperatureId(closet);
+      const newUserPickWeather = new UserPickWeather();
+      newUserPickWeather.closet = closet;
+      newUserPickWeather.temperature = setTemperatureDto.temperature;
+      newUserPickWeather.temperatureRange = temperatureRange;
+      newUserPickWeather.created_at = new Date();
+      await this.userPickWeatherRepository.setTemperature(
+        newUserPickWeather,
         user,
         address,
       );
@@ -166,9 +194,7 @@ export class ClosetService {
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
-
       const weather = await this.forecastService.getVilageFcst(address);
-      console.log(weather);
       const temperatureValue = getTargetValue(
         weather,
         targetDate,
