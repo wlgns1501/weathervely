@@ -36,25 +36,10 @@ export class UserPickWeather extends BaseEntity {
   @JoinColumn({ name: 'closet_id' })
   closet: Closet;
 
-  @ApiProperty({
-    description: 'temp_id',
-    nullable: false,
-    required: true,
-    example: '2',
-  })
   @ManyToOne(() => TemperatureRange, (temperatureRange) => temperatureRange.id)
   @JoinColumn({ name: 'temp_id' })
   temperatureRange: TemperatureRange;
 
-  //   @ManyToOne(() => Closet, (closet) => closet.id)
-  //   @JoinColumn({ name: 'maximum_temperature_clothing_id' })
-  //   maximum_temperature_closet: Closet;
-  @ApiProperty({
-    description: 'created_at',
-    nullable: false,
-    required: true,
-    example: '2023-07-16 22:57',
-  })
   @CreateDateColumn({ name: 'created_at', comment: '생성일자' })
   created_at: Date;
 

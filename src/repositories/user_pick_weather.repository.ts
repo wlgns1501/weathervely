@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
 import { Address } from 'src/entities/address.entity';
 import { User } from 'src/entities/user.entity';
-import { SetRecommendClosetDto } from 'src/v1/closet/dtos/setRecommendCloset.dto';
+import { SetTemperatureDto } from 'src/v1/closet/dtos/setTemperature.dto';
 
 @Injectable()
 export class UserPickWeatherRepository extends Repository<UserPickWeather> {
@@ -11,25 +11,15 @@ export class UserPickWeatherRepository extends Repository<UserPickWeather> {
     super(UserPickWeather, dataSource.createEntityManager());
   }
 
-  async setRecommendCloset(
-    setRecommendClosetDto: SetRecommendClosetDto,
+  async setTemperature(
+    userPickWeather: UserPickWeather,
     user: User,
     address: Address,
   ) {
     return await this.create({
-      ...setRecommendClosetDto,
+      ...userPickWeather,
       user,
       address,
     }).save();
-  }
-
-  // user_set_style도 만들어야댐
-  async getOrderStyle(user: User) {
-    const userId = user.id;
-    const queryBuilder = await this.createQueryBuilder('user_pick_').where(
-      'user_id = :userId',
-      { userId },
-    );
-    return queryBuilder.getOne();
   }
 }
