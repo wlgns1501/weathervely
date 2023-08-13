@@ -98,7 +98,7 @@ function getTw(temperatureValue: number, relativeHumidity: number): number {
   return Tw;
 }
 
-// 여름 - 열지수 공식
+// 여름 - 열지수 공식 - 안쓰이는중
 function calculateHeatIndexCelsius(
   temperatureValue: number,
   relativeHumidity: number,
