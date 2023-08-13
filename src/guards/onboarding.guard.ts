@@ -22,7 +22,7 @@ export class OnboardingGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
-    const accessToken = req.get('cookie')?.split('=')[1];
+    const accessToken = req.cookies['access_token'];
 
     if (!accessToken) {
       throw new HttpException(
