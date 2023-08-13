@@ -102,7 +102,6 @@ export class ClosetRepository extends Repository<Closet> {
       .groupBy('tr.id')
       .setParameter('temp', temperature)
       .setParameter('userId', user.id);
-
     return await tempWithClosetQuery.getRawMany();
   }
 
