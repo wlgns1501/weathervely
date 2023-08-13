@@ -210,16 +210,12 @@ export class ClosetService {
       );
 
       const sonsoryTemperature = getCalculateSensoryTemperature(
-        temperatureValue,
-        windValue,
-        humidityValue,
+        Number(temperatureValue),
+        Number(windValue),
+        Number(humidityValue),
       );
-      console.log('windValue', windValue);
-      console.log('humidityValue', humidityValue);
-      console.log('temperatureValue', temperatureValue);
-      console.log('sonsoryTemperature', sonsoryTemperature);
       const closet = await this.closetRepository.getRecommendCloset(
-        temperatureValue,
+        sonsoryTemperature,
       );
       return closet;
     } catch (err) {
