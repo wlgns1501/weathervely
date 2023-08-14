@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PickType } from '@nestjs/swagger';
-import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
+import { UserSetTemperature } from 'src/entities/user_set_temperature.entity';
 
-export class SetTemperatureDto extends PickType(UserPickWeather, [
+export class SetTemperatureDto extends PickType(UserSetTemperature, [
   'closet',
-  'temperature',
+  'current_temperature',
 ]) {}

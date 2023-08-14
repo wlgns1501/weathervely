@@ -4,7 +4,7 @@ import { ClosetController } from './closet.controller';
 import { AuthRepository } from 'src/repositories/auth.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
-import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
+import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { UserSetStyleRepository } from 'src/repositories/user_set_style.repository';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -19,7 +19,7 @@ import { TemperatureRangeRepository } from 'src/repositories/temperature_range.r
     ClosetRepository,
     UserSetStyleRepository,
     UserPickStyleRepository,
-    UserPickWeatherRepository,
+    UserSetTemperatureRepository,
     ForecastService,
     TemperatureRangeRepository,
   ],

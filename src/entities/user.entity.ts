@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserPickWeather } from './user_pick_weather.entity';
+import { UserSetTemperature } from './user_set_temperature.entity';
 import { UserPickStyle } from './user_pick_style.entity';
 import { UserWithAddress } from './user_with_address.entity';
 import { UserSetStyle } from './user_set_style.entity';
@@ -57,8 +57,8 @@ export class User extends BaseEntity {
   @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user)
   user_with_address: UserWithAddress[];
 
-  @OneToMany(() => UserPickWeather, (userPickWeather) => userPickWeather.user)
-  user_pick_weather: UserPickWeather[];
+  @OneToMany(() => UserSetTemperature, (userSetTemperature) => userSetTemperature.user)
+  user_set_temperature: UserSetTemperature[];
 
   @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.user)
   user_pick_style: UserPickStyle[];

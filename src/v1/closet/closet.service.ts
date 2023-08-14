@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
-import { UserPickWeather } from 'src/entities/user_pick_weather.entity';
+import { UserSetTemperature } from 'src/entities/user_set_temperature.entity';
 import { ClosetRepository } from 'src/repositories/closet.repository';
 import { Transactional } from 'typeorm-transactional';
 import { PickClosetDto } from './dtos/pickCloset.dto';
@@ -11,7 +11,7 @@ import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { formatTime, padNumber } from '../../lib/utils/publicForecast';
 import { Address } from 'src/entities/address.entity';
 import { UserPickStyleRepository } from 'src/repositories/user_pick_style.repository';
-import { UserPickWeatherRepository } from 'src/repositories/user_pick_weather.repository';
+import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { getCalculateSensoryTemperature } from 'src/lib/utils/calculate';
@@ -26,7 +26,7 @@ export class ClosetService {
     private readonly closetRepository: ClosetRepository,
     private readonly userSetStyleRepository: UserSetStyleRepository,
     private readonly userPickStyleRepository: UserPickStyleRepository,
-    private readonly userPickWeatherRepository: UserPickWeatherRepository,
+    private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
     private readonly temperatureRangeRepository: TemperatureRangeRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -150,13 +150,14 @@ export class ClosetService {
       const { closet } = setTemperatureDto;
       const temperatureRange =
         await this.temperatureRangeRepository.getTemperatureId(closet);
-      const newUserPickWeather = new UserPickWeather();
-      newUserPickWeather.closet = closet;
-      newUserPickWeather.temperature = setTemperatureDto.temperature;
-      newUserPickWeather.temperatureRange = temperatureRange;
-      newUserPickWeather.created_at = new Date();
-      await this.userPickWeatherRepository.setTemperature(
-        newUserPickWeather,
+      const newUserSetTemperature = new UserSetTemperature();
+      newUserSetTemperature.closet = closet;
+      newUserSetTemperature.current_temperature =
+        setTemperatureDto.current_temperature;
+      //   newUserSetTemperature.temperatureRange = temperatureRange;
+      newUserSetTemperature.created_at = new Date();
+      await this.userSetTemperatureRepository.setTemperature(
+        newUserSetTemperature,
         user,
         address,
       );
