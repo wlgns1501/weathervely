@@ -33,17 +33,19 @@ export function getCalculateSensoryTemperature(
   windValueMps: number,
   relativeHumidity: number,
 ): number {
-  // 열지수 계산
-  const heatIndex = calculateHeatIndexCelsius(
-    temperatureValue,
-    relativeHumidity,
-  );
-
-  // 체감온도 계산
-  const windChill = calculateWindChillCelsius(temperatureValue, windValueMps);
-
-  // 열지수와 체감온도 중 더 높은 값을 반환 or Month 값 구분해서 보여줄까...?
-  return Math.max(heatIndex, windChill);
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  let sensoryTemp: number;
+  // 여름 - 4,5,6,7,8,9
+  // 겨울 - 1,2,3,10,11,12
+  if (currentMonth >= 4 && currentMonth <= 9) {
+    // 섭씨 , 습도 - 체감온도 계산 ( 여름 )
+    sensoryTemp = calculateHumidityCelsius(temperatureValue, relativeHumidity);
+  } else {
+    // 섭씨 , 풍량 - 체감온도 계산 ( 겨울 )
+    sensoryTemp = calculateWindChillCelsius(temperatureValue, windValueMps);
+  }
+  return sensoryTemp;
 }
 
 // 겨울 - JAG/TI 체감온도 모델 공식 ( Joint Action Group for Temperature Indices )
@@ -63,8 +65,40 @@ function calculateWindChillCelsius(
 }
 
 // 여름 - 기상청 공식
+function calculateHumidityCelsius(
+  temperatureValue: number,
+  relativeHumidity: number,
+): number {
+  // get 습구온도
+  const humidity = getTw(temperatureValue, relativeHumidity);
+  console.log('temperatureValue', temperatureValue);
+  console.log('relativeHumidity', relativeHumidity);
 
-// 여름 - 열지수 공식
+  const c1 = 0.55399 * humidity;
+  const c2 = 0.45535 * temperatureValue;
+  const c3 = 0.0022 * Math.pow(humidity, 2);
+  const c4 = 0.00278 * humidity * temperatureValue;
+
+  const temperature = -0.2442 + c1 + c2 - c3 + c4 + 3.0;
+
+  return temperature;
+}
+
+function getTw(temperatureValue: number, relativeHumidity: number): number {
+  const c1 =
+    temperatureValue *
+    Math.atan(0.151977 * Math.sqrt(relativeHumidity + 8.313659));
+  const c2 = Math.atan(temperatureValue + relativeHumidity);
+  const c3 = Math.atan(relativeHumidity - 1.67633);
+  const c4 =
+    0.00391838 *
+    Math.pow(relativeHumidity, 1.5) *
+    Math.atan(0.023101 * relativeHumidity);
+  const Tw = c1 + c2 - c3 + c4 - 4.686035;
+  return Tw;
+}
+
+// 여름 - 열지수 공식 - 안쓰이는중
 function calculateHeatIndexCelsius(
   temperatureValue: number,
   relativeHumidity: number,
