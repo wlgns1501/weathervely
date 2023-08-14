@@ -13,8 +13,8 @@ import { Closet } from './closet.entity';
 import { TemperatureRange } from './temperature_range.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity({ name: 'user_pick_weather' })
-export class UserPickWeather extends BaseEntity {
+@Entity({ name: 'user_set_temperature' })
+export class UserSetTemperature extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
 
@@ -36,19 +36,27 @@ export class UserPickWeather extends BaseEntity {
   @JoinColumn({ name: 'closet_id' })
   closet: Closet;
 
-  @ManyToOne(() => TemperatureRange, (temperatureRange) => temperatureRange.id)
-  @JoinColumn({ name: 'temp_id' })
-  temperatureRange: TemperatureRange;
-
-  @CreateDateColumn({ name: 'created_at', comment: '생성일자' })
-  created_at: Date;
-
   @ApiProperty({
-    description: 'temperature',
+    description: 'current_temperature',
     nullable: false,
     required: true,
     example: '25',
   })
-  @Column({ name: 'temperature', comment: '온도' })
-  temperature: string;
+  @Column({ name: 'current_temperature', comment: '현재 온도' })
+  current_temperature: string;
+
+  @ApiProperty({
+    description: 'sensory_temperature',
+    nullable: false,
+    required: true,
+    example: '29',
+  })
+  @Column({
+    name: 'sensory_temperature',
+    comment: '선택한 옷의 온도 구간 평균',
+  })
+  sensory_temperature: string;
+
+  @CreateDateColumn({ name: 'created_at', comment: '생성일자' })
+  created_at: Date;
 }

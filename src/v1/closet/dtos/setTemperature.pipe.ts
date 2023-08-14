@@ -14,7 +14,7 @@ export class SetTemperaturePipe implements PipeTransform<any> {
   transform(value: SetTemperatureDto) {
     const validationSchema = Joi.object({
       closet: SCHEMA.REQUIRED_NUMBER('closet'),
-      temperature: SCHEMA.REQUIRED_STRING('temperature'),
+      temperature: SCHEMA.REQUIRED_STRING('current_temperature'),
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);

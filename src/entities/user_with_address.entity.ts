@@ -17,8 +17,8 @@ export class UserWithAddress extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
 
-  @Column({ name: 'sensory_temp', comment: '체감 온도' })
-  sensory_temp: number;
+  //   @Column({ name: 'sensory_temp', comment: '체감 온도' })
+  //   sensory_temp: number;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ClosetClothes } from './closet_clothes.entity';
-import { UserPickWeather } from './user_pick_weather.entity';
+import { UserSetTemperature } from './user_set_temperature.entity';
 import { UserSetStyle } from './user_set_style.entity';
 import { ClosetType } from './closet_type.entity';
 import { ClosetTemperature } from './closet_temperature.entity';
@@ -37,20 +37,23 @@ export class Closet extends BaseEntity {
   @Column({ name: 'status', comment: '상태' })
   status: string;
 
-  @Column({ name: 'is_onboarding', comment: '온보딩 여부' })
-  is_onboarding: boolean;
+  //   @Column({ name: 'is_onboarding', comment: '온보딩 여부' })
+  //   is_onboarding: boolean;
 
   @OneToMany(() => ClosetClothes, (closetClothes) => closetClothes.closet)
   closet_clothes: ClosetClothes[];
 
-  @OneToMany(() => UserPickWeather, (userPickWeather) => userPickWeather.closet)
-  user_pick_closet_id: UserPickWeather[];
+  @OneToMany(
+    () => UserSetTemperature,
+    (userSetTemperature) => userSetTemperature.closet,
+  )
+  user_pick_closet_id: UserSetTemperature[];
 
   //   @OneToMany(
-  //     () => UserPickWeather,
-  //     (userPickWeather) => userPickWeather.minimum_temperature_closet,
+  //     () => UserSetTemperature,
+  //     (userSetTemperature) => userSetTemperature.minimum_temperature_closet,
   //   )
-  //   user_pick_maximum_weather: UserPickWeather[];
+  //   user_pick_maximum_weather: UserSetTemperature[];
 
   @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.closet)
   userSetStyles: UserSetStyle[];
