@@ -216,7 +216,7 @@ export class ClosetService {
         Number(humidityValue),
       );
       const closet = await this.closetRepository.getRecommendCloset(
-        sonsoryTemperature,
+        Math.round(sonsoryTemperature),
       );
       return closet;
     } catch (err) {
