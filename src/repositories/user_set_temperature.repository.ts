@@ -22,4 +22,11 @@ export class UserSetTemperatureRepository extends Repository<UserSetTemperature>
       address,
     }).save();
   }
+
+  async getSensoryTemperature(user: User) {
+    const queryBuilder = await this.createQueryBuilder()
+      .where('user_id = :userId')
+      .setParameter('userId', user.id);
+    return queryBuilder.getRawMany();
+  }
 }
