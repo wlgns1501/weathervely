@@ -16,4 +16,13 @@ export class TemperatureRangeRepository extends Repository<TemperatureRange> {
       .where('ctemp.closet_id = :closetId', { closetId: closet_id })
       .getOne();
   }
+
+  async getAverageTemp(closet_id: Closet | number) {
+    return await this.createQueryBuilder()
+      .select('(tr.min_temp + tr.max_temp) / 2 as avg_temp ')
+      .from('temperature_range', 'tr')
+      .leftJoin('closet_temperature', 'ctemp', 'ctemp.temp_id = tr.id')
+      .where('ctemp.closet_id = :closetId', { closetId: closet_id })
+      .getRawOne();
+  }
 }

@@ -116,7 +116,8 @@ export class ClosetRepository extends Repository<Closet> {
       .innerJoin('ct.temperatureRange', 'tr')
       .where(':temperature between tr.min_temp and tr.max_temp', {
         temperature,
-      });
+      })
+      .orderBy('rand()');
     return queryBuilder.getRawMany();
   }
 

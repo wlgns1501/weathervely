@@ -148,13 +148,14 @@ export class ClosetService {
   ) {
     try {
       const { closet } = setTemperatureDto;
-      const temperatureRange =
-        await this.temperatureRangeRepository.getTemperatureId(closet);
+      const averageTemp = await this.temperatureRangeRepository.getAverageTemp(
+        closet,
+      );
       const newUserSetTemperature = new UserSetTemperature();
       newUserSetTemperature.closet = closet;
       newUserSetTemperature.current_temperature =
         setTemperatureDto.current_temperature;
-      //   newUserSetTemperature.temperatureRange = temperatureRange;
+      newUserSetTemperature.sensory_temperature = averageTemp.avg_temp;
       newUserSetTemperature.created_at = new Date();
       await this.userSetTemperatureRepository.setTemperature(
         newUserSetTemperature,
@@ -210,15 +211,31 @@ export class ClosetService {
         'REH',
       );
 
+      // 공식 적용 체감 온도
       const sonsoryTemperature = getCalculateSensoryTemperature(
         Number(temperatureValue),
         Number(windValue),
         Number(humidityValue),
       );
-      const closet = await this.closetRepository.getRecommendCloset(
-        sonsoryTemperature,
+
+      const sensoryTemperatureArr =
+        await this.userSetTemperatureRepository.getSensoryTemperature(user);
+
+      const avgSensoryTemperature = sensoryTemperatureArr.reduce((acc, cur) => {
+        return (acc +=
+          Number(cur.UserSetTemperature_current_temperature) -
+          Number(cur.UserSetTemperature_sensory_temperature));
+      }, 0);
+
+      // user 체감 온도
+      const userSensoryTemperature =
+        sonsoryTemperature -
+        avgSensoryTemperature / sensoryTemperatureArr.length;
+
+      const closets = await this.closetRepository.getRecommendCloset(
+        Math.round(userSensoryTemperature),
       );
-      return closet;
+      return { closets, userSensoryTemperature };
     } catch (err) {
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:
