@@ -76,8 +76,10 @@ export class UserController {
   @ApiOperation({ summary: '주소 리스트' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  getAddresses(@Req() req: any) {
-    return this.service.getAddresses(req.user);
+  getAddresses(@Req() req: any, @Res() res: Response) {
+    const data = this.service.getAddresses(req.user);
+
+    return res.send({ status: 200, data: { list: data } });
   }
 
   @Post('address/setMain/:addressId')
