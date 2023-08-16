@@ -238,7 +238,10 @@ export class ClosetService {
       const closets = await this.closetRepository.getRecommendCloset(
         Math.round(userSensoryTemperature),
       );
-      return { closets, temperatureDifference };
+      return {
+        closets,
+        temperatureDifference: Math.round(temperatureDifference),
+      };
     } catch (err) {
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:
