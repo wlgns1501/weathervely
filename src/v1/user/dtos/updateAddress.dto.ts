@@ -7,7 +7,6 @@ export class UpdateAddressDto extends PickType(Address, [
   'city',
   'gu',
   'dong',
-  'postal_code',
   'x_code',
   'y_code',
 ]) {}

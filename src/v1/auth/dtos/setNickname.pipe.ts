@@ -23,12 +23,20 @@ export class SetNickNamePipe implements PipeTransform<SetNickNameDto> {
       throw new HttpException(
         {
           message: HTTP_ERROR.VALIDATED_ERROR,
-          detail: error.details[0].context.label,
+          detail: '닉네임에는 띄어쓰기, 쉼표를 사용할 수 없습니다.',
         },
         HttpStatus.BAD_REQUEST,
       );
     }
 
+    if (validatedValue.nickname.length >= 10)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail: '닉네임은 10글자 이상이 될 수 없습니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     return validatedValue;
   }
 }

@@ -19,7 +19,6 @@ export class UpdateAddressPipe implements PipeTransform<UpdateAddressDto> {
       city: SCHEMA.UPDATE_NOTNULL_STRING('city'),
       gu: SCHEMA.UPDATE_NOTNULL_STRING('gu'),
       dong: SCHEMA.UPDATE_NOTNULL_STRING('dong'),
-      postal_code: SCHEMA.UPDATE_NOTNULL_STRING('postal_code'),
       x_code: SCHEMA.UPDATE_NOTNULL_NUMBER('x_code'),
       y_code: SCHEMA.UPDATE_NOTNULL_NUMBER('y_code'),
     });

@@ -20,7 +20,11 @@ export class UserAddressRepository extends Repository<UserWithAddress> {
   }
 
   async createUserWithAddress(user: User, address: Address) {
-    return await this.create({ user, address }).save();
+    return await this.create({ user, address, is_main_address: true }).save();
+  }
+
+  async addUserWithAddress(user: User, address: Address) {
+    return await this.create({ user, address, is_main_address: false }).save();
   }
 
   async updateUserWithAddress(
@@ -42,5 +46,19 @@ export class UserAddressRepository extends Repository<UserWithAddress> {
       .from(UserWithAddress)
       .where({ user_id: userId, address_id: addressId })
       .execute();
+  }
+
+  async settedMainAddress(userId: number, addressId: number) {
+    return await this.update(
+      { address_id: addressId, user_id: userId },
+      { is_main_address: true },
+    );
+  }
+
+  async settedNotMainAddress(userId: number, addressId: number) {
+    return await this.update(
+      { address_id: addressId, user_id: userId },
+      { is_main_address: false },
+    );
   }
 }

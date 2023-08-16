@@ -19,7 +19,6 @@ export class CreateAddressPipe implements PipeTransform<CreateAddressDto> {
       city: SCHEMA.REQUIRED_STRING('city'),
       gu: SCHEMA.REQUIRED_STRING('gu'),
       dong: SCHEMA.REQUIRED_STRING('dong'),
-      postal_code: SCHEMA.REQUIRED_STRING('postal_code'),
       x_code: SCHEMA.REQUIRED_NUMBER('x_code'),
       y_code: SCHEMA.REQUIRED_NUMBER('y_code'),
     });

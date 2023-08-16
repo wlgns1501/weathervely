@@ -10,7 +10,7 @@ import { UserWithAddress } from './user_with_address.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'address' })
-@Unique(['address_name', 'postal_code'])
+@Unique(['address_name', 'gu', 'dong'])
 export class Address extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
@@ -50,15 +50,6 @@ export class Address extends BaseEntity {
   })
   @Column({ name: 'dong', comment: 'dong' })
   dong: string;
-
-  @ApiProperty({
-    description: 'postal_code',
-    nullable: false,
-    required: true,
-    example: '03190',
-  })
-  @Column({ name: 'postal_code', comment: '우편번호' })
-  postal_code: string;
 
   @ApiProperty({
     description: 'country',

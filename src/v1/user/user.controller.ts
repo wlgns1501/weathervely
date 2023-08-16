@@ -80,15 +80,23 @@ export class UserController {
     return this.service.getAddresses(req.user);
   }
 
+  @Post('address/setMain/:addressId')
+  @ApiOperation({ summary: '메인 주소 설정' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  setMainAddress(@Req() req: any, @Param('addressId') addressId: number) {
+    return this.service.setMainAddress(req.user, addressId);
+  }
+
   @Post('address/')
   @ApiOperation({ summary: '주소 설정 추가' })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  createUserWithAddress(
+  addUserWithAddress(
     @Body(new CreateAddressPipe()) createAddressDto: CreateAddressDto,
     @Req() req: any,
   ) {
-    return this.service.createUserWithAddress(createAddressDto, req.user);
+    return this.service.addUserWithAddress(createAddressDto, req.user);
   }
 
   @Patch('address/:addressId')

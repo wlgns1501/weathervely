@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Address } from './address.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({ name: 'user_with_address' })
 @Unique(['user', 'address'])
@@ -19,6 +20,10 @@ export class UserWithAddress extends BaseEntity {
 
   //   @Column({ name: 'sensory_temp', comment: '체감 온도' })
   //   sensory_temp: number;
+
+  @ApiProperty({ description: 'is_main_address', default: true })
+  @Column({ name: 'is_main_address', comment: '대표 주소' })
+  is_main_address: boolean;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })

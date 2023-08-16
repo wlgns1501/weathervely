@@ -18,7 +18,6 @@ export type ADDRESS_TYPE = {
   city: string;
   gu: string;
   dong: string;
-  postal_code: string;
   x_code: number;
   y_code: number;
 };
@@ -62,7 +61,7 @@ export class UserService {
 
   private async createUserAddress(user: User, address: Address) {
     try {
-      await this.userAddressRepository.createUserWithAddress(user, address);
+      await this.userAddressRepository.addUserWithAddress(user, address);
     } catch (err) {
       switch (err.errno) {
         case MYSQL_ERROR_CODE.DUPLICATED_KEY:
@@ -125,12 +124,29 @@ export class UserService {
   async getAddresses(user: User) {
     const userId = user.id;
     const address = await this.addressRepository.getUserAddresses(userId);
+    // const address = await this.userAddressRepository.getUserAddress(user);
 
     return address;
   }
 
   @Transactional()
-  async createUserWithAddress(createAddressDto: CreateAddressDto, user: User) {
+  async setMainAddress(user: User, addressId: number) {
+    const userId = user.id;
+
+    const [{ id: mainAddressId }] =
+      await this.addressRepository.getUserMainAddresses(userId);
+
+    await this.userAddressRepository.settedNotMainAddress(
+      userId,
+      mainAddressId,
+    );
+
+    await this.userAddressRepository.settedMainAddress(userId, addressId);
+    return { success: true };
+  }
+
+  @Transactional()
+  async addUserWithAddress(createAddressDto: CreateAddressDto, user: User) {
     const userId = user.id;
     const settedAddresses = await this.addressRepository.getUserAddresses(
       userId,
