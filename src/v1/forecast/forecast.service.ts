@@ -1,7 +1,12 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { AxiosInstance } from 'axios';
 import { createPublicApiAxiosInstance } from '../../lib/config/axios.config';
-import { dfsXyConvert, getBaseDateTime } from '../../lib/utils/publicForecast';
+import {
+  dfsXyConvert,
+  getBaseDateTime,
+  midTaCode,
+  midLandFcstCode,
+} from '../../lib/utils/publicForecast';
 import { User } from 'src/entities/user.entity';
 import { Address } from 'src/entities/address.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -161,7 +166,6 @@ export class ForecastService {
     try {
       const { city, x_code, y_code } = address;
       const base_date = getBaseDateTime({ provide: 1440 }).base_date;
-      console.log(base_date);
 
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
@@ -193,13 +197,11 @@ export class ForecastService {
       }
       return weather;
     } catch (err) {
-      console.error(err);
-
       throw err;
     }
   }
 
-  // 3일후 ~ 10일후 기온 예보
+  // 3일후 ~ 10일후 기온 예보 - 중기기온예보
   private async getMidTa(address: Address) {
     try {
       const { city } = address;
@@ -218,7 +220,7 @@ export class ForecastService {
           `/MidFcstInfoService/getMidTa`,
           {
             params: {
-              regId: '11B10101', // 지점번호 - ( TODO: 매핑 필요 )
+              regId: midTaCode(city), // 지점번호 - ( TODO: 매핑 필요 )
               tmFc: `${base_date}1800`, // 어제 18시 발표 데이터
             },
           },
@@ -235,13 +237,11 @@ export class ForecastService {
       }
       return temperatureInfo;
     } catch (err) {
-      console.error(err);
-
       throw err;
     }
   }
 
-  // 3일후 ~ 10일후 날씨 예보
+  // 3일후 ~ 10일후 날씨 예보 - 중기육상예보
   private async getMidLandFcst(address: Address) {
     try {
       const { city } = address;
@@ -260,7 +260,7 @@ export class ForecastService {
           `/MidFcstInfoService/getMidLandFcst`,
           {
             params: {
-              regId: '11B00000', // 지점번호 - ( TODO: 매핑 필요 )
+              regId: midLandFcstCode(city), // 지점번호 - ( TODO: 매핑 필요 )
               tmFc: `${base_date}1800`, // 어제 18시 발표 데이터
             },
           },
