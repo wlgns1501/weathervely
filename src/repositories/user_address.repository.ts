@@ -19,6 +19,15 @@ export class UserAddressRepository extends Repository<UserWithAddress> {
       .getOne();
   }
 
+  async getUserAddresses(user: User) {
+    return await this.createQueryBuilder('awd')
+      .where({
+        user,
+      })
+      .leftJoinAndSelect('awd.address', 'a')
+      .getOne();
+  }
+
   async createUserWithAddress(user: User, address: Address) {
     return await this.create({ user, address, is_main_address: true }).save();
   }

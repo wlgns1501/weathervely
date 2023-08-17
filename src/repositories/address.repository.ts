@@ -25,15 +25,6 @@ export class AddressRepository extends Repository<Address> {
     return await this.create({ ...setAddressDto }).save();
   }
 
-  async getUserAddresses(userId: number) {
-    return await this.createQueryBuilder('a')
-      .select(['a.id', 'a.address_name', 'uwa.is_main_address'])
-      .leftJoin('a.user_with_address', 'uwa', 'uwa.address_id = a.id')
-      .leftJoin('user', 'u', 'uwa.user_id = u.id')
-      .where('u.id = :userId', { userId })
-      .getMany();
-  }
-
   async getUserMainAddresses(userId: number) {
     return await this.createQueryBuilder('a')
       .select('*')

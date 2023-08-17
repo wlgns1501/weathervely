@@ -165,6 +165,7 @@ export class ForecastService {
 
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
+
       let weather: any;
       if (cacheData) {
         weather = cacheData;
@@ -223,6 +224,7 @@ export class ForecastService {
             },
           },
         );
+
         if (response?.data?.response?.header?.resultCode !== '00') {
           throw {
             errno: HttpStatus.SERVICE_UNAVAILABLE,
@@ -230,6 +232,7 @@ export class ForecastService {
           };
         }
         temperatureInfo = response.data.response.body?.items?.item;
+
         const milliSeconds = calculateMS();
         await this.cacheManager.set(cacheKey, temperatureInfo, milliSeconds);
       }
