@@ -11,6 +11,7 @@ import { ForecastModule } from './v1/forecast/forecast.module';
 import { ClosetModule } from './v1/closet/closet.module';
 import { TypeModule } from './v1/type/type.module';
 import { UserModule } from './v1/user/user.module';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -31,6 +32,28 @@ import { UserModule } from './v1/user/user.module';
     ClosetModule,
     TypeModule,
     UserModule,
+    RouterModule.register([
+      {
+        path: 'v1',
+        module: AuthModule,
+      },
+      {
+        path: 'v1',
+        module: ForecastModule,
+      },
+      {
+        path: 'v1',
+        module: ClosetModule,
+      },
+      {
+        path: 'v1',
+        module: TypeModule,
+      },
+      {
+        path: 'v1',
+        module: UserModule,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],
