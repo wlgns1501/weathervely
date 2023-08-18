@@ -11,6 +11,8 @@ import { ForecastModule } from './v1/forecast/forecast.module';
 import { ClosetModule } from './v1/closet/closet.module';
 import { TypeModule } from './v1/type/type.module';
 import { UserModule } from './v1/user/user.module';
+import { RouterModule } from '@nestjs/core';
+import { V1Module } from './v1/v1.module';
 
 @Module({
   imports: [
@@ -26,11 +28,7 @@ import { UserModule } from './v1/user/user.module';
         });
       },
     }),
-    AuthModule,
-    ForecastModule,
-    ClosetModule,
-    TypeModule,
-    UserModule,
+    V1Module,
   ],
   controllers: [AppController],
   providers: [AppService],

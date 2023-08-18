@@ -236,11 +236,11 @@ export class ClosetService {
       const temperatureDifference = userSensoryTemperature - temperatureValue;
       // Math.round 빼고, between 를 초과 + 이하 or 이상 + 미만으로 변경하고 , temperature_range 범위 교집합으로 수정해야함
       const closets = await this.closetRepository.getRecommendCloset(
-        Math.round(userSensoryTemperature),
+        userSensoryTemperature,
       );
       return {
-        closets,
         temperatureDifference: Math.round(temperatureDifference),
+        closets,
       };
     } catch (err) {
       switch (err.errno) {

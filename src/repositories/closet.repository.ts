@@ -64,10 +64,10 @@ export class ClosetRepository extends Repository<Closet> {
       .select('tr.id')
       .from('temperature_range', 'tr')
       .where(
-        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) - 3',
+        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) - 3',
       )
       .andWhere(
-        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE :temp BETWEEN tr2.min_temp AND tr2.max_temp) + 3',
+        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) + 3',
       )
       .groupBy('tr.id')
       .orderBy('tr.id')
@@ -82,7 +82,7 @@ export class ClosetRepository extends Repository<Closet> {
       .addSelect('gc.type_name')
       .addSelect('gc.temp_id')
       .addSelect(
-        `case when :temp between tr.min_temp and tr.max_temp then 'true' else 'false' end`,
+        `case when tr.min_temp <= :temp and tr.max_temp > :temp then 'true' else 'false' end`,
         'isCurrentTemperature',
       )
       .from('temperature_range', 'tr')
@@ -114,7 +114,7 @@ export class ClosetRepository extends Repository<Closet> {
       .select('closet.*')
       .innerJoin('closet.closetTemperature', 'ct')
       .innerJoin('ct.temperatureRange', 'tr')
-      .where(':temperature between tr.min_temp and tr.max_temp', {
+      .where('tr.min_temp <= :temperature and tr.max_temp > :temperature', {
         temperature,
       })
       .orderBy('rand()');

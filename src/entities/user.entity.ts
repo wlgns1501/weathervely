@@ -24,7 +24,7 @@ export class User extends BaseEntity {
     description: 'nickName',
     nullable: false,
     required: true,
-    example: 'test1',
+    example: 'test1111',
     maxLength: 10,
   })
   nickname: string;

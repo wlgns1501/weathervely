@@ -90,6 +90,80 @@ export function padNumber(num: number): string {
   return num.toString().padStart(2, '0');
 }
 
+// 중기기온예보구역 코드 - 오픈API 가이드 참조
+export function midTaCode(city: string): string {
+  switch (true) {
+    case city.includes('부산'):
+      return '11H20201';
+    case city.includes('대구'):
+      return '11H10701';
+    case city.includes('인천'):
+      return '11B20201';
+    case city.includes('광주'):
+      return '11F20501';
+    case city.includes('대전'):
+      return '11C20401';
+    case city.includes('울산'):
+      return '11H20101';
+    case city.includes('세종'):
+      return '11C20404';
+    case city.includes('경기'):
+      return '11B20601'; // 수원
+    case city.includes('강원'):
+      return '11D10301'; // 강릉
+    case city.includes('충북'):
+      return '11C10301'; // 청주
+    case city.includes('충남'):
+      return '11C20104'; // 홍성
+    case city.includes('전북'):
+      return '11F10201'; // 전주
+    case city.includes('전남'):
+      return '11F20603'; // 순천
+    case city.includes('경북'):
+      return '11H10201'; // 포항
+    case city.includes('경남'):
+      return '11H20701'; // 진주
+    case city.includes('제주'):
+      return '11G00201';
+    case city.includes('서울'):
+    default:
+      console.log(city);
+      return '11B10101';
+  }
+}
+
+// 중기육상예보구역 코드 - 오픈API 가이드 참조
+export function midLandFcstCode(city: string): string {
+  switch (true) {
+    case city.includes('강원'):
+      return '11D10000';
+    case city.includes('대전'):
+    case city.includes('세종'):
+    case city.includes('충남'):
+      return '11C20000';
+    case city.includes('충북'):
+      return '11C10000';
+    case city.includes('광주'):
+    case city.includes('전남'):
+      return '11F20000';
+    case city.includes('전북'):
+      return '11F10000';
+    case city.includes('대구'):
+    case city.includes('경북'):
+      return '11H10000';
+    case city.includes('부산'):
+    case city.includes('울산'):
+    case city.includes('경남'):
+      return '11H20000';
+    case city.includes('제주'):
+      return '11G00000';
+    case city.includes('서울'):
+    case city.includes('인천'):
+    case city.includes('경기'):
+    default:
+      return '11B00000';
+  }
+}
 // // 상태 가져오는 함수
 // export function getWeatherState(ptyCode: number, skyCode: number): string {
 //   switch (ptyCode) {
