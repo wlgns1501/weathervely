@@ -123,8 +123,8 @@ export class UserService {
 
   async getAddresses(user: User) {
     const userId = user.id;
-    const address = await this.addressRepository.getUserAddresses(userId);
-    // const address = await this.userAddressRepository.getUserAddress(user);
+    const address = await this.userRepository.getUserAddresses(userId);
+    // const address = await this.userAddressRepository.getUserAddress(userId);
 
     return address;
   }
@@ -148,9 +148,7 @@ export class UserService {
   @Transactional()
   async addUserWithAddress(createAddressDto: CreateAddressDto, user: User) {
     const userId = user.id;
-    const settedAddresses = await this.addressRepository.getUserAddresses(
-      userId,
-    );
+    const settedAddresses = await this.userRepository.getUserAddresses(userId);
 
     if (settedAddresses.length >= 3) {
       throw new HttpException(
