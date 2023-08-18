@@ -24,7 +24,7 @@ export class User extends BaseEntity {
     description: 'nickName',
     nullable: false,
     required: true,
-    example: 'test1',
+    example: 'test1111',
     maxLength: 10,
   })
   nickname: string;
@@ -57,7 +57,10 @@ export class User extends BaseEntity {
   @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user)
   user_with_address: UserWithAddress[];
 
-  @OneToMany(() => UserSetTemperature, (userSetTemperature) => userSetTemperature.user)
+  @OneToMany(
+    () => UserSetTemperature,
+    (userSetTemperature) => userSetTemperature.user,
+  )
   user_set_temperature: UserSetTemperature[];
 
   @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.user)
