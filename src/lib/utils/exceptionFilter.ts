@@ -25,8 +25,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
     let body: ApiError;
     let status: HttpStatus;
 
-    console.log(exception);
-
     if (exception instanceof BusinessException) {
       body = {
         id: exception.id,
@@ -63,18 +61,22 @@ export class CustomExceptionFilter implements ExceptionFilter {
       const errorMsg = `Status: ${status} - Message: ${body.message} - Time: ${body.timestamp}`;
       try {
         await axios.post(webhookUrl, { content: errorMsg });
+        response.status(404).json(`성공 ${webhookUrl}`);
       } catch (e) {
-        this.logger.error(`Failed to send discord notification : ${errorMsg}`);
+        response
+          .status(404)
+          .json(`Failed to send discord notification : ${errorMsg}`);
+        // this.logger.error(`Failed to send discord notification : ${errorMsg}`);
       }
     }
 
-    this.logger.error(
-      `Got an exception: ${JSON.stringify({
-        path: request.url,
-        ...body,
-      })}`,
-    );
+    // this.logger.error(
+    //   `Got an exception: ${JSON.stringify({
+    //     path: request.url,
+    //     ...body,
+    //   })}`,
+    // );
 
-    response.status(status).json(body);
+    // response.status(status).json(body);
   }
 }
