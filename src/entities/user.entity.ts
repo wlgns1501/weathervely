@@ -54,15 +54,27 @@ export class User extends BaseEntity {
   @CreateDateColumn({ name: 'createdAt', comment: '생성 시간' })
   createdAt: Date;
 
-  @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user)
+  @OneToMany(() => UserWithAddress, (userWithAddress) => userWithAddress.user, {
+    onDelete: 'CASCADE',
+  })
   user_with_address: UserWithAddress[];
 
-  @OneToMany(() => UserSetTemperature, (userSetTemperature) => userSetTemperature.user)
+  @OneToMany(
+    () => UserSetTemperature,
+    (userSetTemperature) => userSetTemperature.user,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   user_set_temperature: UserSetTemperature[];
 
-  @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.user)
+  @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.user, {
+    onDelete: 'CASCADE',
+  })
   user_pick_style: UserPickStyle[];
 
-  @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.user)
+  @OneToMany(() => UserSetStyle, (userSetStyle) => userSetStyle.user, {
+    onDelete: 'CASCADE',
+  })
   user_set_style: UserSetStyle[];
 }

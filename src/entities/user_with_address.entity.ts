@@ -25,7 +25,9 @@ export class UserWithAddress extends BaseEntity {
   @Column({ name: 'is_main_address', comment: '대표 주소' })
   is_main_address: boolean;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
   @Column()
