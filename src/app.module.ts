@@ -12,6 +12,7 @@ import { ClosetModule } from './v1/closet/closet.module';
 import { TypeModule } from './v1/type/type.module';
 import { UserModule } from './v1/user/user.module';
 import { RouterModule } from '@nestjs/core';
+import { V1Module } from './v1/v1.module';
 
 @Module({
   imports: [
@@ -27,33 +28,7 @@ import { RouterModule } from '@nestjs/core';
         });
       },
     }),
-    AuthModule,
-    ForecastModule,
-    ClosetModule,
-    TypeModule,
-    UserModule,
-    RouterModule.register([
-      {
-        path: 'v1',
-        module: AuthModule,
-      },
-      {
-        path: 'v1',
-        module: ForecastModule,
-      },
-      {
-        path: 'v1',
-        module: ClosetModule,
-      },
-      {
-        path: 'v1',
-        module: TypeModule,
-      },
-      {
-        path: 'v1',
-        module: UserModule,
-      },
-    ]),
+    V1Module,
   ],
   controllers: [AppController],
   providers: [AppService],
