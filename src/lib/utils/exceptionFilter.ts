@@ -55,7 +55,11 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    if (process.env.NEST_APP_MODE === 'production') {
+    if (
+      process.env.NEST_APP_MODE === 'production' &&
+      status >= 500 &&
+      status < 600
+    ) {
       const webhookUrl =
         'https://discord.com/api/webhooks/1142120803060690984/_6YSU5-0nZL2otuj-IrWdnxoU_OOgwq5PNMi8HPwaEQTA7RN1mj_y1KEhLd-Y1LXPGTI';
       const errorMsg = `Status: ${status} - Message: ${body.message} - Time: ${body.timestamp}`;
