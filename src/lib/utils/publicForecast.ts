@@ -111,17 +111,17 @@ export function midTaCode(city: string): string {
       return '11B20601'; // 수원
     case city.includes('강원'):
       return '11D10301'; // 강릉
-    case city.includes('충청북도'):
+    case city.includes('충북'):
       return '11C10301'; // 청주
-    case city.includes('충청남도'):
+    case city.includes('충남'):
       return '11C20104'; // 홍성
-    case city.includes('전라북도'):
-      return '11F10201'; // 전북
-    case city.includes('전라남도'):
+    case city.includes('전북'):
+      return '11F10201'; // 전주
+    case city.includes('전남'):
       return '11F20603'; // 순천
-    case city.includes('경상북도'):
+    case city.includes('경북'):
       return '11H10201'; // 포항
-    case city.includes('경상남도'):
+    case city.includes('경남'):
       return '11H20701'; // 진주
     case city.includes('제주'):
       return '11G00201';
@@ -136,24 +136,24 @@ export function midTaCode(city: string): string {
 export function midLandFcstCode(city: string): string {
   switch (true) {
     case city.includes('강원'):
-      return '11D10000'; // 강릉
+      return '11D10000';
     case city.includes('대전'):
     case city.includes('세종'):
-    case city.includes('충청남도'):
-      return '11C20000'; // 홍성
-    case city.includes('충청북도'):
-      return '11C10000'; // 청주
+    case city.includes('충남'):
+      return '11C20000';
+    case city.includes('충북'):
+      return '11C10000';
     case city.includes('광주'):
-    case city.includes('전라남도'):
+    case city.includes('전남'):
       return '11F20000';
-    case city.includes('전라북도'):
-      return '11F10000'; // 전북
+    case city.includes('전북'):
+      return '11F10000';
     case city.includes('대구'):
-    case city.includes('경상북도'):
-      return '11H10000'; // 포항
+    case city.includes('경북'):
+      return '11H10000';
     case city.includes('부산'):
     case city.includes('울산'):
-    case city.includes('경상남도'):
+    case city.includes('경남'):
       return '11H20000';
     case city.includes('제주'):
       return '11G00000';
