@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "env-cmd -f ./config/.env nest start --watch",
+    "start:dev": "env-cmd -f ./config/.env.development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "deploy": "npm run build && env-cmd -f ./config/.env pm2 start ecosystem.config.js"
+    "deploy": "npm run build && env-cmd -f ./config/.env.production pm2 start ecosystem.config.js"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",
