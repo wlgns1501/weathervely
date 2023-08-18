@@ -2,16 +2,10 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './v1/auth/auth.module';
 import { TypeOrmConfigService } from 'ormconfig';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { addTransactionalDataSource } from 'typeorm-transactional';
-import { ForecastModule } from './v1/forecast/forecast.module';
-import { ClosetModule } from './v1/closet/closet.module';
-import { TypeModule } from './v1/type/type.module';
-import { UserModule } from './v1/user/user.module';
-import { RouterModule } from '@nestjs/core';
 import { V1Module } from './v1/v1.module';
 
 @Module({
