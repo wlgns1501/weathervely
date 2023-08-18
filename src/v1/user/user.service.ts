@@ -121,6 +121,12 @@ export class UserService {
     return { access_token };
   }
 
+  async deleteUser(userId: number) {
+    await this.userRepository.deleteUser(userId);
+
+    return { success: true };
+  }
+
   async getAddresses(user: User) {
     const userId = user.id;
     const address = await this.userRepository.getUserAddresses(userId);

@@ -18,7 +18,9 @@ export class UserSetTemperature extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

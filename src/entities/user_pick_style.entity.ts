@@ -26,7 +26,9 @@ export class UserPickStyle extends BaseEntity {
   @Column({ name: 'feminine', comment: '페미닌 선택한 수' })
   feminine: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

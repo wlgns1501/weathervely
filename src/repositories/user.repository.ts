@@ -23,6 +23,10 @@ export class UserRepository extends Repository<User> {
     return await this.update({ id: userId }, { gender, nickname });
   }
 
+  async deleteUser(userId: number) {
+    return await this.delete({ id: userId });
+  }
+
   async getUserAddresses(userId: number) {
     // const query = this.createQueryBuilder('u')
     //   .leftJoinAndSelect(

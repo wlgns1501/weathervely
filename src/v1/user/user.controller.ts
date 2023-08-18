@@ -72,6 +72,13 @@ export class UserController {
     settledResponse.send({ success: true });
   }
 
+  @Post(':userId')
+  @ApiOperation({ summary: '<test용> 유저 삭제' })
+  @HttpCode(HttpStatus.OK)
+  async deleteUser(@Param('userId') userId: number) {
+    return await this.service.deleteUser(userId);
+  }
+
   @Get('address/')
   @ApiOperation({ summary: '주소 리스트' })
   @HttpCode(HttpStatus.OK)
