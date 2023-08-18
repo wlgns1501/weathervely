@@ -22,6 +22,8 @@ module.exports = {
         PUBLIC_OPEN_API_BASE_URL: process.env.PUBLIC_OPEN_API_BASE_URL,
         PUBLIC_OPEN_API_SERVICE_KEY: process.env.PUBLIC_OPEN_API_SERVICE_KEY,
         JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+        JWT_EXPIRESIN: process.env.JWT_EXPIRESIN,
+        NEST_APP_MODE: process.env.NEST_APP_MODE,
       },
     },
   ],
