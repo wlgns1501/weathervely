@@ -35,6 +35,7 @@ export class UserRepository extends Repository<User> {
       select
         a.id,
         a.address_name,
+        a.dong,
         case when a.is_main_address = 0 then 'false'
         else 'true' end as is_main_address
         
@@ -44,6 +45,7 @@ export class UserRepository extends Repository<User> {
         select
           a.id,
           a.address_name,
+          a.dong,
           uwa.is_main_address
         FROM 
           address a 
