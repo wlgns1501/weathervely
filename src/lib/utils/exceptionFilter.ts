@@ -24,6 +24,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
   async catch(exception: Error, host: ArgumentsHost) {
     let body: ApiError;
     let status: HttpStatus;
+    const errorUrl = host.getArgs()[0].url;
 
     if (exception instanceof BusinessException) {
       body = {
@@ -32,10 +33,12 @@ export class CustomExceptionFilter implements ExceptionFilter {
         domain: exception.domain,
         timestamp: exception.timestamp,
       };
+
       status = exception.status;
     } else if (exception instanceof HttpException) {
+      // console.log(exception);
       body = new BusinessException(
-        'generic',
+        errorUrl,
         exception.message,
         exception.getResponse(),
         exception.getStatus(),
@@ -44,7 +47,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
     } else {
       body = new BusinessException(
-        'generic',
+        errorUrl,
         `Internal error occurred: ${exception.message}`,
         'Internal error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -62,7 +65,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
     ) {
       const webhookUrl =
         'https://discord.com/api/webhooks/1142120803060690984/_6YSU5-0nZL2otuj-IrWdnxoU_OOgwq5PNMi8HPwaEQTA7RN1mj_y1KEhLd-Y1LXPGTI';
-      const errorMsg = `Status: ${status} - Message: ${body.message} - Time: ${body.timestamp}`;
+      const errorMsg = `Domain : ${errorUrl} \n - Status: ${status} \n - Message: ${body.message} \n - Time: ${body.timestamp}`;
       try {
         await axios.post(webhookUrl, { content: errorMsg });
       } catch (e) {
