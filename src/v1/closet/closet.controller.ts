@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
   Post,
   Query,
   Req,
@@ -105,5 +106,16 @@ export class ClosetController {
       req.address,
     );
     return res.send({ status: 200, data: { list: data } });
+  }
+
+  @Post('pick/:closetId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: '메인 화면에서 메인 카드 클릭시 히스토리 저장' })
+  async saveClosetClickHistory(
+    @Param('closetId') closetId: number,
+    @Req() req: any,
+  ) {
+    return this.service.saveClosetClickHistory(req.user, closetId);
   }
 }

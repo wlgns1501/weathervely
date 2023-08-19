@@ -10,6 +10,7 @@ import { UserSetTemperature } from './user_set_temperature.entity';
 import { UserSetStyle } from './user_set_style.entity';
 import { ClosetType } from './closet_type.entity';
 import { ClosetTemperature } from './closet_temperature.entity';
+import { UserPickStyle } from './user_pick_style.entity';
 
 @Entity({ name: 'closet' })
 export class Closet extends BaseEntity {
@@ -66,4 +67,7 @@ export class Closet extends BaseEntity {
     (closetTemperature) => closetTemperature.closet,
   )
   closetTemperature: ClosetTemperature[];
+
+  @OneToMany(() => UserPickStyle, (userPickStyle) => userPickStyle.closet)
+  userPickStyle: UserPickStyle[];
 }

@@ -19,4 +19,8 @@ export class UserPickStyleRepository extends Repository<UserPickStyle> {
     );
     return queryBuilder.getOne();
   }
+
+  async saveClosetClickHistory(userId: number, closetId: number) {
+    return await this.create({ user_id: userId, closet_id: closetId }).save();
+  }
 }

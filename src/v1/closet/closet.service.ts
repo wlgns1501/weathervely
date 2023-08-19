@@ -271,6 +271,15 @@ export class ClosetService {
       }
     }
   }
+
+  @Transactional()
+  async saveClosetClickHistory(user: User, closetId: number) {
+    const userId = user.id;
+
+    await this.userPickStyleRepository.saveClosetClickHistory(userId, closetId);
+
+    return { success: true };
+  }
 }
 
 function getTargetDate(targetDateTime: Date): string {

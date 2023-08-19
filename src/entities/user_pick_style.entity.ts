@@ -1,6 +1,7 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -14,21 +15,22 @@ export class UserPickStyle extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'id', comment: 'PK' })
   id: number;
 
-  @Column({ name: 'casual', comment: '캐주얼 선택한 수' })
-  casual: number;
-
-  @Column({ name: 'formal', comment: '포멀 선택한 수' })
-  formal: number;
-
-  @Column({ name: 'unisex', comment: '유니섹스 선택한 수' })
-  unisex: number;
-
-  @Column({ name: 'feminine', comment: '페미닌 선택한 수' })
-  feminine: number;
+  @CreateDateColumn({ name: 'createdAt', comment: '생성일자' })
+  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.id, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+  @Column()
+  user_id: number;
+
+  @ManyToOne(() => Closet, (closet) => closet.id, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'closet_id' })
+  closet: Closet;
+  @Column()
+  closet_id: number;
 }
