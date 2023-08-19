@@ -10,6 +10,7 @@ import * as jwt from 'jsonwebtoken';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 import { AuthRepository } from 'src/repositories/auth.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
+import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 
 export type JwtPayload = {
   nickname: string;
@@ -20,6 +21,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private authRepository: AuthRepository,
     private userAddressRepository: UserAddressRepository,
+    private userSetTemperatureRepository: UserSetTemperatureRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -70,6 +72,18 @@ export class AuthGuard implements CanActivate {
           {
             message: HTTP_ERROR.NEED_SET_GENDER,
             detail: '성별을 설정하지 않았습니다.',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+
+      const setTemperature =
+        await this.userSetTemperatureRepository.getSensoryTemperature(user);
+
+      if (setTemperature.length == 0)
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.NEED_SET_SENSORY_TEMP,
+            detail: '체감온도를 설정하지 않았습니다.',
           },
           HttpStatus.UNAUTHORIZED,
         );

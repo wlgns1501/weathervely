@@ -83,11 +83,14 @@ export class ClosetService {
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
         temp_id = temperatureRange.id;
       }
+
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
       const weather = await this.forecastService.getVilageFcst(address);
+
       const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
+
       const closets = await this.closetRepository.getClosetByTemperature(
         Number(tmpValue),
         temp_id,

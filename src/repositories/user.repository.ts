@@ -28,8 +28,6 @@ export class UserRepository extends Repository<User> {
   }
 
   async getUserAddresses(userId: number) {
-    console.log(userId);
-
     return await this.query(
       `
       select

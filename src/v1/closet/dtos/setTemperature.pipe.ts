@@ -18,7 +18,6 @@ export class SetTemperaturePipe implements PipeTransform<any> {
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);
-    console.log(error);
 
     if (error) {
       throw new HttpException(

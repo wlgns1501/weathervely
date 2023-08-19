@@ -186,6 +186,7 @@ export class ForecastService {
             },
           },
         );
+
         if (response.data.response.header.resultCode !== '00') {
           throw {
             errno: HttpStatus.SERVICE_UNAVAILABLE,
