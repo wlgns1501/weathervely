@@ -27,13 +27,12 @@ export class AddressRepository extends Repository<Address> {
 
   async getUserMainAddresses(userId: number) {
     return await this.createQueryBuilder('a')
-      .select('*')
-      .leftJoin('user_with_address', 'uwa')
+      .leftJoin('user_with_address', 'uwa', 'uwa.address_id = a.id')
       .leftJoin('user', 'u', 'uwa.user_id = u.id')
       .where('u.id = :userId', { userId })
-      .andWhere('uwa.is_main_address = :is_main_address', {
-        is_main_address: true,
-      })
+      // .andWhere('uwa.is_main_address = :is_main_address', {
+      //   is_main_address: true,
+      // })
       .getMany();
   }
 }

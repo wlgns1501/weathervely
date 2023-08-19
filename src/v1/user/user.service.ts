@@ -138,6 +138,7 @@ export class UserService {
   @Transactional()
   async setMainAddress(user: User, addressId: number) {
     const userId = user.id;
+    // console.log(addressId);
 
     const [{ id: mainAddressId }] =
       await this.addressRepository.getUserMainAddresses(userId);

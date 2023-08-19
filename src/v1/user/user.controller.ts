@@ -82,14 +82,6 @@ export class UserController {
     return res.send({ status: 200, data: { list: data } });
   }
 
-  @Post('address/setMain/:addressId')
-  @ApiOperation({ summary: '메인 주소 설정' })
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
-  setMainAddress(@Req() req: any, @Param('addressId') addressId: number) {
-    return this.service.setMainAddress(req.user, addressId);
-  }
-
   @Post('address/')
   @ApiOperation({ summary: '주소 설정 추가' })
   @HttpCode(HttpStatus.OK)
@@ -126,6 +118,14 @@ export class UserController {
     @Req() req: any,
   ) {
     return this.service.deleteUserWithAddress(addressId, req.user);
+  }
+
+  @Post('address/setMain/:addressId')
+  @ApiOperation({ summary: '메인 주소 설정' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  setMainAddress(@Req() req: any, @Param('addressId') addressId: number) {
+    return this.service.setMainAddress(req.user, addressId);
   }
 
   @Post(':userId')
