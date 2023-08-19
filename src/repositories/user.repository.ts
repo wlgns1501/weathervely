@@ -28,18 +28,7 @@ export class UserRepository extends Repository<User> {
   }
 
   async getUserAddresses(userId: number) {
-    // const query = this.createQueryBuilder('u')
-    //   .leftJoinAndSelect(
-    //     (subQuery) =>
-    //       subQuery
-    //         .from(Address, 'a')
-    //         .leftJoin(UserWithAddress, 'uwa', 'uwa.address_id = a.id'),
-    //     'a',
-    //   )
-    //   .addSelect('a.id', 'a_id')
-    //   .addSelect('a.address_name', 'address_name')
-    //   .addSelect('a.is_main_address', 'is_main_address')
-    //   .where('u.id = :user_id', { user_id: userId });
+    console.log(userId);
 
     return await this.query(
       `

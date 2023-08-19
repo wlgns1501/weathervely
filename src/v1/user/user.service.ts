@@ -168,6 +168,7 @@ export class UserService {
     }
 
     const address = await this.checkAddressAndCreateAddress(createAddressDto);
+    console.log(address);
 
     await this.createUserAddress(user, address);
 
