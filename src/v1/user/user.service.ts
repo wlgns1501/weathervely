@@ -138,10 +138,18 @@ export class UserService {
   @Transactional()
   async setMainAddress(user: User, addressId: number) {
     const userId = user.id;
-    // console.log(addressId);
 
     const [{ id: mainAddressId }] =
       await this.addressRepository.getUserMainAddresses(userId);
+
+    if (addressId == mainAddressId)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.ALREADY_SET_MAIN_ADDRESS,
+          detail: '이 주소는 이미 대표 동네로 설정 되어있습니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
 
     await this.userAddressRepository.settedNotMainAddress(
       userId,
