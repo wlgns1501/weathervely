@@ -81,6 +81,7 @@ export class ClosetRepository extends Repository<Closet> {
       .addSelect('gc.image_url')
       .addSelect('gc.type_name')
       .addSelect('gc.temp_id')
+      .addSelect('gc.site_name')
       .addSelect(
         `case when tr.min_temp <= :temp and tr.max_temp > :temp then 'true' else 'false' end`,
         'isCurrentTemperature',

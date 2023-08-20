@@ -76,10 +76,12 @@ export class AuthGuard implements CanActivate {
           HttpStatus.UNAUTHORIZED,
         );
 
+      const { closet_id } = req.query;
+
       const setTemperature =
         await this.userSetTemperatureRepository.getSensoryTemperature(user);
 
-      if (setTemperature.length == 0)
+      if (setTemperature.length == 0 && closet_id)
         throw new HttpException(
           {
             message: HTTP_ERROR.NEED_SET_SENSORY_TEMP,
