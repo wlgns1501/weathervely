@@ -137,6 +137,7 @@ export class ClosetRepository extends Repository<Closet> {
           gc.image_url,
           gc.site_name,
           gc.type_name,
+          tr.id as temp_id,
           case when tr.min_temp <= ? and tr.max_temp > ? then 'true' 
           else 'false' end as isCurrentTemperature,
           ROW_NUMBER () over(order by tr.id desc) as row_num
@@ -184,7 +185,9 @@ export class ClosetRepository extends Repository<Closet> {
           twc.image_url,
           twc.site_name,
           twc.type_name,
-          twc.isCurrentTemperature
+          twc.isCurrentTemperature,
+          twc.closet_id,
+          twc.temp_id
         FROM 
           temp_with_closet twc
         order by row_num asc
