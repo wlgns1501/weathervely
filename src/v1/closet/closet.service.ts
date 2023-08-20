@@ -154,12 +154,29 @@ export class ClosetService {
       const averageTemp = await this.temperatureRangeRepository.getAverageTemp(
         closet,
       );
+
       const newUserSetTemperature = new UserSetTemperature();
       newUserSetTemperature.closet = closet;
       newUserSetTemperature.current_temperature =
         setTemperatureDto.current_temperature;
-      newUserSetTemperature.sensory_temperature = averageTemp.avg_temp;
       newUserSetTemperature.created_at = new Date();
+
+      if (averageTemp.id === 1) {
+        // 제일 높은 구간
+        newUserSetTemperature.sensory_temperature =
+          Number(setTemperatureDto.current_temperature) < 28 // 현재온도가 28도 보다 낮을때
+            ? '28' // 28도 이상은 하나의 구간이니깐 28도로 set
+            : setTemperatureDto.current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
+      } else if (averageTemp.id === 9) {
+        // 제일 낮은 구간
+        newUserSetTemperature.sensory_temperature =
+          Number(setTemperatureDto.current_temperature) > 5 // 현재온도가 5도 보다 높을때
+            ? '5' // 5도 이하는 하나의 구간이니깐 5도로 set
+            : setTemperatureDto.current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
+      } else {
+        newUserSetTemperature.sensory_temperature = averageTemp.avg_temp;
+      }
+
       await this.userSetTemperatureRepository.setTemperature(
         newUserSetTemperature,
         user,
