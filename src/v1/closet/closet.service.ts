@@ -75,6 +75,19 @@ export class ClosetService {
     try {
       // use 단기예보 API
       const { dateTime, closet_id } = getClosetByTemperatureDto;
+      // throw {
+      //   errno: HttpStatus.BAD_REQUEST,
+      //   message: HTTP_ERROR.BAD_REQUEST,
+      //   detail: '조회시간을 잘못 입력하였습니다.',
+      // };
+      // if (dateTime < '') {
+      //   // dateTime이 어제 03시 이전이거나, 현재시간 이후일때
+      // throw {
+      //   errno: HttpStatus.BAD_REQUEST,
+      //   message: HTTP_ERROR.BAD_REQUEST,
+      //   detail: '조회시간을 잘못 입력하였습니다.',
+      // };
+      // }
       let temp_id: number;
       let closet: any;
       if (closet_id) {
@@ -113,6 +126,20 @@ export class ClosetService {
       };
     } catch (err) {
       console.log(err);
+      if (!err.errno) {
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      throw new HttpException(
+        { message: err.message, detail: err.detail },
+        err.errno,
+      );
 
       switch (err.errno) {
         case HttpStatus.SERVICE_UNAVAILABLE:
