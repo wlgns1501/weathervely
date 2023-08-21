@@ -99,10 +99,10 @@ export class UserService {
     updateUserNickNameGenderDto: UpdateUserNickNameGenderDto,
     user: User,
   ) {
-    const { nickname, gender } = updateUserNickNameGenderDto;
+    const { nickname } = updateUserNickNameGenderDto;
     const userId = user.id;
     try {
-      await this.userRepository.updateNickNameGender(nickname, gender, userId);
+      await this.userRepository.updateNickNameGender(nickname, userId);
     } catch (err) {
       switch (err.errno) {
         case MYSQL_ERROR_CODE.DUPLICATED_KEY:

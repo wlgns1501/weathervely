@@ -36,7 +36,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
 
       status = exception.status;
     } else if (exception instanceof HttpException) {
-      // console.log(exception);
       body = new BusinessException(
         errorUrl,
         exception.message,

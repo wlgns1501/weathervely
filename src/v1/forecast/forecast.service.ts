@@ -188,10 +188,13 @@ export class ForecastService {
         );
 
         if (response.data.response.header.resultCode !== '00') {
-          throw {
-            errno: HttpStatus.SERVICE_UNAVAILABLE,
-            message: response.data.response.header.resultMsg,
-          };
+          throw new HttpException(
+            {
+              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
+              detail: response.data.response.header.resultMsg,
+            },
+            HttpStatus.SERVICE_UNAVAILABLE,
+          );
         }
         weather = response.data.response.body?.items?.item;
         const milliSeconds = calculateMS();

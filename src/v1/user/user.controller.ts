@@ -49,7 +49,7 @@ export class UserController {
   }
 
   @Patch('')
-  @ApiOperation({ summary: '닉네임 및 성별 수정' })
+  @ApiOperation({ summary: '닉네임 수정' })
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   async updateUserNickNameGender(

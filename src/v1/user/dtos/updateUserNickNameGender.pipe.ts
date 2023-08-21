@@ -17,7 +17,6 @@ export class UpdateUserNickNameGenderPipe
   transform(value: UpdateUserNickNameGenderDto) {
     const validationSchema = Joi.object({
       nickname: SCHEMA.REQUIRED_STRING('nickname'),
-      gender: SCHEMA.REQUIRED_STRING('gender'),
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);
