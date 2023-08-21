@@ -19,8 +19,8 @@ export class UserRepository extends Repository<User> {
     });
   }
 
-  async updateNickNameGender(nickname: string, gender: string, userId: number) {
-    return await this.update({ id: userId }, { gender, nickname });
+  async updateNickNameGender(nickname: string, userId: number) {
+    return await this.update({ id: userId }, { nickname });
   }
 
   async deleteUser(userId: number) {
