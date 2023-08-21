@@ -31,8 +31,8 @@ export class AuthService {
     const { nickname } = loginDto;
 
     let user;
-    let setTemperature: boolean | string;
-    let address: Address | string;
+    let setTemperature: boolean;
+    let address: Address | null;
 
     const findUser = await this.authRepository.getUserByNickname(nickname);
 
@@ -58,7 +58,7 @@ export class AuthService {
     );
 
     if (!setAddress) {
-      address = '';
+      address = null;
     } else {
       address = setAddress;
     }
@@ -67,7 +67,7 @@ export class AuthService {
       await this.userSetTemperatureRepository.getUserSetTemperature(user.id);
 
     if (temperature.length == 0) {
-      setTemperature = '';
+      setTemperature = false;
     } else {
       setTemperature = true;
     }
