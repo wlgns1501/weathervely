@@ -12,6 +12,7 @@ import { UserAddressRepository } from 'src/repositories/user_address.repository'
 import { Address } from 'src/entities/address.entity';
 import { SetGenderDto } from './dtos/setGender.dto';
 import { LoginDto } from './dtos/login.dto';
+import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly addressRepository: AddressRepository,
     private readonly userAddressRepository: UserAddressRepository,
+    private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
   ) {}
 
   private createAccessToken(nickname: string) {
@@ -28,9 +30,13 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { nickname } = loginDto;
 
-    const user = await this.authRepository.getUserByNickname(nickname);
+    let user;
+    let setTemperature: boolean | string;
+    let address: Address | string;
 
-    if (!user)
+    const findUser = await this.authRepository.getUserByNickname(nickname);
+
+    if (!findUser) {
       throw new HttpException(
         {
           message: HTTP_ERROR.NOT_FOUND,
@@ -38,9 +44,35 @@ export class AuthService {
         },
         HttpStatus.NOT_FOUND,
       );
+    } else {
+      user = {
+        id: findUser.id,
+        nickname: findUser.nickname,
+      };
+    }
+
     const access_token = await this.createAccessToken(nickname);
 
-    return { access_token };
+    const [setAddress] = await this.addressRepository.getUserMainAddresses(
+      user.id,
+    );
+
+    if (!setAddress) {
+      address = '';
+    } else {
+      address = setAddress;
+    }
+
+    const temperature =
+      await this.userSetTemperatureRepository.getUserSetTemperature(user.id);
+
+    if (temperature.length == 0) {
+      setTemperature = '';
+    } else {
+      setTemperature = true;
+    }
+
+    return { access_token, user, address, setTemperature };
   }
 
   async getUser() {
@@ -75,6 +107,17 @@ export class AuthService {
   @Transactional()
   async setAddress(setAddressDto: SetAddressDto, user: User) {
     let address: Address | null;
+
+    const settedAddress = await this.userAddressRepository.getUserAddress(user);
+
+    if (settedAddress)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.ALREADY_SET_ADDRESS,
+          detail: '이미 동네 설정을 한 상태 입니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
 
     address = await this.addressRepository.getAddress(setAddressDto);
 

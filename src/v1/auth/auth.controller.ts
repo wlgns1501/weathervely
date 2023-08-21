@@ -49,7 +49,8 @@ export class AuthController {
     @Body(new LoginPipe()) loginDto: LoginDto,
     @Res() response: Response,
   ) {
-    const { access_token } = await this.service.login(loginDto);
+    const { access_token, user, address, setTemperature } =
+      await this.service.login(loginDto);
 
     const settledResponse = this.setAccessToken(
       response,
@@ -57,7 +58,10 @@ export class AuthController {
       ACCESS_TOKEN_EXPIRESIN,
     );
 
-    settledResponse.send({ status: 200 });
+    settledResponse.send({
+      status: 200,
+      data: { user, address, setTemperature },
+    });
   }
 
   @Get('/getUser')
@@ -89,12 +93,12 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(OnboardingGuard)
   @ApiOperation({ summary: 'address 설정' })
-  setAddress(
+  async setAddress(
     @Body(new SetAddressPipe()) setAddressDto: SetAddressDto,
     @Req() req: any,
     @Res() res: Response,
   ) {
-    const data = this.service.setAddress(setAddressDto, req.user);
+    const data = await this.service.setAddress(setAddressDto, req.user);
     return res.send({ status: 200, data: { data: data } });
   }
 
@@ -102,12 +106,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(OnboardingGuard)
   @ApiOperation({ summary: 'gender 설정' })
-  setGender(
+  async setGender(
     @Body(new SetGenderPipe()) setGenderDto: SetGenderDto,
     @Req() req: any,
     @Res() res: Response,
   ) {
-    const data = this.service.setGender(setGenderDto, req.user);
+    const data = await this.service.setGender(setGenderDto, req.user);
     return res.send({ status: 200, data: { data: data } });
   }
 }

@@ -29,4 +29,10 @@ export class UserSetTemperatureRepository extends Repository<UserSetTemperature>
       .setParameter('userId', user.id);
     return queryBuilder.getRawMany();
   }
+
+  async getUserSetTemperature(userId: number) {
+    return await this.createQueryBuilder('ust')
+      .where('user_id = :userId', { userId })
+      .getMany();
+  }
 }

@@ -23,6 +23,8 @@ export class UserSetTemperature extends BaseEntity {
   })
   @JoinColumn({ name: 'user_id' })
   user: User;
+  @Column()
+  user_id: number;
 
   @ManyToOne(() => Address, (address) => address.id)
   @JoinColumn({ name: 'address_id' })
