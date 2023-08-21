@@ -37,167 +37,159 @@ export class ClosetRepository extends Repository<Closet> {
     type_id: number,
     user: User,
   ): Promise<any[]> {
-    // const userSettedTypeQuery = await this.createQueryBuilder()
-    //   .select('t.id, t.name')
-    //   .from('type', 't')
-    //   .where('t.id = coalesce(:type_id, t.id)')
-    //   .orderBy('RAND()')
-    //   .limit(1)
-    //   .getQuery();
-
-    // const getClosetsQuery = await this.createQueryBuilder()
-    //   .select('c.*, ust.name as type_name')
-    //   .from('(' + userSettedTypeQuery + ')', 'ust')
-    //   .leftJoin(
-    //     (subQuery) =>
-    //       subQuery
-    //         .select('c.*, ct.type_id')
-    //         .from('closet', 'c')
-    //         .leftJoin('closet_type', 'ct', 'ct.closet_id = c.id'),
-    //     'c',
-    //     '(ust.id IS NOT NULL AND c.type_id = ust.id) or (ust.id IS NULL AND 1 = 1)',
-    //   )
-    //   .groupBy('c.id')
-    //   .getQuery();
-
-    // const tempRangeIds = await this.createQueryBuilder()
-    //   .select('tr.id')
-    //   .from('temperature_range', 'tr')
-    //   .where(
-    //     'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) - 3',
-    //   )
-    //   .andWhere(
-    //     'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) + 3',
-    //   )
-    //   .groupBy('tr.id')
-    //   .orderBy('tr.id')
-    //   .setParameter('temp', temperature)
-    //   .getRawMany();
-
-    // const tempWithClosetQuery = await this.createQueryBuilder()
-    //   .select('tr.*')
-    //   .addSelect('gc.id', 'closet_id')
-    //   .addSelect('gc.name')
-    //   .addSelect('gc.image_url')
-    //   .addSelect('gc.type_name')
-    //   .addSelect('gc.temp_id')
-    //   .addSelect('gc.site_name')
-    //   .addSelect(
-    //     `case when tr.min_temp <= :temp and tr.max_temp > :temp then 'true' else 'false' end`,
-    //     'isCurrentTemperature',
-    //   )
-    //   .from('temperature_range', 'tr')
-    //   .leftJoin(
-    //     (subQuery) =>
-    //       subQuery
-    //         .select(
-    //           'gc.*, ct.temp_id, row_number() over (partition by ct.temp_id order by rand()) as rn',
-    //         )
-    //         .from('(' + getClosetsQuery + ')', 'gc')
-    //         .leftJoin('closet_temperature', 'ct', 'ct.closet_id = gc.id'),
-    //     'gc',
-    //     'tr.id = gc.temp_id and gc.rn = 1',
-    //   )
-    //   .where('tr.id IS NOT NULL')
-    //   .andWhere('tr.id IN (:tempIds)', {
-    //     tempIds: tempRangeIds.map((it) => it.tr_id),
-    //   })
-    //   .groupBy('tr.id')
-    //   .setParameter('temp', temperature)
-    //   .setParameter('userId', user.id)
-    //   .setParameter('type_id', type_id);
-
-    // return await tempWithClosetQuery.getRawMany();
-    return await this.query(
-      `
-      with  get_closets as (
-        select
-          c.*,
-          t.name as type_name
-        FROM 
-          closet c
-        left join lateral(
-          select
-            t.name
-          FROM 
-            type t 
-          left join closet_type ct on ct.type_id = t.id
-          WHERE 
-            ct.closet_id = c.id
-          order by rand() 
-          limit 1
-          
-        ) t on true
-        
-      ), temp_with_closet as (
-        SELECT 
-          tr.*,
-          gc.id as closet_id,
-          gc.name,
-          gc.image_url,
-          gc.site_name,
-          gc.type_name,
-          tr.id as temp_id,
-          case when tr.min_temp <= ? and tr.max_temp > ? then 'true' 
-          else 'false' end as isCurrentTemperature,
-          ROW_NUMBER () over(order by tr.id desc) as row_num
-        FROM 
-          temperature_range tr 
-        left join lateral(
-          select
-            gc.*
-          FROM 
-            get_closets gc
-          left join closet_temperature ct on ct.closet_id = gc.id
-          WHERE 
-            ct.temp_id = tr.id 
-          order by rand()
-          limit 1
-        ) gc on true
-        where
-          tr.id is not null AND 
-          tr.id in (
-              SELECT 
-                tr.id
-            FROM temperature_range AS tr
-            WHERE tr.id >= (
-              SELECT 
-                MIN(tr2.id)
-              FROM 
-                temperature_range AS tr2
-              WHERE 
-                ? BETWEEN tr2.min_temp AND tr2.max_temp
-            ) - 3
-            AND tr.id <= (
-              SELECT MAX(tr2.id)
-              FROM temperature_range AS tr2
-              WHERE ? BETWEEN tr2.min_temp AND tr2.max_temp
-            ) + 3 
-            ORDER BY tr.id desc
-          )
-        order by rand() and tr.id desc
-      ), get_data as (
-        select
-          twc.id,
-          twc.name,
-          twc.min_temp,
-          twc.max_temp,
-          twc.image_url,
-          twc.site_name,
-          twc.type_name,
-          twc.isCurrentTemperature,
-          twc.closet_id,
-          twc.temp_id
-        FROM 
-          temp_with_closet twc
-        order by row_num asc
+    const userSettedTypeQuery = await this.createQueryBuilder()
+      .select('t.id, t.name')
+      .from('type', 't')
+      .where('t.id = coalesce(:type_id, t.id)')
+      .orderBy('RAND()')
+      .limit(1)
+      .getQuery();
+    const getClosetsQuery = await this.createQueryBuilder()
+      .select('c.*, ust.name as type_name')
+      .from('(' + userSettedTypeQuery + ')', 'ust')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select('c.*, ct.type_id')
+            .from('closet', 'c')
+            .leftJoin('closet_type', 'ct', 'ct.closet_id = c.id'),
+        'c',
+        '(ust.id IS NOT NULL AND c.type_id = ust.id) or (ust.id IS NULL AND 1 = 1)',
       )
-      
-      
-      select * from get_data
-      `,
-      [temperature, temperature, temperature, temperature],
-    );
+      .groupBy('c.id')
+      .getQuery();
+    const tempRangeIds = await this.createQueryBuilder()
+      .select('tr.id')
+      .from('temperature_range', 'tr')
+      .where(
+        'tr.id >= (SELECT MIN(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) - 3',
+      )
+      .andWhere(
+        'tr.id <= (SELECT MAX(tr2.id) FROM temperature_range tr2 WHERE tr2.min_temp <= :temp and tr2.max_temp > :temp) + 3',
+      )
+      .groupBy('tr.id')
+      .orderBy('tr.id')
+      .setParameter('temp', temperature)
+      .getRawMany();
+    const tempWithClosetQuery = await this.createQueryBuilder()
+      .select('tr.*')
+      .addSelect('gc.id', 'closet_id')
+      .addSelect('gc.name')
+      .addSelect('gc.image_url')
+      .addSelect('gc.type_name')
+      .addSelect('gc.temp_id')
+      .addSelect('gc.site_name')
+      .addSelect(
+        `case when tr.min_temp <= :temp and tr.max_temp > :temp then 'true' else 'false' end`,
+        'isCurrentTemperature',
+      )
+      .from('temperature_range', 'tr')
+      .leftJoin(
+        (subQuery) =>
+          subQuery
+            .select(
+              'gc.*, ct.temp_id, row_number() over (partition by ct.temp_id order by rand()) as rn',
+            )
+            .from('(' + getClosetsQuery + ')', 'gc')
+            .leftJoin('closet_temperature', 'ct', 'ct.closet_id = gc.id'),
+        'gc',
+        'tr.id = gc.temp_id and gc.rn = 1',
+      )
+      .where('tr.id IS NOT NULL')
+      .andWhere('tr.id IN (:tempIds)', {
+        tempIds: tempRangeIds.map((it) => it.tr_id),
+      })
+      .groupBy('tr.id')
+      .setParameter('temp', temperature)
+      .setParameter('userId', user.id)
+      .setParameter('type_id', type_id);
+    return await tempWithClosetQuery.getRawMany();
+    // return await this.query(
+    //   `
+    //   with  get_closets as (
+    //     select
+    //       c.*,
+    //       t.name as type_name
+    //     FROM
+    //       closet c
+    //     left join lateral(
+    //       select
+    //         t.name
+    //       FROM
+    //         type t
+    //       left join closet_type ct on ct.type_id = t.id
+    //       WHERE
+    //         ct.closet_id = c.id
+    //       order by rand()
+    //       limit 1
+    //     ) t on true
+    //   ), temp_with_closet as (
+    //     SELECT
+    //       tr.*,
+    //       gc.id as closet_id,
+    //       gc.name,
+    //       gc.image_url,
+    //       gc.site_name,
+    //       gc.type_name,
+    //       tr.id as temp_id,
+    //       case when tr.min_temp <= ? and tr.max_temp > ? then 'true'
+    //       else 'false' end as isCurrentTemperature,
+    //       ROW_NUMBER () over(order by tr.id desc) as row_num
+    //     FROM
+    //       temperature_range tr
+    //     left join lateral(
+    //       select
+    //         gc.*
+    //       FROM
+    //         get_closets gc
+    //       left join closet_temperature ct on ct.closet_id = gc.id
+    //       WHERE
+    //         ct.temp_id = tr.id
+    //       order by rand()
+    //       limit 1
+    //     ) gc on true
+    //     where
+    //       tr.id is not null AND
+    //       tr.id in (
+    //           SELECT
+    //             tr.id
+    //         FROM temperature_range AS tr
+    //         WHERE tr.id >= (
+    //           SELECT
+    //             MIN(tr2.id)
+    //           FROM
+    //             temperature_range AS tr2
+    //           WHERE
+    //             ? BETWEEN tr2.min_temp AND tr2.max_temp
+    //         ) - 3
+    //         AND tr.id <= (
+    //           SELECT MAX(tr2.id)
+    //           FROM temperature_range AS tr2
+    //           WHERE ? BETWEEN tr2.min_temp AND tr2.max_temp
+    //         ) + 3
+    //         ORDER BY tr.id desc
+    //       )
+    //     order by rand() and tr.id desc
+    //   ), get_data as (
+    //     select
+    //       twc.id,
+    //       twc.name,
+    //       twc.min_temp,
+    //       twc.max_temp,
+    //       twc.image_url,
+    //       twc.site_name,
+    //       twc.type_name,
+    //       twc.isCurrentTemperature,
+    //       twc.closet_id,
+    //       twc.temp_id
+    //     FROM
+    //       temp_with_closet twc
+    //     order by row_num asc
+    //   )
+    //   select * from get_data
+    //   `,
+    //   [temperature, temperature, temperature, temperature],
+    // );
   }
 
   async getRecommendCloset(temperature: number) {
