@@ -122,7 +122,9 @@ export class ClosetRepository extends Repository<Closet> {
     //         ct.closet_id = c.id
     //       order by rand()
     //       limit 1
+
     //     ) t on true
+
     //   ), temp_with_closet as (
     //     SELECT
     //       tr.*,
