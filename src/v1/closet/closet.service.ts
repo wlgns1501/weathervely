@@ -75,23 +75,30 @@ export class ClosetService {
     try {
       // use 단기예보 API
       const { dateTime, closet_id } = getClosetByTemperatureDto;
-      // throw {
-      //   errno: HttpStatus.BAD_REQUEST,
-      //   message: HTTP_ERROR.BAD_REQUEST,
-      //   detail: '조회시간을 잘못 입력하였습니다.',
-      // };
-      // if (dateTime < '') {
-      //   // dateTime이 어제 03시 이전이거나, 현재시간 이후일때
-      // throw {
-      //   errno: HttpStatus.BAD_REQUEST,
-      //   message: HTTP_ERROR.BAD_REQUEST,
-      //   detail: '조회시간을 잘못 입력하였습니다.',
-      // };
-      // }
+      const date = new Date(dateTime);
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(3, 0, 0, 0);
+
+      if (date < yesterday || date > new Date()) {
+        // dateTime이 어제 03시 이전이거나, 현재시간 이후일때
+        throw {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: HTTP_ERROR.BAD_REQUEST,
+          detail: '유효하지 않은 시간대입니다.',
+        };
+      }
       let temp_id: number;
       let closet: any;
       if (closet_id) {
         closet = await this.closetRepository.getClosetById(closet_id);
+        if (!closet) {
+          throw {
+            status_code: HttpStatus.NOT_FOUND,
+            message: HTTP_ERROR.NOT_FOUND,
+            detail: '해당 옷이 존재하지 않습니다.',
+          };
+        }
         const temperatureRange =
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
         temp_id = temperatureRange.id;
@@ -125,12 +132,11 @@ export class ClosetService {
         tmpValue,
       };
     } catch (err) {
-      console.log(err);
-      if (!err.errno) {
+      if (!err.status_code) {
         throw new HttpException(
           {
             message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-            detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            detail: '서버가 불안정 합니다.',
           },
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
@@ -138,35 +144,8 @@ export class ClosetService {
 
       throw new HttpException(
         { message: err.message, detail: err.detail },
-        err.errno,
+        err.status_code,
       );
-
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        case MYSQL_ERROR_CODE.SQL_SYNTAX:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
-              detail: 'SERVER ERROR!',
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-      }
     }
   }
 
@@ -177,29 +156,35 @@ export class ClosetService {
     address: Address,
   ) {
     try {
-      const { closet } = setTemperatureDto;
+      const { closet, current_temperature } = setTemperatureDto;
+      if (!closet || isNaN(Number(current_temperature))) {
+        throw {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: HTTP_ERROR.BAD_REQUEST,
+          detail: '유효하지 않은 요청입니다.',
+        };
+      }
       const averageTemp = await this.temperatureRangeRepository.getAverageTemp(
         closet,
       );
 
       const newUserSetTemperature = new UserSetTemperature();
       newUserSetTemperature.closet = closet;
-      newUserSetTemperature.current_temperature =
-        setTemperatureDto.current_temperature;
+      newUserSetTemperature.current_temperature = current_temperature;
       newUserSetTemperature.created_at = new Date();
 
       if (averageTemp.id === 1) {
         // 제일 높은 구간
         newUserSetTemperature.sensory_temperature =
-          Number(setTemperatureDto.current_temperature) < 28 // 현재온도가 28도 보다 낮을때
+          Number(current_temperature) < 28 // 현재온도가 28도 보다 낮을때
             ? '28' // 28도 이상은 하나의 구간이니깐 28도로 set
-            : setTemperatureDto.current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
+            : current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
       } else if (averageTemp.id === 9) {
         // 제일 낮은 구간
         newUserSetTemperature.sensory_temperature =
-          Number(setTemperatureDto.current_temperature) > 5 // 현재온도가 5도 보다 높을때
+          Number(current_temperature) > 5 // 현재온도가 5도 보다 높을때
             ? '5' // 5도 이하는 하나의 구간이니깐 5도로 set
-            : setTemperatureDto.current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
+            : current_temperature; // 체감온도 스와이프 x이니깐, 선택 체감 = 현재 온도
       } else {
         newUserSetTemperature.sensory_temperature = averageTemp.avg_temp;
       }
@@ -210,24 +195,20 @@ export class ClosetService {
         address,
       );
     } catch (err) {
-      switch (err.errno) {
-        case MYSQL_ERROR_CODE.DUPLICATED_KEY:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
-              detail: '이미 선택한 체감온도 입니다.',
-            },
-            HttpStatus.BAD_REQUEST,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+      if (!err.status_code) {
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            detail: '서버가 불안정 합니다.',
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
+
+      throw new HttpException(
+        { message: err.message, detail: err.detail },
+        err.status_code,
+      );
     }
   }
 
@@ -240,6 +221,22 @@ export class ClosetService {
     try {
       // use 단기예보 API
       const { dateTime } = getRecommendClosetDto;
+      const date = new Date(dateTime);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(23, 0, 0, 0);
+
+      if (date < today || date > tomorrow) {
+        // dateTime이 어제 이거나, 내일 23시 이후일때
+        throw {
+          status_code: HttpStatus.BAD_REQUEST,
+          message: HTTP_ERROR.BAD_REQUEST,
+          detail: '유효하지 않은 시간대입니다.',
+        };
+      }
+
       const targetDateTime = new Date(dateTime);
       const targetDate = getTargetDate(targetDateTime);
       const targetTime = getTargetTime(targetDateTime);
@@ -276,8 +273,10 @@ export class ClosetService {
 
       // user 체감 온도
       const userSensoryTemperature =
-        sonsoryTemperature -
-        avgSensoryTemperature / sensoryTemperatureArr.length;
+        avgSensoryTemperature === 0
+          ? sonsoryTemperature
+          : sonsoryTemperature -
+            avgSensoryTemperature / sensoryTemperatureArr.length;
 
       // 조회 기온과 온도차이
       const temperatureDifference = userSensoryTemperature - temperatureValue;
@@ -290,32 +289,20 @@ export class ClosetService {
         closets,
       };
     } catch (err) {
-      switch (err.errno) {
-        case HttpStatus.SERVICE_UNAVAILABLE:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SERVICE_UNAVAILABLE,
-              detail: err.message,
-            },
-            HttpStatus.SERVICE_UNAVAILABLE,
-          );
-        case MYSQL_ERROR_CODE.SQL_SYNTAX:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.SQL_SYNTAX_ERROR,
-              detail: 'SERVER ERROR!',
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        default:
-          throw new HttpException(
-            {
-              message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-              detail: HTTP_ERROR.INTERNAL_SERVER_ERROR,
-            },
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
+      if (!err.status_code) {
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.INTERNAL_SERVER_ERROR,
+            detail: '서버가 불안정 합니다.',
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
+
+      throw new HttpException(
+        { message: err.message, detail: err.detail },
+        err.status_code,
+      );
     }
   }
 
