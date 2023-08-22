@@ -76,21 +76,23 @@ export class ClosetService {
       // use 단기예보 API
       const { dateTime, closet_id } = getClosetByTemperatureDto;
       const date = new Date(dateTime);
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(3, 0, 0, 0);
 
-      if (date < yesterday || date > new Date()) {
-        // dateTime이 어제 03시 이전이거나, 현재시간 이후일때
-        throw {
-          status_code: HttpStatus.BAD_REQUEST,
-          message: HTTP_ERROR.BAD_REQUEST,
-          detail: '유효하지 않은 시간대입니다.',
-        };
-      }
       let temp_id: number;
       let closet: any;
       if (closet_id) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(23, 0, 0, 0);
+        if (date < today || date > tomorrow) {
+          // dateTime이 어제 이거나, 내일 23시 이후일때
+          throw {
+            status_code: HttpStatus.BAD_REQUEST,
+            message: HTTP_ERROR.BAD_REQUEST,
+            detail: '유효하지 않은 시간대입니다.',
+          };
+        }
         closet = await this.closetRepository.getClosetById(closet_id);
         if (!closet) {
           throw {
@@ -102,6 +104,18 @@ export class ClosetService {
         const temperatureRange =
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
         temp_id = temperatureRange.id;
+      } else {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(3, 0, 0, 0);
+        if (date < yesterday || date > new Date()) {
+          // dateTime이 어제 03시 이전이거나, 현재시간 이후일때
+          throw {
+            status_code: HttpStatus.BAD_REQUEST,
+            message: HTTP_ERROR.BAD_REQUEST,
+            detail: '유효하지 않은 시간대입니다.',
+          };
+        }
       }
 
       const targetDateTime = new Date(dateTime);
@@ -284,6 +298,7 @@ export class ClosetService {
       const closets = await this.closetRepository.getRecommendCloset(
         userSensoryTemperature,
       );
+
       // 조회 기온과 온도차이
       const temperatureDifference = userSensoryTemperature - temperatureValue;
 
