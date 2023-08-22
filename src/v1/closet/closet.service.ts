@@ -262,28 +262,31 @@ export class ClosetService {
         Number(humidityValue),
       );
 
+      // user 선택 체감온도 가져오기 - Array
       const sensoryTemperatureArr =
         await this.userSetTemperatureRepository.getSensoryTemperature(user);
 
+      // 각 row 별 체감온도 차이 계산 후 합산
       const avgSensoryTemperature = sensoryTemperatureArr.reduce((acc, cur) => {
         return (acc +=
           Number(cur.UserSetTemperature_current_temperature) -
           Number(cur.UserSetTemperature_sensory_temperature));
       }, 0);
 
-      // user 체감 온도
+      // user 체감 온도 : 공식 적용 체감 온도 + (유저선택 체감온도 차이 누적값 / 선택 횟수)
       const userSensoryTemperature =
         avgSensoryTemperature === 0
           ? sonsoryTemperature
-          : sonsoryTemperature -
+          : sonsoryTemperature +
             avgSensoryTemperature / sensoryTemperatureArr.length;
 
-      // 조회 기온과 온도차이
-      const temperatureDifference = userSensoryTemperature - temperatureValue;
       // Math.round 빼고, between 를 초과 + 이하 or 이상 + 미만으로 변경하고 , temperature_range 범위 교집합으로 수정해야함
       const closets = await this.closetRepository.getRecommendCloset(
         userSensoryTemperature,
       );
+      // 조회 기온과 온도차이
+      const temperatureDifference = userSensoryTemperature - temperatureValue;
+
       return {
         temperatureDifference: Math.round(temperatureDifference),
         closets,
