@@ -52,7 +52,10 @@ export class UserRepository extends Repository<User> {
         uwa.user_id = u.id
       ) a on true
       where
-        u.id = ?`,
+        u.id = ?
+      order by 
+        a.is_main_address desc
+        `,
       [userId],
     );
 

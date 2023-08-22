@@ -220,6 +220,30 @@ export class UserService {
   async deleteUserWithAddress(addressId: number, user: User) {
     const userId = user.id;
 
+    const address = await this.getAddresses(user);
+
+    if (address.length === 1)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.CAN_NOT_DELETE_MAIN_ADDRESS,
+          detail:
+            '동네를 하나로 설정 했을 때, 메인 동네는 삭제 할 수 없습니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const [{ id: mainAddressId }] =
+      await this.addressRepository.getUserMainAddresses(userId);
+
+    if (mainAddressId == addressId) {
+      const nextAddress = address[1];
+
+      await this.userAddressRepository.settedMainAddress(
+        userId,
+        nextAddress.id,
+      );
+    }
+
     const { affected } = await this.userAddressRepository.deleteUserAddress(
       addressId,
       userId,
