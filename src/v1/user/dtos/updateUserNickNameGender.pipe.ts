@@ -22,11 +22,37 @@ export class UpdateUserNickNameGenderPipe
 
     const { error, value: validatedValue } = validationSchema.validate(value);
 
-    if (error) {
+    // if (error) {
+    //   throw new HttpException(
+    //     {
+    //       message: HTTP_ERROR.VALIDATED_ERROR,
+    //       detail: '닉네임에는 띄어쓰기, 쉼표를 사용할 수 없습니다.',
+    //     },
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // }
+
+    if (value.nickname.includes(' ') && value.nickname.includes(',')) {
       throw new HttpException(
         {
           message: HTTP_ERROR.VALIDATED_ERROR,
-          detail: '닉네임에는 띄어쓰기, 쉼표를 사용할 수 없습니다.',
+          detail: '공백과 쉼표는 사용할 수 없습니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (value.nickname.includes(' ')) {
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail: '공백을 사용할 수 없습니다.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (value.nickname.includes(',')) {
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail: '쉼표를 사용할 수 없습니다.',
         },
         HttpStatus.BAD_REQUEST,
       );
