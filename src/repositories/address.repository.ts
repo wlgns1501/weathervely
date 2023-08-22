@@ -9,7 +9,9 @@ export class AddressRepository extends Repository<Address> {
     super(Address, dataSource.createEntityManager());
   }
 
-  // async getAddressByUserId(userId: number) {}
+  async getAddressById(addressId: number) {
+    return await this.find({ where: { id: addressId } });
+  }
 
   async getAddress(setAddressDto: SetAddressDto): Promise<Address | null> {
     const { address_name } = setAddressDto;

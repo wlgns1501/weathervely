@@ -10,6 +10,8 @@ import { UserSetStyleRepository } from 'src/repositories/user_set_style.reposito
 import { CacheModule } from '@nestjs/cache-manager';
 import { ForecastService } from '../forecast/forecast.service';
 import { TemperatureRangeRepository } from 'src/repositories/temperature_range.repository';
+import { UserRepository } from 'src/repositories/user.repository';
+import { AddressRepository } from 'src/repositories/address.repository';
 @Module({
   imports: [CacheModule.register()],
   providers: [
@@ -22,6 +24,8 @@ import { TemperatureRangeRepository } from 'src/repositories/temperature_range.r
     UserSetTemperatureRepository,
     ForecastService,
     TemperatureRangeRepository,
+    UserRepository,
+    AddressRepository,
   ],
   controllers: [ClosetController],
 })
