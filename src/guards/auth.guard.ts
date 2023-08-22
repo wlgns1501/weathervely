@@ -8,7 +8,9 @@ import {
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
+import { AddressRepository } from 'src/repositories/address.repository';
 import { AuthRepository } from 'src/repositories/auth.repository';
+import { UserRepository } from 'src/repositories/user.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
 import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 
@@ -22,6 +24,8 @@ export class AuthGuard implements CanActivate {
     private authRepository: AuthRepository,
     private userAddressRepository: UserAddressRepository,
     private userSetTemperatureRepository: UserSetTemperatureRepository,
+    private userRepository: UserRepository,
+    private addressRepository: AddressRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -55,9 +59,9 @@ export class AuthGuard implements CanActivate {
           HttpStatus.BAD_REQUEST,
         );
 
-      const { address } = await this.userAddressRepository.getUserAddress(user);
+      const addresses = await this.userRepository.getUserAddresses(user.id);
 
-      if (!address) {
+      if (addresses.length === 0) {
         throw new HttpException(
           {
             message: HTTP_ERROR.NEED_SET_ADDRESS,
@@ -89,6 +93,12 @@ export class AuthGuard implements CanActivate {
           },
           HttpStatus.UNAUTHORIZED,
         );
+
+      const mainAddressId = addresses[0].id;
+
+      const [address] = await this.addressRepository.getAddressById(
+        mainAddressId,
+      );
 
       req['user'] = user;
       req['address'] = address;
