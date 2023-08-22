@@ -53,7 +53,8 @@ export class UserRepository extends Repository<User> {
       ) a on true
       where
         u.id = ?
-      order by a.is_main_address desc  
+      order by 
+        a.is_main_address desc
         `,
       [userId],
     );
