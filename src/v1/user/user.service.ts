@@ -38,12 +38,9 @@ export class UserService {
     let address: Address | null;
 
     address = await this.addressRepository.getAddress(addressType);
-    console.log(address);
 
     if (!address) {
       try {
-        console.log('????');
-
         address = await this.addressRepository.createAddress(addressType);
       } catch (err) {
         switch (err.errno) {
