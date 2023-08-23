@@ -107,89 +107,89 @@ export class ClosetRepository extends Repository<Closet> {
     return await tempWithClosetQuery.getRawMany();
     // return await this.query(
     //   `
-    //   with  get_closets as (
+    // with  get_closets as (
+    //   select
+    //     c.*,
+    //     t.name as type_name
+    //   FROM
+    //     closet c
+    //   left join lateral(
     //     select
-    //       c.*,
-    //       t.name as type_name
+    //       t.name
     //     FROM
-    //       closet c
-    //     left join lateral(
-    //       select
-    //         t.name
-    //       FROM
-    //         type t
-    //       left join closet_type ct on ct.type_id = t.id
-    //       WHERE
-    //         ct.closet_id = c.id
-    //       order by rand()
-    //       limit 1
+    //       type t
+    //     left join closet_type ct on ct.type_id = t.id
+    //     WHERE
+    //       ct.closet_id = c.id
+    //     order by rand()
+    //     limit 1
 
-    //     ) t on true
+    //   ) t on true
 
-    //   ), temp_with_closet as (
-    //     SELECT
-    //       tr.*,
-    //       gc.id as closet_id,
-    //       gc.name,
-    //       gc.image_url,
-    //       gc.site_name,
-    //       gc.type_name,
-    //       tr.id as temp_id,
-    //       case when tr.min_temp <= ? and tr.max_temp > ? then 'true'
-    //       else 'false' end as isCurrentTemperature,
-    //       ROW_NUMBER () over(order by tr.id desc) as row_num
-    //     FROM
-    //       temperature_range tr
-    //     left join lateral(
-    //       select
-    //         gc.*
-    //       FROM
-    //         get_closets gc
-    //       left join closet_temperature ct on ct.closet_id = gc.id
-    //       WHERE
-    //         ct.temp_id = tr.id
-    //       order by rand()
-    //       limit 1
-    //     ) gc on true
-    //     where
-    //       tr.id is not null AND
-    //       tr.id in (
-    //           SELECT
-    //             tr.id
-    //         FROM temperature_range AS tr
-    //         WHERE tr.id >= (
-    //           SELECT
-    //             MIN(tr2.id)
-    //           FROM
-    //             temperature_range AS tr2
-    //           WHERE
-    //             ? BETWEEN tr2.min_temp AND tr2.max_temp
-    //         ) - 3
-    //         AND tr.id <= (
-    //           SELECT MAX(tr2.id)
-    //           FROM temperature_range AS tr2
-    //           WHERE ? BETWEEN tr2.min_temp AND tr2.max_temp
-    //         ) + 3
-    //         ORDER BY tr.id desc
-    //       )
-    //     order by rand() and tr.id desc
-    //   ), get_data as (
+    // ), temp_with_closet as (
+    //   SELECT
+    //     tr.*,
+    //     gc.id as closet_id,
+    //     gc.name,
+    //     gc.image_url,
+    //     gc.site_name,
+    //     gc.type_name,
+    //     tr.id as temp_id,
+    //     case when tr.min_temp <= ? and tr.max_temp > ? then 'true'
+    //     else 'false' end as isCurrentTemperature,
+    //     ROW_NUMBER () over(order by tr.id desc) as row_num
+    //   FROM
+    //     temperature_range tr
+    //   left join lateral(
     //     select
-    //       twc.id,
-    //       twc.name,
-    //       twc.min_temp,
-    //       twc.max_temp,
-    //       twc.image_url,
-    //       twc.site_name,
-    //       twc.type_name,
-    //       twc.isCurrentTemperature,
-    //       twc.closet_id,
-    //       twc.temp_id
+    //       gc.*
     //     FROM
-    //       temp_with_closet twc
-    //     order by row_num asc
-    //   )
-    //   select * from get_data
+    //       get_closets gc
+    //     left join closet_temperature ct on ct.closet_id = gc.id
+    //     WHERE
+    //       ct.temp_id = tr.id
+    //     order by rand()
+    //     limit 1
+    //   ) gc on true
+    //   where
+    //     tr.id is not null AND
+    //     tr.id in (
+    //         SELECT
+    //           tr.id
+    //       FROM temperature_range AS tr
+    //       WHERE tr.id >= (
+    //         SELECT
+    //           MIN(tr2.id)
+    //         FROM
+    //           temperature_range AS tr2
+    //         WHERE
+    //           ? BETWEEN tr2.min_temp AND tr2.max_temp
+    //       ) - 3
+    //       AND tr.id <= (
+    //         SELECT MAX(tr2.id)
+    //         FROM temperature_range AS tr2
+    //         WHERE ? BETWEEN tr2.min_temp AND tr2.max_temp
+    //       ) + 3
+    //       ORDER BY tr.id desc
+    //     )
+    //   order by rand() and tr.id desc
+    // ), get_data as (
+    //   select
+    //     twc.id,
+    //     twc.name,
+    //     twc.min_temp,
+    //     twc.max_temp,
+    //     twc.image_url,
+    //     twc.site_name,
+    //     twc.type_name,
+    //     twc.isCurrentTemperature,
+    //     twc.closet_id,
+    //     twc.temp_id
+    //   FROM
+    //     temp_with_closet twc
+    //   order by row_num asc
+    // )
+    // select * from get_data
     //   `,
     //   [temperature, temperature, temperature, temperature],
     // );

@@ -235,7 +235,7 @@ export class UserService {
     const [{ id: mainAddressId }] =
       await this.addressRepository.getUserMainAddresses(userId);
 
-    if (mainAddressId == addressId) {
+    if (mainAddressId == addressId && address.length > 1) {
       const nextAddress = address[1];
 
       await this.userAddressRepository.settedMainAddress(
