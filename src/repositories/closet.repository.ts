@@ -99,6 +99,7 @@ export class ClosetRepository extends Repository<Closet> {
       .andWhere('tr.id IN (:tempIds)', {
         tempIds: tempRangeIds.map((it) => it.tr_id),
       })
+      .orderBy('tr.id')
       .groupBy('tr.id')
       .setParameter('temp', temperature)
       .setParameter('userId', user.id)
