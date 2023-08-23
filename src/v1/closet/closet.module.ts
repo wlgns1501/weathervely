@@ -12,6 +12,7 @@ import { ForecastService } from '../forecast/forecast.service';
 import { TemperatureRangeRepository } from 'src/repositories/temperature_range.repository';
 import { UserRepository } from 'src/repositories/user.repository';
 import { AddressRepository } from 'src/repositories/address.repository';
+import { TypeRepository } from 'src/repositories/type.repository';
 @Module({
   imports: [CacheModule.register()],
   providers: [
@@ -26,6 +27,7 @@ import { AddressRepository } from 'src/repositories/address.repository';
     TemperatureRangeRepository,
     UserRepository,
     AddressRepository,
+    TypeRepository,
   ],
   controllers: [ClosetController],
 })

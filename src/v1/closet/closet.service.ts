@@ -19,6 +19,7 @@ import { SetTemperatureDto } from './dtos/setTemperature.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { ForecastService } from '../forecast/forecast.service';
+import { TypeRepository } from 'src/repositories/type.repository';
 
 @Injectable()
 export class ClosetService {
@@ -28,6 +29,7 @@ export class ClosetService {
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
     private readonly temperatureRangeRepository: TemperatureRangeRepository,
+    private readonly typeRepository: TypeRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -77,7 +79,9 @@ export class ClosetService {
       const { dateTime, closet_id } = getClosetByTemperatureDto;
       const date = new Date(dateTime);
 
+      let type_id: number;
       let temp_id: number;
+      let temperature: number;
       let closet: any;
       if (closet_id) {
         const today = new Date();
@@ -101,9 +105,16 @@ export class ClosetService {
             detail: '해당 옷이 존재하지 않습니다.',
           };
         }
+
+        const type = await this.typeRepository.getTypeId(closet.id);
+        type_id = type.id;
         const temperatureRange =
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
         temp_id = temperatureRange.id;
+        temperature =
+          (Number(temperatureRange.min_temp) +
+            Number(temperatureRange.max_temp)) /
+          2;
       } else {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
@@ -126,12 +137,12 @@ export class ClosetService {
       const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
 
       const closets = await this.closetRepository.getClosetByTemperature(
-        Number(tmpValue),
-        temp_id,
+        Number(type_id ? temperature : tmpValue),
+        type_id,
         user,
       );
 
-      if (temp_id) {
+      if (type_id) {
         closets.forEach((c) => {
           if (c.temp_id === temp_id) {
             c.closet_id = closet.id;
