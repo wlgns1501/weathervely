@@ -19,6 +19,7 @@ import { SetTemperatureDto } from './dtos/setTemperature.dto';
 import { GetRecommendClosetDto } from './dtos/getRecommendCloset.dto';
 import { GetClosetByTemperatureDto } from './dtos/getClosetByTemperature.dto';
 import { ForecastService } from '../forecast/forecast.service';
+import { TypeRepository } from 'src/repositories/type.repository';
 
 @Injectable()
 export class ClosetService {
@@ -28,6 +29,7 @@ export class ClosetService {
     private readonly userPickStyleRepository: UserPickStyleRepository,
     private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
     private readonly temperatureRangeRepository: TemperatureRangeRepository,
+    private readonly typeRepository: TypeRepository,
     private readonly forecastService: ForecastService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
@@ -76,10 +78,14 @@ export class ClosetService {
       // use 단기예보 API
       const { dateTime, closet_id } = getClosetByTemperatureDto;
       const date = new Date(dateTime);
+      const targetDateTime = new Date(dateTime);
+      const targetDate = getTargetDate(targetDateTime);
+      const targetTime = getTargetTime(targetDateTime);
+      const weather = await this.forecastService.getVilageFcst(address);
+      const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
 
-      let temp_id: number;
-      let closet: any;
       if (closet_id) {
+        // 메인
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date();
@@ -93,7 +99,7 @@ export class ClosetService {
             detail: '유효하지 않은 시간대입니다.',
           };
         }
-        closet = await this.closetRepository.getClosetById(closet_id);
+        const closet = await this.closetRepository.getClosetById(closet_id);
         if (!closet) {
           throw {
             status_code: HttpStatus.NOT_FOUND,
@@ -101,10 +107,38 @@ export class ClosetService {
             detail: '해당 옷이 존재하지 않습니다.',
           };
         }
+
+        const type = await this.typeRepository.getTypeId(closet.id);
+        const type_id = type.id;
         const temperatureRange =
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
-        temp_id = temperatureRange.id;
+        const temp_id = temperatureRange.id;
+        const temperature =
+          (Number(temperatureRange.min_temp) +
+            Number(temperatureRange.max_temp)) /
+          2;
+        const closets = await this.closetRepository.getClosetByTemperature(
+          temperature,
+          type_id,
+          user,
+        );
+
+        if (temp_id) {
+          closets.forEach((c) => {
+            if (c.temp_id === temp_id) {
+              c.closet_id = closet.id;
+              c.name = closet.name;
+              c.image_url = closet.image_url;
+            }
+          });
+        }
+
+        return {
+          closets,
+          tmpValue,
+        };
       } else {
+        // 온보딩
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(3, 0, 0, 0);
@@ -116,35 +150,18 @@ export class ClosetService {
             detail: '유효하지 않은 시간대입니다.',
           };
         }
+
+        const closets = await this.closetRepository.getClosetByTemperature(
+          Number(tmpValue),
+          null,
+          user,
+        );
+
+        return {
+          closets,
+          tmpValue,
+        };
       }
-
-      const targetDateTime = new Date(dateTime);
-      const targetDate = getTargetDate(targetDateTime);
-      const targetTime = getTargetTime(targetDateTime);
-      const weather = await this.forecastService.getVilageFcst(address);
-
-      const tmpValue = getTargetValue(weather, targetDate, targetTime, 'TMP');
-
-      const closets = await this.closetRepository.getClosetByTemperature(
-        Number(tmpValue),
-        temp_id,
-        user,
-      );
-
-      if (temp_id) {
-        closets.forEach((c) => {
-          if (c.temp_id === temp_id) {
-            c.closet_id = closet.id;
-            c.name = closet.name;
-            c.image_url = closet.image_url;
-          }
-        });
-      }
-
-      return {
-        closets,
-        tmpValue,
-      };
     } catch (err) {
       if (!err.status_code) {
         throw new HttpException(
