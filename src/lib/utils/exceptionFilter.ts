@@ -70,13 +70,13 @@ export class CustomExceptionFilter implements ExceptionFilter {
         'https://discord.com/api/webhooks/1142120803060690984/_6YSU5-0nZL2otuj-IrWdnxoU_OOgwq5PNMi8HPwaEQTA7RN1mj_y1KEhLd-Y1LXPGTI';
       const errorMsg = `
         - Domain : ${errorUrl}
-          - Status: ${status}
-          - Message: ${body.message}
-          - Time: ${body.timestamp}
-          - detail
-            - userId : ${req.user.id}
-            - requestBody : ${Object.values(request.body)[0]}
-            - requestQuery : ${Object.values(request.query)[0]}
+        - Status: ${status}
+        - Message: ${body.message}
+        - Time: ${body.timestamp}
+        - detail
+        - userId : ${req.user.id}
+        - requestBody : ${Object?.values(request.body)[0] || ''}
+        - requestQuery : ${Object?.values(request.query)[0] || ''}
         `;
 
       try {
