@@ -108,8 +108,8 @@ export class ClosetService {
           };
         }
 
-        const type = await this.typeRepository.getTypeId(closet.id);
-        const type_id = type.id;
+        const type_id = await this.typeRepository.getTypeId(closet.id);
+
         const temperatureRange =
           await this.temperatureRangeRepository.getTemperatureId(closet.id);
         const temp_id = temperatureRange.id;
@@ -151,9 +151,12 @@ export class ClosetService {
           };
         }
 
+        // const fromTypeQuery = await this.typeRepository.fromTypeQuery();
+        const randomTypeId = await this.typeRepository.typeQuery();
+
         const closets = await this.closetRepository.getClosetByTemperature(
           Number(tmpValue),
-          null,
+          randomTypeId,
           user,
         );
 
@@ -163,6 +166,8 @@ export class ClosetService {
         };
       }
     } catch (err) {
+      console.log(err);
+
       if (!err.status_code) {
         throw new HttpException(
           {

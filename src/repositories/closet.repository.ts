@@ -34,30 +34,79 @@ export class ClosetRepository extends Repository<Closet> {
 
   async getClosetByTemperature(
     temperature: number,
-    type_id: number,
+    type_id: any,
     user: User,
   ): Promise<any[]> {
-    const userSettedTypeQuery = await this.createQueryBuilder()
-      .select('t.id, t.name')
-      .from('type', 't')
-      .where('t.id = coalesce(:type_id, t.id)')
-      .orderBy('RAND()')
-      .limit(1)
-      .getQuery();
-    const getClosetsQuery = await this.createQueryBuilder()
-      .select('c.*, ust.name as type_name')
-      .from('(' + userSettedTypeQuery + ')', 'ust')
-      .leftJoin(
-        (subQuery) =>
-          subQuery
-            .select('c.*, ct.type_id')
-            .from('closet', 'c')
-            .leftJoin('closet_type', 'ct', 'ct.closet_id = c.id'),
-        'c',
-        '(ust.id IS NOT NULL AND c.type_id = ust.id) or (ust.id IS NULL AND 1 = 1)',
-      )
-      .groupBy('c.id')
-      .getQuery();
+    /**
+     * 1. closet_id가 있을 경우 그 closet_id의 타입 2개를 갖고옴
+     * 2. closet_id가 없을 경우 랜덤의 type 중 2개를 가져옴
+     */
+
+    let userSettedTypeQuery;
+    let typeQuery;
+
+    // if (type_id == null) {
+    //   userSettedTypeQuery = await this.createQueryBuilder()
+    //     .select('t.id, t.name')
+    //     .from('type', 't')
+    //     .where('t.id = coalesce(:type_id, t.id)')
+    //     .orderBy('RAND()')
+    //     .getQuery();
+    // } else {
+    //   const typeQuery = `(  ${type_id.type_ids} )`;
+
+    //   userSettedTypeQuery = await this.createQueryBuilder()
+    //     .select('t.id, t.name')
+    //     .from('type', 't')
+    //     .where(`t.id in  ${typeQuery} `)
+    //     .limit(2)
+    //     .getQuery();
+    // }
+
+    if (type_id == null) {
+      typeQuery = type_id.type_ids;
+    } else {
+      typeQuery = type_id.type_ids;
+    }
+
+    console.log(typeQuery);
+
+    // const getClosetsQuery = await this.createQueryBuilder()
+    //   .select('c.*, ust.name as type_name')
+    //   .from('(' + userSettedTypeQuery + ')', 'ust')
+    //   .leftJoin(
+    //     (subQuery) =>
+    //       subQuery
+    //         .select('c.*, ct.type_id')
+    //         .from('closet', 'c')
+    //         .leftJoin('closet_type', 'ct', 'ct.closet_id = c.id'),
+    //     'c',
+    //     '(ust.id IS NOT NULL AND c.type_id = ust.id) or (ust.id IS NULL AND 1 = 1)',
+    //   )
+    //   .groupBy('c.id')
+    //   .getQuery();
+
+    const getClosetsQuery = `
+        SELECT 
+          c.*, 
+          t.ids,
+          t.name as type_name 
+        FROM 
+          closet c 
+        LEFT JOIN lateral (
+          SELECT 
+            t.id, 
+            GROUP_CONCAT(t.id order by t.id) as ids, 
+            t.name
+          FROM 
+            type t
+          LEFT JOIN closet_type ct ON ct.type_id = t.id
+          WHERE 
+            ct.closet_id = c.id
+        ) t on true
+        HAVING t.ids = '${typeQuery}'
+    `;
+
     const tempRangeIds = await this.createQueryBuilder()
       .select('tr.id')
       .from('temperature_range', 'tr')
@@ -71,6 +120,7 @@ export class ClosetRepository extends Repository<Closet> {
       .orderBy('tr.id')
       .setParameter('temp', temperature)
       .getRawMany();
+
     const tempWithClosetQuery = await this.createQueryBuilder()
       .select('tr.*')
       .addSelect('gc.id', 'closet_id')
