@@ -57,6 +57,10 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    const res = ctx.getResponse();
+    const req = ctx.getRequest();
+
     if (
       process.env.NEST_APP_MODE === 'production' &&
       status >= 500 &&
@@ -64,7 +68,17 @@ export class CustomExceptionFilter implements ExceptionFilter {
     ) {
       const webhookUrl =
         'https://discord.com/api/webhooks/1142120803060690984/_6YSU5-0nZL2otuj-IrWdnxoU_OOgwq5PNMi8HPwaEQTA7RN1mj_y1KEhLd-Y1LXPGTI';
-      const errorMsg = `Domain : ${errorUrl} \n - Status: ${status} \n - Message: ${body.message} \n - Time: ${body.timestamp}`;
+      const errorMsg = `
+        - Domain : ${errorUrl} \n 
+          - Status: ${status} \n 
+          - Message: ${body.message} \n 
+          - Time: ${body.timestamp} \n
+          - detail \n
+            - userId : ${req.user.id} \n
+            - requestBody : ${req.body} \n
+            - requestQuery : ${req.query} \n
+        `;
+
       try {
         await axios.post(webhookUrl, { content: errorMsg });
       } catch (e) {
