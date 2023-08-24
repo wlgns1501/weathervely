@@ -69,14 +69,14 @@ export class CustomExceptionFilter implements ExceptionFilter {
       const webhookUrl =
         'https://discord.com/api/webhooks/1142120803060690984/_6YSU5-0nZL2otuj-IrWdnxoU_OOgwq5PNMi8HPwaEQTA7RN1mj_y1KEhLd-Y1LXPGTI';
       const errorMsg = `
-        - Domain : ${errorUrl} \n 
-          - Status: ${status} \n 
-          - Message: ${body.message} \n 
-          - Time: ${body.timestamp} \n
-          - detail \n
-            - userId : ${req.user.id} \n
-            - requestBody : ${req.body} \n
-            - requestQuery : ${req.query} \n
+        - Domain : ${errorUrl}
+          - Status: ${status}
+          - Message: ${body.message}
+          - Time: ${body.timestamp}
+          - detail
+            - userId : ${req.user.id}
+            - requestBody : ${Object.values(request.body)[0]}
+            - requestQuery : ${Object.values(request.query)[0]}
         `;
 
       try {
