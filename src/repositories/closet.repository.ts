@@ -34,7 +34,7 @@ export class ClosetRepository extends Repository<Closet> {
 
   async getClosetByTemperature(
     temperature: number,
-    type_id: any | null,
+    type_id: any,
     user: User,
   ): Promise<any[]> {
     /**
