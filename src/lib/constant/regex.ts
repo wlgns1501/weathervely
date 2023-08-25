@@ -1,1 +1,2 @@
-export const NICKNAME_REGEX = /^[A-Za-z0-9ㄱ-힣_-]*$/;
+export const NICKNAME_REGEX =
+  /^[[A-Za-z0-9ㄱ-힣_-\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"£\€\$\¥\•\˚\≠\°\∆\÷\×\π\¶\∞]]*$/;

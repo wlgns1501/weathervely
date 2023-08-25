@@ -83,11 +83,11 @@ export class AuthService {
 
   @Transactional()
   async setNickName(setNickNameDto: SetNickNameDto) {
-    const { nickname } = setNickNameDto;
+    const { nickname, phone_id } = setNickNameDto;
     const accessToken = this.createAccessToken(nickname);
 
     try {
-      await this.authRepository.createNickName(nickname, accessToken);
+      await this.authRepository.createNickName(nickname, phone_id, accessToken);
     } catch (err) {
       switch (err.errno) {
         case MYSQL_ERROR_CODE.DUPLICATED_KEY:

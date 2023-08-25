@@ -21,8 +21,12 @@ export class AuthRepository extends Repository<User> {
     return await this.find();
   }
 
-  async createNickName(nickname: string, accessToken: string) {
-    return await this.create({ nickname, token: accessToken }).save();
+  async createNickName(
+    nickname: string,
+    phone_id: string,
+    accessToken: string,
+  ) {
+    return await this.create({ nickname, phone_id, token: accessToken }).save();
   }
 
   async setGender(setGenderDto: SetGenderDto, userId: number) {
