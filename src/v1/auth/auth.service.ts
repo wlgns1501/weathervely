@@ -51,7 +51,7 @@ export class AuthService {
       };
     }
 
-    const access_token = await this.createAccessToken(nickname);
+    const access_token = findUser.token;
 
     const [setAddress] = await this.addressRepository.getUserMainAddresses(
       user.id,
