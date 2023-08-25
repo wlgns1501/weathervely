@@ -24,7 +24,9 @@ export class AuthService {
   ) {}
 
   private createAccessToken(nickname: string) {
-    return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY);
+    return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY, {
+      expiresIn: '24h',
+    });
   }
 
   async login(loginDto: LoginDto) {
