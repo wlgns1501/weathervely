@@ -69,17 +69,17 @@ export class UpdateUserNickNameGenderPipe
           HttpStatus.BAD_REQUEST,
         );
       }
-
-      if (error._original.nickname.length > 10)
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.VALIDATED_ERROR,
-            detail:
-              '닉네임은 최대 10글자에요 (한글/영어 소문자/대문자/숫자 무관)',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
     }
+
+    if (value.nickname.length > 10)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail:
+            '닉네임은 최대 10글자에요 (한글/영어 소문자/대문자/숫자 무관)',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
 
     return validatedValue;
   }

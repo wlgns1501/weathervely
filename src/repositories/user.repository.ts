@@ -27,6 +27,10 @@ export class UserRepository extends Repository<User> {
     return await this.delete({ id: userId });
   }
 
+  async updateToken(access_token: string, user_id: number) {
+    return await this.update({ id: user_id }, { token: access_token });
+  }
+
   async getUserAddresses(userId: number) {
     return await this.query(
       `
