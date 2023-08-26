@@ -30,25 +30,17 @@ export class SetNickNamePipe implements PipeTransform<SetNickNameDto> {
         HttpStatus.BAD_REQUEST,
       );
 
+    if (EMOJI_REGEX.test(value.nickname)) {
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail: '사용 불가 문자가 포함됐어요 (쉼표, 이모지 불가)',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     if (error) {
-      if (EMOJI_REGEX.test(error._original.nickname)) {
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.VALIDATED_ERROR,
-            detail: '사용 불가 문자가 포함됐어요 (쉼표, 이모지 불가)',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      if (error._original.phone_id.length == '') {
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.VALIDATED_ERROR,
-            detail: '기기 고유번호를 입력하지 않았습니다.',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
       if (
         error._original.nickname.includes(' ') &&
         error._original.nickname.includes(',')
