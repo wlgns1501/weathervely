@@ -7,7 +7,7 @@ import {
 import { SetNickNameDto } from './setNickName.dto';
 import * as Joi from 'joi';
 import { SCHEMA } from 'src/lib/constant/schema';
-import { NICKNAME_REGEX } from 'src/lib/constant/regex';
+import { EMOJI_REGEX, NICKNAME_REGEX } from 'src/lib/constant/regex';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
 
 @Injectable()
@@ -21,6 +21,15 @@ export class SetNickNamePipe implements PipeTransform<SetNickNameDto> {
     const { error, value: validatedValue } = validationSchema.validate(value);
 
     if (error) {
+      if (EMOJI_REGEX.test(error._original.nickname)) {
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.VALIDATED_ERROR,
+            detail: '사용 불가 문자가 포함됐어요 (쉼표, 이모지 불가)',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       if (error._original.phone_id.length == '') {
         throw new HttpException(
           {
