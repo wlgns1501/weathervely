@@ -58,18 +58,18 @@ export class UserController {
     @Req() req: any,
     @Res() response: Response,
   ) {
-    const { access_token } = await this.service.updateUserNickNameGender(
+    return await this.service.updateUserNickNameGender(
       updateUserNickNameGenderDto,
       req.user,
     );
 
-    const settledResponse = this.setAccessToken(
-      response,
-      access_token,
-      ACCESS_TOKEN_EXPIRESIN,
-    );
+    // const settledResponse = this.setAccessToken(
+    //   response,
+    //   access_token,
+    //   ACCESS_TOKEN_EXPIRESIN,
+    // );
 
-    settledResponse.send({ success: true });
+    // settledResponse.send({ success: true });
   }
 
   @Get('address/')

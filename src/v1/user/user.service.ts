@@ -116,9 +116,9 @@ export class UserService {
       }
     }
 
-    const access_token = await this.createAccessToken(nickname);
+    // const access_token = await this.createAccessToken(nickname);
 
-    return { access_token };
+    return { success: true };
   }
 
   async deleteUser(userId: number) {

@@ -9,10 +9,18 @@ export class AuthRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  async getUserByNickname(nickName: string) {
+  async getUserByPhoneId(phone_id: string) {
     return await this.findOne({
       where: {
-        nickname: nickName,
+        phone_id,
+      },
+    });
+  }
+
+  async getUserByNickname(nickname: string) {
+    return await this.findOne({
+      where: {
+        nickname,
       },
     });
   }

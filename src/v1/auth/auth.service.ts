@@ -23,8 +23,8 @@ export class AuthService {
     private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
   ) {}
 
-  private createAccessToken(nickname: string) {
-    return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY);
+  private createAccessToken(phone_id: string) {
+    return jwt.sign({ phone_id }, process.env.JWT_SECRET_KEY);
   }
 
   async login(loginDto: LoginDto) {
@@ -84,7 +84,7 @@ export class AuthService {
   @Transactional()
   async setNickName(setNickNameDto: SetNickNameDto) {
     const { nickname, phone_id } = setNickNameDto;
-    const accessToken = this.createAccessToken(nickname);
+    const accessToken = this.createAccessToken(phone_id);
 
     try {
       await this.authRepository.createNickName(nickname, phone_id, accessToken);
