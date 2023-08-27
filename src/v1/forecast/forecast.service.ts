@@ -167,8 +167,10 @@ export class ForecastService {
         const obj = {};
         const tempArr = arr.filter((it) => it.includes(keyNumbers[i]));
         for (let j = 0; j < tempArr.length; j++) {
-          obj[tempArr[j]] = temperatureInfo[0][tempArr[j]];
+          obj[tempArr[j].replace(keyNumbers[i], '')] =
+            temperatureInfo[0][tempArr[j]];
         }
+        obj['dayAfter'] = keyNumbers[i];
         newArr.push(obj);
       }
       return newArr;
@@ -228,8 +230,10 @@ export class ForecastService {
         const obj = {};
         const tempArr = arr.filter((it) => it.includes(keyNumbers[i]));
         for (let j = 0; j < tempArr.length; j++) {
-          obj[tempArr[j]] = weatherInfo[0][tempArr[j]];
+          obj[tempArr[j].replace(keyNumbers[i], '')] =
+            weatherInfo[0][tempArr[j]];
         }
+        obj['dayAfter'] = keyNumbers[i];
         newArr.push(obj);
       }
       return newArr;
