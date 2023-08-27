@@ -14,7 +14,7 @@ import { HTTP_ERROR } from 'src/lib/constant/httpError';
 export class SetNickNamePipe implements PipeTransform<SetNickNameDto> {
   transform(value: SetNickNameDto) {
     const validationSchema = Joi.object({
-      // phone_id: SCHEMA.REQUIRED_STRING('기기 고유 번호'),
+      phone_id: SCHEMA.REQUIRED_STRING('기기 고유 번호'),
       nickname: SCHEMA.REQUIRED_STRING_WITH_REGEX('닉네임', NICKNAME_REGEX),
     });
 

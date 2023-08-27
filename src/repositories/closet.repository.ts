@@ -42,9 +42,6 @@ export class ClosetRepository extends Repository<Closet> {
      * 2. closet_id가 없을 경우 랜덤의 type 중 2개를 가져옴
      */
 
-    let userSettedTypeQuery;
-    let typeQuery;
-
     // if (type_id == null) {
     //   userSettedTypeQuery = await this.createQueryBuilder()
     //     .select('t.id, t.name')
@@ -63,13 +60,7 @@ export class ClosetRepository extends Repository<Closet> {
     //     .getQuery();
     // }
 
-    if (type_id == null) {
-      typeQuery = type_id.type_ids;
-    } else {
-      typeQuery = type_id.type_ids;
-    }
-
-    console.log(typeQuery);
+    const typeQuery = type_id.type_ids;
 
     // const getClosetsQuery = await this.createQueryBuilder()
     //   .select('c.*, ust.name as type_name')

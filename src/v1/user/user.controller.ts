@@ -56,20 +56,13 @@ export class UserController {
     @Body(new UpdateUserNickNameGenderPipe())
     updateUserNickNameGenderDto: UpdateUserNickNameGenderDto,
     @Req() req: any,
-    @Res() response: Response,
   ) {
-    const { access_token } = await this.service.updateUserNickNameGender(
+    const result = await this.service.updateUserNickNameGender(
       updateUserNickNameGenderDto,
       req.user,
     );
 
-    const settledResponse = this.setAccessToken(
-      response,
-      access_token,
-      ACCESS_TOKEN_EXPIRESIN,
-    );
-
-    settledResponse.send({ success: true });
+    return result;
   }
 
   @Get('address/')

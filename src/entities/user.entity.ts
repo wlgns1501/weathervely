@@ -45,6 +45,11 @@ export class User extends BaseEntity {
   gender: string;
 
   @Column({ name: 'phone_id', comment: '기기 고유번호' })
+  @ApiProperty({
+    description: '기기 고유번호',
+    nullable: false,
+    required: true,
+  })
   phone_id: string;
 
   @Exclude()
