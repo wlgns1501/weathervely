@@ -28,13 +28,13 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { nickname } = loginDto;
+    const { phone_id } = loginDto;
 
     let user;
     let setTemperature: boolean;
     let address: Address | null;
 
-    const findUser = await this.authRepository.getUserByNickname(nickname);
+    const findUser = await this.authRepository.getUserByPhoneId(phone_id);
 
     if (!findUser) {
       throw new HttpException(
