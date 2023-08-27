@@ -304,9 +304,10 @@ export class ClosetService {
 
       // 각 row 별 체감온도 차이 계산 후 합산
       const avgSensoryTemperature = sensoryTemperatureArr.reduce((acc, cur) => {
-        return (acc +=
-          Number(cur.UserSetTemperature_current_temperature) -
-          Number(cur.UserSetTemperature_sensory_temperature));
+        return (
+          (acc += Number(cur.UserSetTemperature_sensory_temperature)) -
+          Number(cur.UserSetTemperature_current_temperature)
+        );
       }, 0);
 
       // user 체감 온도 : 공식 적용 체감 온도 + (유저선택 체감온도 차이 누적값 / 선택 횟수)
