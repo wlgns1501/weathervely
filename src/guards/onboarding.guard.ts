@@ -39,7 +39,7 @@ export class OnboardingGuard implements CanActivate {
 
       const { phone_id } = verifiedToken as JwtPayload;
 
-      const user = await this.authRepository.getUserByNickname(nickname);
+      const user = await this.authRepository.getUserByPhoneId(phone_id);
 
       req['user'] = user;
 
