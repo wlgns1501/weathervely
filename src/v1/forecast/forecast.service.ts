@@ -76,7 +76,7 @@ export class ForecastService {
     try {
       const { city, x_code, y_code } = address;
       const base_date = getBaseDateTime({ provide: 1440 }).base_date;
-
+      console.log(base_date);
       const cacheKey = `VilageFcst_${city}_${base_date}`;
       const cacheData: any | null = await this.cacheManager.get(cacheKey);
 
@@ -151,7 +151,29 @@ export class ForecastService {
         const milliSeconds = calculateMS();
         await this.cacheManager.set(cacheKey, temperatureInfo, milliSeconds);
       }
-      return temperatureInfo;
+
+      // 수훈이의 긴급요청으로 인한 데이터 가공ㅋㅋ
+      const arr = [];
+      Object.keys(temperatureInfo[0]).forEach((it) => {
+        if (it !== 'regId') {
+          arr.push(it);
+        }
+      });
+
+      const keyNumbers = [3, 4, 5, 6, 7, 8, 9, 10];
+
+      const newArr = [];
+      for (let i = 0; i < keyNumbers.length; i++) {
+        const obj = {};
+        const tempArr = arr.filter((it) => it.includes(keyNumbers[i]));
+        for (let j = 0; j < tempArr.length; j++) {
+          obj[tempArr[j].replace(keyNumbers[i], '')] =
+            temperatureInfo[0][tempArr[j]];
+        }
+        obj['dayAfter'] = keyNumbers[i];
+        newArr.push(obj);
+      }
+      return newArr;
     } catch (err) {
       throw err;
     }
@@ -192,7 +214,29 @@ export class ForecastService {
         const milliSeconds = calculateMS();
         await this.cacheManager.set(cacheKey, weatherInfo, milliSeconds);
       }
-      return weatherInfo;
+
+      // 수훈이의 긴급요청으로 인한 데이터 가공ㅋㅋ
+      const arr = [];
+      Object.keys(weatherInfo[0]).forEach((it) => {
+        if (it !== 'regId') {
+          arr.push(it);
+        }
+      });
+
+      const keyNumbers = [3, 4, 5, 6, 7, 8, 9, 10];
+
+      const newArr = [];
+      for (let i = 0; i < keyNumbers.length; i++) {
+        const obj = {};
+        const tempArr = arr.filter((it) => it.includes(keyNumbers[i]));
+        for (let j = 0; j < tempArr.length; j++) {
+          obj[tempArr[j].replace(keyNumbers[i], '')] =
+            weatherInfo[0][tempArr[j]];
+        }
+        obj['dayAfter'] = keyNumbers[i];
+        newArr.push(obj);
+      }
+      return newArr;
     } catch (err) {
       throw err;
     }

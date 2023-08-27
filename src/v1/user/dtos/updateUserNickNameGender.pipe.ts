@@ -9,7 +9,7 @@ import { UpdateUserNickNameGenderDto } from './updateUserNickNameGender.dto';
 import * as Joi from 'joi';
 import { SCHEMA } from 'src/lib/constant/schema';
 import { HTTP_ERROR } from 'src/lib/constant/httpError';
-import { NICKNAME_REGEX } from 'src/lib/constant/regex';
+import { EMOJI_REGEX, NICKNAME_REGEX } from 'src/lib/constant/regex';
 
 @Injectable()
 export class UpdateUserNickNameGenderPipe
@@ -21,6 +21,26 @@ export class UpdateUserNickNameGenderPipe
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);
+
+    if (EMOJI_REGEX.test(value.nickname)) {
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail: '사용 불가 문자가 포함됐어요 (쉼표, 이모지 불가)',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (value.nickname.length > 10)
+      throw new HttpException(
+        {
+          message: HTTP_ERROR.VALIDATED_ERROR,
+          detail:
+            '닉네임은 최대 10글자에요 (한글/영어 소문자/대문자/숫자 무관)',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
 
     if (error) {
       if (
@@ -51,15 +71,6 @@ export class UpdateUserNickNameGenderPipe
           HttpStatus.BAD_REQUEST,
         );
       }
-
-      if (error._original.nickname.length >= 10)
-        throw new HttpException(
-          {
-            message: HTTP_ERROR.VALIDATED_ERROR,
-            detail: '닉네임은 10글자 이상이 될 수 없습니다.',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
     }
 
     return validatedValue;

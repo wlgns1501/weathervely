@@ -109,16 +109,18 @@ export class UserService {
           throw new HttpException(
             {
               message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
-              detail: '중복된 닉네임 입니다.',
+              detail: '같은 닉네임이 이미 존재해요 다른 닉네임을 설정해주세요',
             },
             HttpStatus.BAD_REQUEST,
           );
       }
     }
 
-    // const access_token = await this.createAccessToken(nickname);
+    const access_token = await this.createAccessToken(nickname);
 
-    return { success: true };
+    await this.userRepository.updateToken(access_token, userId);
+
+    return { access_token };
   }
 
   async deleteUser(userId: number) {
