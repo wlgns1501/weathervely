@@ -116,11 +116,11 @@ export class UserService {
       }
     }
 
-    const access_token = await this.createAccessToken(nickname);
+    // const access_token = await this.createAccessToken(nickname);
 
-    await this.userRepository.updateToken(access_token, userId);
+    // await this.userRepository.updateToken(access_token, userId);
 
-    return { access_token };
+    return { success: true };
   }
 
   async deleteUser(userId: number) {
