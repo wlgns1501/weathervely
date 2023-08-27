@@ -115,12 +115,10 @@ export class UserService {
           );
       }
     }
-
+    return { success: true };
     // const access_token = await this.createAccessToken(nickname);
 
     // await this.userRepository.updateToken(access_token, userId);
-
-    return { success: true };
   }
 
   async deleteUser(userId: number) {
