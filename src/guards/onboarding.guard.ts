@@ -12,7 +12,7 @@ import { AuthRepository } from 'src/repositories/auth.repository';
 import { UserAddressRepository } from 'src/repositories/user_address.repository';
 
 export type JwtPayload = {
-  nickname: string;
+  phone_id: string;
 };
 
 @Injectable()
@@ -37,7 +37,7 @@ export class OnboardingGuard implements CanActivate {
     try {
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
 
-      const { nickname } = verifiedToken as JwtPayload;
+      const { phone_id } = verifiedToken as JwtPayload;
 
       const user = await this.authRepository.getUserByNickname(nickname);
 
