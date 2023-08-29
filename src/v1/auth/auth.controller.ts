@@ -23,7 +23,7 @@ import { SetGenderPipe } from './dtos/setGender.pipe';
 import { LoginDto } from './dtos/login.dto';
 import { LoginPipe } from './dtos/login.pipe';
 
-export const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 8;
+export const ACCESS_TOKEN_EXPIRESIN = 1000 * 60 * 60 * 24;
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -43,7 +43,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  @ApiOperation({ summary: '<test 용> 임시 토큰 발행' })
+  @ApiOperation({ summary: '토큰 발행' })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body(new LoginPipe()) loginDto: LoginDto,

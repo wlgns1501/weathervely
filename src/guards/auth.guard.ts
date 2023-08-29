@@ -36,8 +36,8 @@ export class AuthGuard implements CanActivate {
     if (!accessToken) {
       throw new HttpException(
         {
-          message: HTTP_ERROR.NEED_SET_NICKNAME,
-          detail: '닉네임을 설정하지 않았습니다.',
+          message: HTTP_ERROR.NEED_LOGIN,
+          detail: '토큰이 만료 되었습니다.',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -105,6 +105,15 @@ export class AuthGuard implements CanActivate {
 
       return true;
     } catch (err) {
+      if (err.hasOwnProperty('expiredAt'))
+        throw new HttpException(
+          {
+            message: HTTP_ERROR.NEED_LOGIN,
+            detail: '토큰이 만료 되었습니다.',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+
       if (err instanceof HttpException) {
         throw err;
       }
