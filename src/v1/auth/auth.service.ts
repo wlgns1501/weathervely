@@ -23,20 +23,18 @@ export class AuthService {
     private readonly userSetTemperatureRepository: UserSetTemperatureRepository,
   ) {}
 
-  private createAccessToken(nickname: string) {
-    return jwt.sign({ nickname }, process.env.JWT_SECRET_KEY, {
-      expiresIn: '24h',
-    });
+  private createAccessToken(phone_id: string) {
+    return jwt.sign({ phone_id }, process.env.JWT_SECRET_KEY);
   }
 
   async login(loginDto: LoginDto) {
-    const { nickname } = loginDto;
+    const { phone_id } = loginDto;
 
     let user;
     let setTemperature: boolean;
     let address: Address | null;
 
-    const findUser = await this.authRepository.getUserByNickname(nickname);
+    const findUser = await this.authRepository.getUserByPhoneId(phone_id);
 
     if (!findUser) {
       throw new HttpException(
@@ -53,7 +51,7 @@ export class AuthService {
       };
     }
 
-    const access_token = await this.createAccessToken(nickname);
+    const access_token = findUser.token;
 
     const [setAddress] = await this.addressRepository.getUserMainAddresses(
       user.id,
@@ -85,18 +83,18 @@ export class AuthService {
 
   @Transactional()
   async setNickName(setNickNameDto: SetNickNameDto) {
-    const { nickname } = setNickNameDto;
-    const accessToken = this.createAccessToken(nickname);
+    const { nickname, phone_id } = setNickNameDto;
+    const accessToken = this.createAccessToken(phone_id);
 
     try {
-      await this.authRepository.createNickName(nickname, accessToken);
+      await this.authRepository.createNickName(nickname, phone_id, accessToken);
     } catch (err) {
       switch (err.errno) {
         case MYSQL_ERROR_CODE.DUPLICATED_KEY:
           throw new HttpException(
             {
               message: HTTP_ERROR.DUPLICATED_KEY_ERROR,
-              detail: '중복된 닉네임 입니다.',
+              detail: '같은 닉네임이 이미 존재해요. 다른 닉네임을 설정해주세요',
             },
             HttpStatus.BAD_REQUEST,
           );

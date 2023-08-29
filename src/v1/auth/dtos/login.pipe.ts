@@ -14,7 +14,7 @@ import { LoginDto } from './login.dto';
 export class LoginPipe implements PipeTransform<LoginDto> {
   transform(value: LoginDto) {
     const validationSchema = Joi.object({
-      nickname: SCHEMA.REQUIRED_STRING('닉네임'),
+      phone_id: SCHEMA.REQUIRED_STRING('기기고유번호'),
     });
 
     const { error, value: validatedValue } = validationSchema.validate(value);

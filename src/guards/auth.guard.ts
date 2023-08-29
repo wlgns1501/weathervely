@@ -15,7 +15,7 @@ import { UserAddressRepository } from 'src/repositories/user_address.repository'
 import { UserSetTemperatureRepository } from 'src/repositories/user_set_temperature.repository';
 
 export type JwtPayload = {
-  nickname: string;
+  phone_id: string;
 };
 
 @Injectable()
@@ -46,9 +46,9 @@ export class AuthGuard implements CanActivate {
     try {
       const verifiedToken = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
 
-      const { nickname } = verifiedToken as JwtPayload;
+      const { phone_id } = verifiedToken as JwtPayload;
 
-      const user = await this.authRepository.getUserByNickname(nickname);
+      const user = await this.authRepository.getUserByPhoneId(phone_id);
 
       if (!user)
         throw new HttpException(
