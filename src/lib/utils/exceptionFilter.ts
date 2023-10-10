@@ -74,7 +74,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         - Message: ${body.message}
         - Time: ${body.timestamp}
         - detail
-        - userId : ${req.user.id}
+        - userId : ${req.user?.id}
         - requestBody : ${Object?.values(request.body)[0] || ''}
         - requestQuery : ${Object?.values(request.query)[0] || ''}
         `;
