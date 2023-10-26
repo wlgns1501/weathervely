@@ -48,7 +48,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document, swaggerCustomOptions);
 
   app.use(cookieParser('dd'));
-
-  await app.listen(3000);
+  try {
+    await app.listen(3000);
+  } catch (err) {
+    console.log(err);
+  }
 }
 bootstrap();
