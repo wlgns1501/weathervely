@@ -8,6 +8,8 @@ import {
 import { CustomExceptionFilter } from './lib/utils/exceptionFilter';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import csurf from 'csurf';
 
 async function bootstrap() {
   initializeTransactionalContext();
@@ -15,6 +17,9 @@ async function bootstrap() {
 
   // global filter
   app.useGlobalFilters(new CustomExceptionFilter());
+
+  app.use(helmet());
+  app.use(csurf());
 
   // swagger setting
   const config = new DocumentBuilder()

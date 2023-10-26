@@ -257,8 +257,11 @@ export class ClosetService {
     try {
       // use 단기예보 API
       const { dateTime } = getRecommendClosetDto;
+
       const date = new Date(dateTime);
+
       const today = new Date();
+
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -330,6 +333,8 @@ export class ClosetService {
         closets,
       };
     } catch (err) {
+      console.log(err);
+
       if (!err.status_code) {
         throw new HttpException(
           {
