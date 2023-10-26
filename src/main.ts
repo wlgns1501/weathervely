@@ -9,7 +9,7 @@ import { CustomExceptionFilter } from './lib/utils/exceptionFilter';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import csurf from 'csurf';
+import * as csurf from 'csurf';
 
 async function bootstrap() {
   initializeTransactionalContext();
