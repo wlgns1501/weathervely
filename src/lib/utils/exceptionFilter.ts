@@ -75,10 +75,10 @@ export class CustomExceptionFilter implements ExceptionFilter {
         - Time: ${body.timestamp}
         - detail
         - userId : ${req.user?.id}
-        - requestBody : ${Object?.values(request.body)[0] || ''}
-        - requestQuery : ${Object?.values(request.query)[0] || ''}
+        
         `;
-
+      // - requestBody : ${Object?.values(request.body)[0] || ''}
+      // - requestQuery : ${Object?.values(request.query)[0] || ''}
       try {
         await axios.post(webhookUrl, { content: errorMsg });
       } catch (e) {
