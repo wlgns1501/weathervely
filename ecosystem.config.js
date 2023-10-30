@@ -2,9 +2,9 @@ module.exports = {
   apps: [
     {
       name: 'weatherbly',
-      script: './dist/src/main.js',
+      script: 'dist/src/main.js',
       watch: '.',
-      instandces: 4,
+      instances: 4,
       autorestart: true,
       watch: true,
       time: true,
