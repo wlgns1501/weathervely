@@ -4,7 +4,7 @@ module.exports = {
       name: 'weatherbly',
       script: 'dist/src/main.js',
       watch: '.',
-      instances: 1,
+      instandces: 4,
       autorestart: true,
       watch: true,
       time: true,
