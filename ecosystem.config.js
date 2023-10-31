@@ -4,7 +4,7 @@ module.exports = {
       name: 'weatherbly',
       script: './dist/src/main.js',
       watch: '.',
-      instances: 1,
+      instances: 4,
       autorestart: true,
       watch: true,
       time: true,
@@ -12,6 +12,7 @@ module.exports = {
       max_memory_restart: '1G',
       exec_mode: 'cluster',
       log_type: 'json',
+      merge_logs: true,
       env: {
         DB_HOST: process.env.DB_HOST,
         DB_PORT: process.env.DB_PORT,
