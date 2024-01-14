@@ -8,8 +8,6 @@
 
 - 패션과 날씨 고민은 이제 웨더블리로 걱정 끝.
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/fd36af32-c5be-4825-94e2-b614a851f6af/Untitled.png)
-
 **[ 오늘/ 내일 날씨와 옷차림 ]**
 
 - 오늘과 내일의 정확한 날씨 정보를 확인할 수 있어요.
