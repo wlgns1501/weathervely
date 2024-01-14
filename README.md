@@ -1,73 +1,33 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 웨더블리
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> **‘오늘 날씨에 가디건은 더울까?’ ‘난 더위를 많이 타는데?’ ‘오늘 뭐입지?’** 
+웨더블리가 내 온도에 꼭 맞는 옷을 추천해드려요.
+> 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+일상룩, 산책룩, 데이트룩, 캠퍼스룩 등. A to Z까지 내 기분에 맞게, 날씨에 맞게 
 
-## Description
+- 패션과 날씨 고민은 이제 웨더블리로 걱정 끝.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/fd36af32-c5be-4825-94e2-b614a851f6af/Untitled.png)
 
-## Installation
+**[ 오늘/ 내일 날씨와 옷차림 ]**
 
-```bash
-$ npm install
-```
+- 오늘과 내일의 정확한 날씨 정보를 확인할 수 있어요.
 
-## Running the app
+**[ 내 온도에 맞춘 옷 추천 ]**
 
-```bash
-# development
-$ npm run start
+- 과거 데이터에 기반해 옷 두께감을 조절할 수 있어요.
 
-# watch mode
-$ npm run start:dev
+**[ 다양한 옷 스타일 ]**
 
-# production mode
-$ npm run start:prod
-```
+- 최신 패션 트렌드를 반영하여 주기적으로 추천 스타일이 업데이트돼요.
+- 마음에 드는 스타일을 누르면 바로 쇼핑 정보를 확인할 수 있어요.
 
-## Test
+**[ 10일간 예보 ]**
 
-```bash
-# unit tests
-$ npm run test
+- 어제 날씨와 10일간의 날씨를 체크할 수 있어요.
 
-# e2e tests
-$ npm run test:e2e
+**[ 쉽고 직관적인 UI ]**
 
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+- 날씨 정보와 내게 필요한 옷차림 정보가 한 눈에. 쉽고 빠르게 확인하세요.
+- 변하는 날씨마다 말풍선 가이드가 날씨 tip 또는 응원 메시지를 보내줘요.
