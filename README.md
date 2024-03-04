@@ -32,5 +32,6 @@
 
 
 
-- ERD
-[Weathervely ERD](https://dbdiagram.io/d/65acc927ac844320ae5d193f)
+**[ERD]**
+
+- [Weathervely ERD](https://dbdiagram.io/d/65acc927ac844320ae5d193f)
